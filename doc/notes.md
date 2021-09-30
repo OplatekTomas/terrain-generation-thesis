@@ -1,3 +1,12 @@
+## Libs
+- nlohmann json
+- cpr
+- boost
+- cpm
+
+## Useful odkazy
+- https://app.quicktype.io/
+
 ## Detaily
 - uživatel si ozančí ma mapě oblast - vygeneruje se 3d mapa, kde se na základě metadat dogenerujou další věci
 - gegl

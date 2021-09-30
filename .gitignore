@@ -1,3 +1,4 @@
 cmake-build-debug/
 .idea/
 .directory
+/src/keys.csv
