@@ -10,13 +10,16 @@
 
 class ApiBase {
 public:
-    ApiBase(std::string apiKey){
-        this->apiKey = std::move(apiKey);
-    }
+    ApiBase(std::string apiKey);
+    template <class T> T sendRequest(std::string uri);
 private:
     virtual std::string getBaseAddress() = 0;
+protected:
     std::string apiKey;
+
 };
+
+#include "ApiBase_impl.h"
 
 
 #endif //VUT_BP_APIBASE_H

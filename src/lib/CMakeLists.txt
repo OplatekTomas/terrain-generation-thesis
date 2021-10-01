@@ -25,9 +25,9 @@ include(${CPM_DOWNLOAD_LOCATION})
 
 #add packages
 CPMAddPackage(gh:nlohmann/json@3.10.2)
-CPMAddPackage(NAME cpr
-        GIT_TAG 1.6.2
-        GITHUB_REPOSITORY libcpr/cpr
+CPMAddPackage(NAME curlpp
+        VERSION 0.8.1
+        GITHUB_REPOSITORY jpbarrette/curlpp
         )
 
 find_package(Boost 1.76.0 COMPONENTS filesystem)
@@ -35,12 +35,12 @@ find_package(Boost 1.76.0 COMPONENTS filesystem)
 add_library (lib
         CsvDecoder.h CsvDecoder.cpp
         api/ApiBase.h
-        api/BingApi.cpp api/BingApi.h models/bing/ElevationResult.cpp models/bing/ElevationResult.h)
+        api/BingApi.cpp api/BingApi.h models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h)
 
 
 target_link_libraries(lib PRIVATE ${Boost_LIBRARIES})
-target_link_libraries(lib PUBLIC cpr::cpr)
 target_link_libraries(lib PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries(lib PUBLIC curlpp::curlpp)
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

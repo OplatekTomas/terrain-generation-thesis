@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     auto key = reader->getValues("name", "bing");
 
     auto api = new BingApi(key[1]);
-
+    auto elevation = api->getElevation();
 
     return 0;
 }

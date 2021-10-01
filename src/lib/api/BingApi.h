@@ -9,11 +9,12 @@
 
 #include "ApiBase.h"
 #include <cpr/cpr.h>
-
+#include "../models/bing/ElevationResult.h"
 
 class BingApi : ApiBase {
 public:
     explicit BingApi(std::string key);
+    quicktype::ElevationResult * getElevation();
 private:
     std::string getBaseAddress() override;
 
