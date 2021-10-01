@@ -8,7 +8,6 @@
 #pragma once
 
 #include "ApiBase.h"
-#include <cpr/cpr.h>
 #include "../models/bing/ElevationResult.h"
 
 class BingApi : ApiBase {

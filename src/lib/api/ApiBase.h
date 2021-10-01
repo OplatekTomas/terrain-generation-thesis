@@ -7,11 +7,11 @@
 
 #include <string>
 #include <utility>
-
+#include "nlohmann/json.hpp"
 class ApiBase {
 public:
     ApiBase(std::string apiKey);
-    template <class T> T sendRequest(std::string uri);
+    template<class T> bool sendRequest(std::string uri, T& obj);
 private:
     virtual std::string getBaseAddress() = 0;
 protected:

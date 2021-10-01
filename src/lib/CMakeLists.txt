@@ -7,6 +7,9 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
+include(FetchContent)
+
+
 #set correct directory for CPM
 if(CPM_SOURCE_CACHE)
     set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
@@ -24,13 +27,21 @@ endif()
 include(${CPM_DOWNLOAD_LOCATION})
 
 #add packages
-CPMAddPackage(gh:nlohmann/json@3.10.2)
-CPMAddPackage(NAME curlpp
-        VERSION 0.8.1
-        GITHUB_REPOSITORY jpbarrette/curlpp
-        )
+CPMAddPackage(
+        NAME nlohmann_json
+        VERSION 3.10.2
+        # the git repo is incredibly large, so we download the archived include directory
+        URL https://github.com/nlohmann/json/releases/download/v3.10.2/include.zip
+)
 
-find_package(Boost 1.76.0 COMPONENTS filesystem)
+CPMAddPackage(
+        NAME cpr
+        GITHUB_REPOSITORY libcpr/cpr
+        GIT_TAG 1.6.2
+)
+
+find_package(Boost 1.76.0 COMPONENTS filesystem format)
+
 
 add_library (lib
         CsvDecoder.h CsvDecoder.cpp
@@ -38,9 +49,11 @@ add_library (lib
         api/BingApi.cpp api/BingApi.h models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h)
 
 
-target_link_libraries(lib PRIVATE ${Boost_LIBRARIES})
-target_link_libraries(lib PUBLIC nlohmann_json::nlohmann_json)
-target_link_libraries(lib PUBLIC curlpp::curlpp)
+target_link_libraries(lib PUBLIC ${Boost_LIBRARIES})
+if (nlohmann_json_ADDED)
+    target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
+endif()
+target_link_libraries(lib PUBLIC cpr::cpr)
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
