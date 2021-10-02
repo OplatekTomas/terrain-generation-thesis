@@ -2,3 +2,5 @@ cmake-build-debug/
 .idea/
 .directory
 /src/keys.csv
+src/build-gui-Desktop-Debug
+*.user

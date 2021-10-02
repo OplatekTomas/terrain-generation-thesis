@@ -5,15 +5,6 @@
 #ifndef VUT_BP_ELEVATIONRESULT_H
 #define VUT_BP_ELEVATIONRESULT_H
 
-
-//  To parse this JSON data, first install
-//
-//      json.hpp  https://github.com/nlohmann/json
-//
-//  Then include this file, and then do
-//
-//     Welcome data = nlohmann::json::parse(jsonString);
-
 #pragma once
 
 #include "nlohmann/json.hpp"

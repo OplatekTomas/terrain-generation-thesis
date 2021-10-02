@@ -6,7 +6,6 @@ set(CPM_DOWNLOAD_VERSION 0.32.0)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-
 include(FetchContent)
 
 
@@ -37,7 +36,7 @@ CPMAddPackage(
 CPMAddPackage(
         NAME cpr
         GITHUB_REPOSITORY libcpr/cpr
-        GIT_TAG 1.6.2
+        GIT_TAG 290fbaff7321b3df66c4ac5b039815f25e4333bb
 )
 
 find_package(Boost 1.76.0 COMPONENTS filesystem format)
