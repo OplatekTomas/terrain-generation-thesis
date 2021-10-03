@@ -12,6 +12,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CPM_DOWNLOAD_VERSION 0.32.0)
 
+#Create dummy files so that they at least exist when CMake project is loaded
+file(WRITE shaders/include/shader.fs "")
+file(WRITE shaders/include/shader.vs "")
+
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
@@ -32,20 +37,29 @@ endif()
 include(${CPM_DOWNLOAD_LOCATION})
 include(FetchContent)
 
-
-
 set(PROJECT_SOURCES
         main.cpp
-        MainWindow.cpp MainWindow.h MainWindow.ui opengl/Renderer.cpp opengl/Renderer.h)
+        MainWindow.cpp MainWindow.h MainWindow.ui
+        opengl/Renderer.cpp opengl/Renderer.h
+        shaders/Shaders.h shaders/include/shader.fs shaders/include/shader.vs)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(gui  MANUAL_FINALIZATION ${PROJECT_SOURCES})
+    qt_add_executable(${PROJECT_NAME}  MANUAL_FINALIZATION ${PROJECT_SOURCES})
 else()
-    add_executable(gui  ${PROJECT_SOURCES})
+    add_executable(${PROJECT_NAME}  ${PROJECT_SOURCES})
 endif()
 
 
-target_link_libraries(gui  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets lib)
+target_link_libraries(${PROJECT_NAME}  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets lib)
+
+#Create fake target that calls the shaders/CMakeLists.txt file just before compile time to include the current version
+#of a shader and not the one that would be read during loading of the project
+set(FAKE_TARGET fakeTarget)
+add_custom_target(fakeTarget
+        COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/shaders/CMakeLists.txt"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        )
+add_dependencies(${PROJECT_NAME} ${FAKE_TARGET})
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(vut-bp-gui)

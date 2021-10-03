@@ -4,3 +4,4 @@ cmake-build-debug/
 /src/keys.csv
 src/build-gui-Desktop-Debug
 *.user
+/src/gui/shaders/include/
