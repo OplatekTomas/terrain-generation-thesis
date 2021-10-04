@@ -8,6 +8,7 @@
 #pragma once
 
 #include "nlohmann/json.hpp"
+#include "JsonHelper.h"
 
 #include <optional>
 #include <stdexcept>
@@ -15,17 +16,6 @@
 
 namespace MapGenerator {
     using nlohmann::json;
-
-    inline json get_untyped(const json & j, const char * property) {
-        if (j.find(property) != j.end()) {
-            return j.at(property).get<json>();
-        }
-        return json();
-    }
-
-    inline json get_untyped(const json & j, std::string property) {
-        return get_untyped(j, property.data());
-    }
 
     class Resource {
     public:

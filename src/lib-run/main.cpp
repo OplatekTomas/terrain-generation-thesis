@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
         cout << "CSV Parsing failed!" << endl;
         return 1;
     }
-    auto api = new BingApi(config.keys[0].key);
+    auto api = new MapGenerator::BingApi(config.keys[0].key);
     auto elevation = api->getElevation();
     if(elevation == nullptr){
         return 1;

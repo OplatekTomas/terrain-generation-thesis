@@ -44,7 +44,7 @@ CPMAddPackage(
 add_library (lib
         Config.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
-        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h ConfigReader.cpp ConfigReader.h)
+        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h ConfigReader.cpp ConfigReader.h JsonHelper.h)
 
 
 if (nlohmann_json_ADDED)

@@ -7,11 +7,11 @@
 #include <utility>
 
 namespace MapGenerator{
-    std::string BingApi::getBaseAddress() {
-        return "http://dev.virtualearth.net/REST/v1/";
+    BingApi::BingApi(std::string key) : ApiBase(std::move(key)){
     }
 
-    BingApi::BingApi(std::string key) : ApiBase(std::move(key)){
+    std::string BingApi::getBaseAddress() {
+        return "http://dev.virtualearth.net/REST/v1/";
     }
 
     MapGenerator::ElevationResult* BingApi::getElevation() {
