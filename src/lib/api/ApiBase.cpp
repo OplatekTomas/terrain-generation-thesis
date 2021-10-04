@@ -4,9 +4,11 @@
 
 #include "ApiBase.h"
 
-
-
-ApiBase::ApiBase(std::string apiKey) {
-    this->apiKey = std::move(apiKey);
+namespace MapGenerator{
+    ApiBase::ApiBase(std::string apiKey) {
+        this->apiKey = std::move(apiKey);
+    }
 }
+
+
 

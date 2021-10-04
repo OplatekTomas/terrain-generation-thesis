@@ -5,7 +5,7 @@
 - cpm
 
 ## Useful odkazy
-- https://app.quicktype.io/
+- https://app.MapGenerator.io/
 
 ## Detaily
 - uživatel si ozančí ma mapě oblast - vygeneruje se 3d mapa, kde se na základě metadat dogenerujou další věci

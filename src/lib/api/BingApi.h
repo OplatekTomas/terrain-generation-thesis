@@ -10,14 +10,18 @@
 #include "ApiBase.h"
 #include "../models/bing/ElevationResult.h"
 
-class BingApi : ApiBase {
-public:
-    explicit BingApi(std::string key);
-    quicktype::ElevationResult * getElevation();
-private:
-    std::string getBaseAddress() override;
+namespace MapGenerator {
+    class BingApi : ApiBase {
+    public:
+        explicit BingApi(std::string key);
+        ElevationResult * getElevation();
+    private:
+        std::string getBaseAddress() override;
 
-};
+    };
+}
+
+
 
 
 #endif //VUT_BP_BINGAPI_H

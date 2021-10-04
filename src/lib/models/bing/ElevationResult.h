@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <regex>
 
-namespace quicktype {
+namespace MapGenerator {
     using nlohmann::json;
 
     inline json get_untyped(const json & j, const char * property) {
@@ -116,50 +116,50 @@ namespace quicktype {
 }
 
 namespace nlohmann {
-    void from_json(const json & j, quicktype::Resource & x);
-    void to_json(json & j, const quicktype::Resource & x);
+    void from_json(const json & j, MapGenerator::Resource & x);
+    void to_json(json & j, const MapGenerator::Resource & x);
 
-    void from_json(const json & j, quicktype::ResourceSet & x);
-    void to_json(json & j, const quicktype::ResourceSet & x);
+    void from_json(const json & j, MapGenerator::ResourceSet & x);
+    void to_json(json & j, const MapGenerator::ResourceSet & x);
 
-    void from_json(const json & j, quicktype::ElevationResult & x);
-    void to_json(json & j, const quicktype::ElevationResult & x);
+    void from_json(const json & j, MapGenerator::ElevationResult & x);
+    void to_json(json & j, const MapGenerator::ElevationResult & x);
 
-    inline void from_json(const json & j, quicktype::Resource& x) {
+    inline void from_json(const json & j, MapGenerator::Resource& x) {
         x.setType(j.at("__type").get<std::string>());
         x.setElevations(j.at("elevations").get<std::vector<int64_t>>());
         x.setZoomLevel(j.at("zoomLevel").get<int64_t>());
     }
 
-    inline void to_json(json & j, const quicktype::Resource & x) {
+    inline void to_json(json & j, const MapGenerator::Resource & x) {
         j = json::object();
         j["__type"] = x.getType();
         j["elevations"] = x.getElevations();
         j["zoomLevel"] = x.getZoomLevel();
     }
 
-    inline void from_json(const json & j, quicktype::ResourceSet& x) {
+    inline void from_json(const json & j, MapGenerator::ResourceSet& x) {
         x.setEstimatedTotal(j.at("estimatedTotal").get<int64_t>());
-        x.setResources(j.at("resources").get<std::vector<quicktype::Resource>>());
+        x.setResources(j.at("resources").get<std::vector<MapGenerator::Resource>>());
     }
 
-    inline void to_json(json & j, const quicktype::ResourceSet & x) {
+    inline void to_json(json & j, const MapGenerator::ResourceSet & x) {
         j = json::object();
         j["estimatedTotal"] = x.getEstimatedTotal();
         j["resources"] = x.getResources();
     }
 
-    inline void from_json(const json & j, quicktype::ElevationResult& x) {
+    inline void from_json(const json & j, MapGenerator::ElevationResult& x) {
         x.setAuthenticationResultCode(j.at("authenticationResultCode").get<std::string>());
         x.setBrandLogoUri(j.at("brandLogoUri").get<std::string>());
         x.setCopyright(j.at("copyright").get<std::string>());
-        x.setResourceSets(j.at("resourceSets").get<std::vector<quicktype::ResourceSet>>());
+        x.setResourceSets(j.at("resourceSets").get<std::vector<MapGenerator::ResourceSet>>());
         x.setStatusCode(j.at("statusCode").get<int64_t>());
         x.setStatusDescription(j.at("statusDescription").get<std::string>());
         x.setTraceId(j.at("traceId").get<std::string>());
     }
 
-    inline void to_json(json & j, const quicktype::ElevationResult & x) {
+    inline void to_json(json & j, const MapGenerator::ElevationResult & x) {
         j = json::object();
         j["authenticationResultCode"] = x.getAuthenticationResultCode();
         j["brandLogoUri"] = x.getBrandLogoUri();

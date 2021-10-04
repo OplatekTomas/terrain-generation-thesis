@@ -5,3 +5,4 @@ cmake-build-debug/
 src/build-gui-Desktop-Debug
 *.user
 /src/gui/shaders/include/
+/src/config.json

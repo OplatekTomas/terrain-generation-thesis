@@ -39,16 +39,14 @@ CPMAddPackage(
         GIT_TAG 290fbaff7321b3df66c4ac5b039815f25e4333bb
 )
 
-find_package(Boost 1.76.0 COMPONENTS filesystem format)
 
 
 add_library (lib
-        CsvDecoder.h CsvDecoder.cpp
-        api/ApiBase.h
-        api/BingApi.cpp api/BingApi.h models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h)
+        Config.h
+        api/ApiBase.h api/BingApi.cpp api/BingApi.h
+        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h ConfigReader.cpp ConfigReader.h)
 
 
-target_link_libraries(lib PUBLIC ${Boost_LIBRARIES})
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
 endif()

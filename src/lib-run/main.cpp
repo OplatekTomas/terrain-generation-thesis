@@ -1,7 +1,8 @@
 #include <iostream>
-#include "CsvDecoder.h"
+#include <api/BingApi.h>
 #include <boost/format.hpp>
-#include "api/BingApi.h"
+#include "ConfigReader.h"
+#include "Config.h"
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -9,16 +10,13 @@ int main(int argc, char *argv[]) {
         cout << "Please enter a keys.csv file as an arg" << endl;
         return 1;
     }
-    auto data = CsvDecoder::create(argv[1]);
-    auto success = get<bool>(data);
-    if(!success){
+    bool hasError = false;
+    auto config = MapGenerator::ConfigReader::read(argv[1], &hasError);
+    if(hasError){
         cout << "CSV Parsing failed!" << endl;
         return 1;
     }
-    auto reader = get<CsvDecoder*>(data);
-    auto key = reader->getValues("name", "bing");
-
-    auto api = new BingApi(key[1]);
+    auto api = new BingApi(config.keys[0].key);
     auto elevation = api->getElevation();
     if(elevation == nullptr){
         return 1;
