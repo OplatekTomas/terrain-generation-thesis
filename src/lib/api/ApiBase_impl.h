@@ -2,12 +2,9 @@
 // Created by tomas on 30.09.21.
 //
 
-#ifndef VUT_BP_APIBASE_IMPL_H
-#define VUT_BP_APIBASE_IMPL_H
+#pragma once
 
-#endif //VUT_BP_APIBASE_IMPL_H
-
-#include "ApiBase.h"
+#include <api/ApiBase.h>
 #include <cpr/cpr.h>
 namespace MapGenerator {
     template<class T> bool ApiBase::sendRequest(std::string uri, T& obj) {

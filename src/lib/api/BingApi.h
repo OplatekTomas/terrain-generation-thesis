@@ -2,8 +2,6 @@
 // Created by tomas on 30.09.21.
 //
 
-#ifndef VUT_BP_BINGAPI_H
-#define VUT_BP_BINGAPI_H
 
 #pragma once
 
@@ -21,7 +19,3 @@ namespace MapGenerator {
     };
 }
 
-
-
-
-#endif //VUT_BP_BINGAPI_H

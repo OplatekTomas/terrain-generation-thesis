@@ -2,7 +2,7 @@
 // Created by tomas on 30.09.21.
 //
 
-#include "BingApi.h"
+#include <api/BingApi.h>
 
 #include <utility>
 

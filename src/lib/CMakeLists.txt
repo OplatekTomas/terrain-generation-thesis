@@ -40,7 +40,6 @@ CPMAddPackage(
 )
 
 
-
 add_library (lib
         Config.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h

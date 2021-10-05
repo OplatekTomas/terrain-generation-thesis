@@ -2,8 +2,8 @@
 // Created by tomas on 04.10.21.
 //
 
-#include "ConfigReader.h"
-#include "Config.h"
+#include <ConfigReader.h>
+#include <Config.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>

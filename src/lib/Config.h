@@ -2,11 +2,11 @@
 // Created by tomas on 04.10.21.
 //
 
-#ifndef VUT_BP_CONFIG_H
-#define VUT_BP_CONFIG_H
+#pragma once
+
 
 #include <nlohmann/json.hpp>
-#include "JsonHelper.h"
+#include <JsonHelper.h>
 namespace MapGenerator {
     using nlohmann::json;
 
@@ -48,4 +48,3 @@ namespace nlohmann {
     }
 }
 
-#endif //VUT_BP_CONFIG_H

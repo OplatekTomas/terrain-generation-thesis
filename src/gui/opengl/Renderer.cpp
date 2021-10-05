@@ -6,13 +6,11 @@
 
 #include <iostream>
 #include <QOpenGLContext>
-#include "shaders/Shaders.h"
+#include <shaders/Shaders.h>
 
-Renderer::Renderer(QWidget* parent) : QOpenGLWidget(parent) {
+Renderer::Renderer(Camera *camera, QWidget *parent) : QOpenGLWidget(parent) {
 
 }
-
-
 void Renderer::tempSetup(){ //Testing setup
     float vertices[] = {
             -0.5f, -0.5f, 0.0f,
@@ -71,3 +69,5 @@ void Renderer::resizeGL(int w, int h) {
     std::cout << "Resize" << std::endl;
     QOpenGLWidget::resizeGL(w, h);
 }
+
+

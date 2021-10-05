@@ -37,11 +37,17 @@ endif()
 include(${CPM_DOWNLOAD_LOCATION})
 include(FetchContent)
 
+CPMAddPackage(
+        NAME geGL
+        GITHUB_REPOSITORY Rendering-FIT/GPUEngine
+        GIT_TAG 53c587c52d99b57e77817bb4df1d625fcea1d5be
+)
+
 set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
         opengl/Renderer.cpp opengl/Renderer.h
-        shaders/Shaders.h shaders/include/shader.fs shaders/include/shader.vs)
+        shaders/Shaders.h shaders/include/shader.fs shaders/include/shader.vs opengl/Camera.cpp opengl/Camera.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}  MANUAL_FINALIZATION ${PROJECT_SOURCES})
@@ -50,7 +56,7 @@ else()
 endif()
 
 
-target_link_libraries(${PROJECT_NAME}  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets lib)
+target_link_libraries(${PROJECT_NAME}  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets geGL lib)
 
 #Create fake target that calls the shaders/CMakeLists.txt file just before compile time to include the current version
 #of a shader and not the one that would be read during loading of the project

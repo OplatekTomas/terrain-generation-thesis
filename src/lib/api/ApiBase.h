@@ -2,12 +2,12 @@
 // Created by tomas on 29.09.21.
 //
 
-#ifndef VUT_BP_APIBASE_H
-#define VUT_BP_APIBASE_H
+#pragma once
+
 
 #include <string>
 #include <utility>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace MapGenerator{
     class ApiBase {
@@ -22,8 +22,4 @@ namespace MapGenerator{
     };
 };
 
-
 #include "ApiBase_impl.h"
-
-
-#endif //VUT_BP_APIBASE_H

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <api/BingApi.h>
 #include <boost/format.hpp>
-#include "ConfigReader.h"
-#include "Config.h"
+#include <ConfigReader.h>
+#include <Config.h>
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     cout << "Printing heights: " << endl;
-    for(auto height: elevation->getResourceSets()[0].getResources()[0].getElevations()) {
+    for(auto height: elevation->resourceSets[0].resources[0].elevations) {
         std::cout << boost::str(boost::format("%.2f") % height) << " ";
     }
     cout << endl;

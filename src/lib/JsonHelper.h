@@ -2,8 +2,7 @@
 // Created by tomas on 04.10.21.
 //
 
-#ifndef VUT_BP_JSONHELPER_H
-#define VUT_BP_JSONHELPER_H
+#pragma once
 
 #include <nlohmann/json.hpp>
 
@@ -22,5 +21,3 @@ namespace MapGenerator{
         return get_untyped(j, property.data());
     }
 }
-
-#endif //VUT_BP_JSONHELPER_H
