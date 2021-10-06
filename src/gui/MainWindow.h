@@ -5,7 +5,7 @@
 #pragma once
 
 #include <QMainWindow>
-#include <opengl/Renderer.h>
+#include <renderer/Renderer.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

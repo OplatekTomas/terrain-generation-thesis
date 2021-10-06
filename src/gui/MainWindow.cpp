@@ -11,8 +11,8 @@
 MainWindow::MainWindow(QWidget *parent) :QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     baseGridLayout = this->findChild<QGridLayout*>("baseGridLayout");
-    this->renderer = new Renderer(nullptr);
-    baseGridLayout->addWidget(renderer);
+    this->renderer = new Renderer();
+    //baseGridLayout->addWidget(renderer);
     QSizePolicy sizePolicy;
     sizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);
     sizePolicy.setVerticalPolicy(QSizePolicy::Expanding);
