@@ -15,9 +15,9 @@ namespace MapGenerator {
         std::string key;
     };
 
-    struct Config {
+    typedef struct Config_T {
         std::vector<key> keys;
-    };
+    } Config;
 }
 
 namespace nlohmann {

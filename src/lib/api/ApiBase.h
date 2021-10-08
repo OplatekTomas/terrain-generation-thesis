@@ -13,7 +13,7 @@ namespace MapGenerator{
     class ApiBase {
     public:
         ApiBase(std::string apiKey);
-        template<class T> bool sendRequest(std::string uri, T& obj);
+        template<class T> std::shared_ptr<T> sendRequest(std::string uri);
     private:
         virtual std::string getBaseAddress() = 0;
     protected:

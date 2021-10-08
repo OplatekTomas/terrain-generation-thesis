@@ -8,6 +8,7 @@ namespace MapGenerator{
     ApiBase::ApiBase(std::string apiKey) {
         this->apiKey = std::move(apiKey);
     }
+
 }
 
 

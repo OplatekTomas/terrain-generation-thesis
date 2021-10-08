@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CPM_DOWNLOAD_VERSION 0.32.0)
 set(Boost_USE_STATIC_LIBS OFF)
@@ -39,17 +40,20 @@ CPMAddPackage(
         GIT_TAG 290fbaff7321b3df66c4ac5b039815f25e4333bb
 )
 
+CPMAddPackage("gh:fmtlib/fmt#8.0.1")
+
+
 
 add_library (lib
         Config.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
-        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h ConfigReader.cpp ConfigReader.h JsonHelper.h)
+        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h ConfigReader.cpp ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h)
 
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
 endif()
-target_link_libraries(lib PUBLIC cpr::cpr)
+target_link_libraries(lib PUBLIC cpr::cpr fmt)
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

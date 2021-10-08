@@ -1,8 +1,8 @@
 #include <iostream>
-#include <api/BingApi.h>
-#include <boost/format.hpp>
-#include <ConfigReader.h>
+#include <MapGenerator.h>
 #include <Config.h>
+#include <ConfigReader.h>
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -16,15 +16,8 @@ int main(int argc, char *argv[]) {
         cout << "CSV Parsing failed!" << endl;
         return 1;
     }
-    auto api = new MapGenerator::BingApi(config.keys[0].key);
-    auto elevation = api->getElevation();
-    if(elevation == nullptr){
-        return 1;
-    }
-    cout << "Printing heights: " << endl;
-    for(auto height: elevation->resourceSets[0].resources[0].elevations) {
-        std::cout << boost::str(boost::format("%.2f") % height) << " ";
-    }
+    auto generator = new MapGenerator::MapGenerator(&config);
+    generator->getVertices();
     cout << endl;
 
     return 0;

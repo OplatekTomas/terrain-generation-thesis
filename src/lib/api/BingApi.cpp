@@ -3,27 +3,55 @@
 //
 
 #include <api/BingApi.h>
+#include <fmt/format.h>
+#include <chrono>  // for high_resolution_clock
+
 
 #include <utility>
+#include <memory>
+#include <csignal>
 
-namespace MapGenerator{
-    BingApi::BingApi(std::string key) : ApiBase(std::move(key)){
+namespace MapGenerator {
+    BingApi::BingApi(std::string key) : ApiBase(std::move(key)) {
     }
 
     std::string BingApi::getBaseAddress() {
         return "http://dev.virtualearth.net/REST/v1/";
     }
 
-    MapGenerator::ElevationResult* BingApi::getElevation() {
-        auto url = getBaseAddress() + "Elevation/Bounds?bounds=49.210677743172724,16.62863105170431,49.21309576479339,16.625380048112635&rows=10&cols=10&key=" + this->apiKey;
-        auto result = new MapGenerator::ElevationResult();
-        auto success = this->sendRequest(url, *result);
-        if(!success){
-            delete result;
+    std::shared_ptr<ElevationResult> BingApi::getElevation(double long1, double lat1, double long2, double lat2, int resolution) {
+        auto args = "Elevation/Bounds?bounds={0},{1},{2},{3}&rows={4}&cols={4}&key={5}";
+        auto url = getBaseAddress() + fmt::format(args, long1, lat1, long2, lat2, resolution, this->apiKey);
+        auto result = this->sendRequest<ElevationResult>(url);
+        if(result == nullptr){
             return nullptr;
         }
         return result;
     }
+
+    std::vector<double> BingApi::getElevationNormalized(double long1, double lat1, double long2, double lat2, int resolution) {
+        auto result = getElevation(long1, lat1, long2, lat2, resolution);
+        if(result == nullptr || result->resourceSets.empty() || result->resourceSets[0].resources.empty()){
+            return {};
+        }
+        auto data = result->resourceSets[0].resources[0].elevations;
+        double min = 8849; //Mt. Everest
+        double max = -11034; //Mariana Trench
+        //I could use stl functions, but this way there is only 1 pass
+        for(auto item : data){
+            if(item < min){
+                min = item;
+            }
+            if(item > max){
+                max = item;
+            }
+        }
+        for(double & item : data){
+            item = (item-min)/(max-min);
+        }
+        return data;
+    }
+
 }
 
 

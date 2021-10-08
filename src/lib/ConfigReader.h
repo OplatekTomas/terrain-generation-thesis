@@ -4,15 +4,15 @@
 
 #pragma once
 
-
+#include <Config.h>
 #include <string>
 
 namespace MapGenerator {
-    struct Config;
 
     class ConfigReader {
+
     public:
-        static struct MapGenerator::Config read(std::string path, bool* isError);
+        static Config read(std::string path, bool* isError);
     };
 }
 

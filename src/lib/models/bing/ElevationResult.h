@@ -15,7 +15,7 @@ namespace MapGenerator {
 
     struct Resource {
         std::string type;
-        std::vector<int64_t> elevations;
+        std::vector<double> elevations;
         int64_t zoomLevel;
     };
 
@@ -47,7 +47,7 @@ namespace nlohmann {
 
     inline void from_json(const json & j, MapGenerator::Resource& x) {
         x.type = j.at("__type").get<std::string>();
-        x.elevations = j.at("elevations").get<std::vector<int64_t>>();
+        x.elevations = j.at("elevations").get<std::vector<double>>();
         x.zoomLevel = j.at("zoomLevel").get<int64_t>();
     }
 

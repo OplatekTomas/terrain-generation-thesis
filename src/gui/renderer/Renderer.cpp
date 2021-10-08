@@ -9,6 +9,10 @@
 #include <iostream>
 #include <csignal>
 #include <shaders/Shaders.h>
+#include <glm/fwd.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <regex>
 
 Renderer::Renderer(QWindow *parent) {
     initialized = false;
@@ -21,7 +25,6 @@ Renderer::Renderer(QWindow *parent) {
 
 void Renderer::initialize() {
     if (initialized) return;
-    //! [qt_context]
     if (!context) {
         context = new QOpenGLContext(this);
         context->setFormat(surfaceFormat);
@@ -50,11 +53,14 @@ void Renderer::initialize() {
     buffer = std::make_shared<ge::gl::Buffer>(trianglePos.size() * sizeof(float), trianglePos.data(), GL_STATIC_DRAW);
     indicesBuffer = std::make_shared<ge::gl::Buffer>(indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
 
+    std::vector<glm::mat4> modelMatrices;
+    glm::mat4 mat = glm::translate(glm::mat4(1.0f), glm::vec3{0,0,-5}) * glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3{1.f,1.0f,0.f});
+    modelMatrices.push_back(mat);
+
 
     vao = std::make_shared<ge::gl::VertexArray>();
     vao->addElementBuffer(indicesBuffer);
     vao->addAttrib(buffer, 0, 3, GL_FLOAT);
-
 
     std::shared_ptr<ge::gl::Shader> vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
     std::shared_ptr<ge::gl::Shader> fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, FragmentSource);
@@ -84,7 +90,6 @@ void Renderer::renderNow() {
 }
 
 bool Renderer::event(QEvent *event) {
-
     switch (event->type()) {
         case QEvent::UpdateRequest:
             renderNow();
