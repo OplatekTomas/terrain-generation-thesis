@@ -6,22 +6,32 @@
 #include <renderer/Renderer.h>
 #include <geGL/geGL.h>
 
-#include <iostream>
 #include <csignal>
 #include <shaders/Shaders.h>
-#include <glm/fwd.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <regex>
+#include <ConfigReader.h>
+#include <QCoreApplication>
 
 Renderer::Renderer(QWindow *parent) {
     initialized = false;
     context = nullptr;
-    setSurfaceType(
-            QWindow::OpenGLSurface); //this needs to be set otherwise makeCurrent and other gl context related functions will fail
+    setSurfaceType(QWindow::OpenGLSurface); //this needs to be set otherwise makeCurrent and other gl context related functions will fail
     surfaceFormat.setVersion(4, 5);
     surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+    setupLib();
+
 }
+
+bool Renderer::setupLib(){
+
+    bool hasError = false;
+    auto config = MapGenerator::ConfigReader::read(QCoreApplication::arguments().at(1).toStdString(), &hasError);
+    if(hasError){
+        return false;
+    }
+    this->mapGenerator = std::make_shared<MapGenerator::MapGenerator>(&config);
+    return true;
+}
+
 
 void Renderer::initialize() {
     if (initialized) return;
@@ -39,28 +49,15 @@ void Renderer::initialize() {
     context->makeCurrent(this);
     ge::gl::init();
     gl = std::make_shared<ge::gl::Context>();
-    //! [geGL_init]
+    auto data = mapGenerator->getVertices();
 
-    std::vector<float> trianglePos = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f,  0.5f, 0.0f
-    };
-
-    std::vector<int> indices = {0,1,2};
-
-
-    buffer = std::make_shared<ge::gl::Buffer>(trianglePos.size() * sizeof(float), trianglePos.data(), GL_STATIC_DRAW);
-    indicesBuffer = std::make_shared<ge::gl::Buffer>(indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
-
-    std::vector<glm::mat4> modelMatrices;
-    glm::mat4 mat = glm::translate(glm::mat4(1.0f), glm::vec3{0,0,-5}) * glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3{1.f,1.0f,0.f});
-    modelMatrices.push_back(mat);
-
+    vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(), GL_STATIC_DRAW);
+    indices = std::make_shared<ge::gl::Buffer>(data->indices->size() * sizeof(int), data->indices->data(), GL_STATIC_DRAW);
 
     vao = std::make_shared<ge::gl::VertexArray>();
-    vao->addElementBuffer(indicesBuffer);
-    vao->addAttrib(buffer, 0, 3, GL_FLOAT);
+    vao->addAttrib(vertices, 0, 3, GL_FLOAT);
+    vao->addElementBuffer(indices);
+    drawCount = data->indices->size();
 
     std::shared_ptr<ge::gl::Shader> vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
     std::shared_ptr<ge::gl::Shader> fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, FragmentSource);
@@ -77,7 +74,7 @@ void Renderer::render() {
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     shaderProgram->use();
     vao->bind();
-    gl->glDrawArrays(GL_TRIANGLES,0,3);
+    gl->glDrawElements(GL_TRIANGLES,drawCount,GL_UNSIGNED_INT, nullptr);
 
     std::cout << "Render" << std::endl;
     context->swapBuffers(this);

@@ -47,7 +47,7 @@ CPMAddPackage("gh:fmtlib/fmt#8.0.1")
 add_library (lib
         Config.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
-        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h ConfigReader.cpp ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h)
+        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h ConfigReader.cpp ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h VertexData.cpp VertexData.h)
 
 
 if (nlohmann_json_ADDED)
