@@ -47,8 +47,9 @@ set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
         shaders/Shaders.h shaders/include/shader.fs shaders/include/shader.vs
-        opengl/Camera.cpp opengl/Camera.h
-        renderer/Renderer.cpp renderer/Renderer.h)
+        renderer/Renderer.cpp renderer/Renderer.h
+        renderer/Camera.cpp renderer/Camera.h
+        )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}  MANUAL_FINALIZATION ${PROJECT_SOURCES})

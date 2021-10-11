@@ -46,6 +46,7 @@ namespace MapGenerator {
                 max = item;
             }
         }
+        //this normalization is great but makes the world unrealistic - need to scale according to latitude and longitude as well
         for(double & item : data){
             item = (item-min)/(max-min);
         }

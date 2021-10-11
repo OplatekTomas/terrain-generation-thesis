@@ -10,6 +10,8 @@
 #include <shaders/Shaders.h>
 #include <ConfigReader.h>
 #include <QCoreApplication>
+#include <QMetaMethod>
+#include <QKeyEvent>
 
 Renderer::Renderer(QWindow *parent) {
     initialized = false;
@@ -43,6 +45,11 @@ void Renderer::initialize() {
             //fail gracefully TODO:actually fail
             ::raise(SIGSEGV);
         }
+        camera = std::make_shared<MapGenerator::Camera>();
+        connect(this, SIGNAL(keyPressEvent(QKeyEvent*)), camera.get(), SLOT(keyPressEvent(QKeyEvent*)));
+        connect(this, SIGNAL(keyReleaseEvent(QKeyEvent*)), camera.get(), SLOT(keyReleaseEvent(QKeyEvent*)));
+
+
     }
 
     //let's say to the OS that we want to work with this context
@@ -101,4 +108,6 @@ void Renderer::exposeEvent(QExposeEvent *event) {
         renderNow();
     }
 }
+
+
 

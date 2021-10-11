@@ -11,6 +11,7 @@
 #include <QSurfaceFormat>
 #include <QWindow>
 #include <QOpenGLContext>
+#include <renderer/Camera.h>
 #include <MapGenerator.h>
 
 class Renderer : public QWindow {
@@ -24,6 +25,10 @@ public:
 public slots:
 
     void renderNow();
+
+signals:
+    void keyPressEvent(QKeyEvent * event) override;
+    void keyReleaseEvent(QKeyEvent*event) override;
 
 protected:
     bool event(QEvent *event) override;
@@ -39,6 +44,7 @@ protected:
     std::shared_ptr<ge::gl::Buffer> vertices;
     std::shared_ptr<ge::gl::Program> shaderProgram;
     std::shared_ptr<ge::gl::VertexArray> vao;
+    std::shared_ptr<MapGenerator::Camera> camera;
 
     QSurfaceFormat surfaceFormat;
 
