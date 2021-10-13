@@ -11,7 +11,7 @@
 MainWindow::MainWindow(QWidget *parent) :QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     baseGridLayout = this->findChild<QGridLayout*>("baseGridLayout");
-    this->renderer = new Renderer();
+    //this->renderer = new MapRenderer::Renderer();
     //baseGridLayout->addWidget(renderer);
     QSizePolicy sizePolicy;
     sizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);

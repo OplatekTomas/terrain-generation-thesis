@@ -1,7 +1,7 @@
 #include <iostream>
 #include <MapGenerator.h>
-#include <Config.h>
-#include <ConfigReader.h>
+#include <config/Config.h>
+#include <config/ConfigReader.h>
 
 using namespace std;
 

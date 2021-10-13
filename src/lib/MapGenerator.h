@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Config.h>
+#include <config/Config.h>
 #include <api/BingApi.h>
 #include <VertexData.h>
 

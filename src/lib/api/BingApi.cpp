@@ -39,12 +39,8 @@ namespace MapGenerator {
         double max = -11034; //Mariana Trench
         //I could use stl functions, but this way there is only 1 pass
         for(auto item : data){
-            if(item < min){
-                min = item;
-            }
-            if(item > max){
-                max = item;
-            }
+            min = item < min ? item : min;
+            max = item > max ? item : max;
         }
         //this normalization is great but makes the world unrealistic - need to scale according to latitude and longitude as well
         for(double & item : data){

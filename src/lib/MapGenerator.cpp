@@ -20,14 +20,14 @@ namespace MapGenerator {
                                                       resolution + 1);
 
 
-        auto data = std::make_shared<VertexData>((resolution+1)*(resolution+1)*3, resolution*resolution);
+        auto data = std::make_shared<VertexData>((resolution + 1) * (resolution + 1) * 3, resolution * resolution);
         for (int x = 0; x <= resolution; x++) {
             for (int y = 0; y <= resolution; y++) {
                 auto index = (x * (resolution + 1) + y);
                 data->addVertex(
-                    ((float) x / (float) resolution) - 0.5f,
-                    ((float) y / (float) resolution) - 0.5f,
-                    (float) elevation[index]
+                        ((float) x / (float) resolution),
+                        ((float) y / (float) resolution),
+                        (float) elevation[index]
                 );
             }
         }
