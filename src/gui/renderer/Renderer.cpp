@@ -64,13 +64,21 @@ namespace MapGenerator{
 
         std::vector<double> posHome {
                 49.886345859314645, 17.884317103291107,
-                49.890439664583255, 17.870389844778817        };
+
+                49.890439664583255, 17.870389844778817
+                //49.89026759887128, 17.876138805985576
+        };
 
         std::vector<double> posBrno = {
                 49.210677743172724, 16.62863105170431,
                 49.213095764793390, 16.625380048112635
         };
-        auto draw = posHome;
+
+        std::vector<double> posRadun = {
+                49.870291704376214, 17.860090558506485,
+                49.888954501165955, 17.88689223413519,
+        };
+        auto draw = posRadun;
 
         auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 20);
 

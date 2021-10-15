@@ -18,3 +18,6 @@
  - načtení kusu mapy a drobné modifikace
  - úvod, teorie část návrhu do ledna, ale když to nebude tak hlavu mi neurve, ale tak 10 normostran
  - konzultovat hodně
+
+
+## Normalizace všeho podle celkového maxu - jedině tak znormalizuju celou oblast
