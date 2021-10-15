@@ -23,8 +23,9 @@ namespace MapGenerator {
         front = glm::vec3(0, 0, -1);
         right = glm::vec3(1, 0, 0);
         pitch = 0;
-        yaw =  -90.0f;
-
+        yaw = -90.0f;
+        xMove = yMove = 0;
+        moved = false;
     }
 
     void Camera::keyPressEvent(QKeyEvent *event) {
@@ -80,24 +81,14 @@ namespace MapGenerator {
         if(xMove == 0 && yMove == 0){
             return;
         }
-        const auto sensitivity = 0.25f;
-        if (xMove != 0) {
-            yaw += xMove * sensitivity;
-            xMove = 0;
-            moved = true;
-            if (pitch > 89.0f){
-                pitch= 89.0f;
-            }
-            if (pitch < -89.0f){
-                pitch = -89.0f;
-            }
-        }
-        if (yMove != 0) {
-            pitch -= yMove * sensitivity;
-            yMove = 0;
-            moved = true;
-        }
+        moved = true;
+        const auto sensitivity = 0.2f;
 
+        yaw += xMove * sensitivity;
+        pitch -= yMove * sensitivity;
+        pitch = pitch > 89.0f ? 89.0f : pitch < -89.0f ? -89.0f : pitch;
+        xMove = 0;
+        yMove = 0;
         glm::vec3 frontTmp;
         frontTmp.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         frontTmp.y = sin(glm::radians(pitch));

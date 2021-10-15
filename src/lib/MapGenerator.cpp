@@ -13,21 +13,16 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<VertexData> MapGenerator::getVertices() {
-        int resolution = 10;
-        auto elevation = bing->getElevationNormalized(49.210677743172724, 16.62863105170431,
-                                                      49.213095764793390, 16.625380048112635,
-                                                      resolution + 1);
-
-
+    std::shared_ptr<VertexData> MapGenerator::getVertices(double long1, double lat1, double long2, double lat2, int resolution) {
+        auto elevation = bing->getElevationNormalized(long1, lat1, long2, lat2, resolution+1);
         auto data = std::make_shared<VertexData>((resolution + 1) * (resolution + 1) * 3, resolution * resolution);
         for (int x = 0; x <= resolution; x++) {
             for (int y = 0; y <= resolution; y++) {
                 auto index = (x * (resolution + 1) + y);
                 data->addVertex(
-                        ((float) x / (float) resolution),
-                        ((float) y / (float) resolution),
-                        (float) elevation[index]
+                    ((float) x / (float) resolution),
+                    (float) elevation[index],
+                    ((float) y / (float) resolution)
                 );
             }
         }

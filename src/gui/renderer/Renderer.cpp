@@ -55,15 +55,24 @@ namespace MapGenerator{
             connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyPressEvent(QKeyEvent * )));
             connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyReleaseEvent(QKeyEvent * )));
             connect(this, SIGNAL(mouseMoveEvent(QMouseEvent *)), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
-
-
         }
 
         //let's say to the OS that we want to work with this context
         context->makeCurrent(this);
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
-        auto data = mapGenerator->getVertices();
+
+        std::vector<double> posHome {
+                49.886345859314645, 17.884317103291107,
+                49.890439664583255, 17.870389844778817        };
+
+        std::vector<double> posBrno = {
+                49.210677743172724, 16.62863105170431,
+                49.213095764793390, 16.625380048112635
+        };
+        auto draw = posHome;
+
+        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 20);
 
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
@@ -82,6 +91,9 @@ namespace MapGenerator{
         shaderProgram = std::make_shared<ge::gl::Program>(vertexShader, fragmentShader);
 
         initialized = true;
+        //Draw as wireframe
+        gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
+
 
     }
 
@@ -93,7 +105,7 @@ namespace MapGenerator{
 
         auto view = camera->getViewMatrix();
         shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
-        glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)width() / (float)height(), 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)width() / (float)height(), 0.1f, 100.0f);
         shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));
 
         shaderProgram->use();
