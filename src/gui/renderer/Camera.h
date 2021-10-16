@@ -24,12 +24,9 @@ namespace MapGenerator {
         glm::mat4 getViewMatrix();
 
     public slots:
-        void keyPressEvent(QKeyEvent* event);
-        void keyReleaseEvent(QKeyEvent* event);
+        void keyEvent(QKeyEvent* event);
         void mouseMoved(QMouseEvent *event);
-
         void updateSteps();
-
 
     private:
         void updateKeyboardEvents();
@@ -50,10 +47,17 @@ namespace MapGenerator {
         bool a_down;
         bool s_down;
         bool d_down;
+        bool ctrl_down;
+        bool space_down;
+
+
         int xMove;
         int yMove;
+        int mouseCounter;
 
         bool moved;
+
+
 
     };
 

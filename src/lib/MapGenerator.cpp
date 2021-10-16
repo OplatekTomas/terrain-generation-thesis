@@ -25,12 +25,10 @@ namespace MapGenerator {
         for (int x = 0; x <= resolution; x++) {
             for (int y = 0; y <= resolution; y++) {
                 auto index = (x * (resolution + 1) + y);
-                auto yValue = resolution - 1 - y;
-                auto xValue = resolution - 1 - x;
                 data->addVertex(
                         ((float) y / (float) resolution),
                         (float) elevation[index] - 0.2f ,
-                        (((float) xValue / (float) resolution)) * scale
+                        (((float) x / (float) resolution)) * (float)scale
                 );
             }
         }

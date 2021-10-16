@@ -20,4 +20,5 @@
  - konzultovat hodně
 
 
-## Normalizace všeho podle celkového maxu - jedině tak znormalizuju celou oblast
+## Notes
+ - max res per request: 32x32 (1024 je max počet bodů)

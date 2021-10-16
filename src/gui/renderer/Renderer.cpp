@@ -52,8 +52,8 @@ namespace MapGenerator{
                 ::raise(SIGSEGV);
             }
             camera = std::make_shared<Camera>((Renderer*)this);
-            connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyPressEvent(QKeyEvent * )));
-            connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyReleaseEvent(QKeyEvent * )));
+            connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
+            connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(mouseMoveEvent(QMouseEvent *)), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
         }
 
@@ -64,7 +64,6 @@ namespace MapGenerator{
 
         std::vector<double> posHome {
                 49.886345859314645, 17.884317103291107,
-
                 49.890439664583255, 17.870389844778817
                 //49.89026759887128, 17.876138805985576
         };
@@ -74,13 +73,13 @@ namespace MapGenerator{
                 49.213095764793390, 16.625380048112635
         };
 
-        std::vector<double> posRadun = {
+        std::vector<double> posHradec = {
                 49.870291704376214, 17.860090558506485,
                 49.888954501165955, 17.88689223413519,
         };
-        auto draw = posRadun;
+        auto draw = posHradec;
 
-        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 20);
+        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 40);
 
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
@@ -112,8 +111,9 @@ namespace MapGenerator{
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         auto view = camera->getViewMatrix();
-        shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
         glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)width() / (float)height(), 0.1f, 100.0f);
+
+        shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
         shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));
 
         shaderProgram->use();

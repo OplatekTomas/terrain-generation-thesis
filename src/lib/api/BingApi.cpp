@@ -11,6 +11,8 @@
 #include <memory>
 #include <csignal>
 #include <cmath>
+#include <iostream>
+#include <models/bing/ElevationData.h>
 
 #define _USE_MATH_DEFINES
 
@@ -20,31 +22,62 @@ namespace MapGenerator {
     }
 
     std::string BingApi::getBaseAddress() {
+        return "http://52.156.193.145/REST/v1/";
         return "http://dev.virtualearth.net/REST/v1/";
     }
 
-    std::shared_ptr<ElevationResult>
-    BingApi::getElevation(double lat1, double long1, double lat2, double long2, int rows, int cols) {
-        auto args = "Elevation/Bounds?bounds={0},{1},{2},{3}&rows={4}&cols={5}&key={6}";
-        auto url = getBaseAddress() + fmt::format(args, lat1, long1, lat2, long2, rows, cols, this->apiKey);
-        auto result = this->sendRequest<ElevationResult>(url);
-        if (result == nullptr) {
-            return nullptr;
-        }
-        return result;
-    }
 
+    std::shared_ptr<ElevationData>
+    BingApi::getElevation(double lat1, double long1, double lat2, double long2, int rows, int cols) {
+        if (lat1 > lat2) {
+            std::swap(lat1, lat2);
+        }
+        if (long1 < long2) {
+            std::swap(long1, long2);
+        }
+        if (rows * cols <= 1024) {
+            auto result = sendElevationRequest(lat1, long1, lat2, long2, rows, cols);
+            if (result == nullptr || result->resourceSets.empty() || result->resourceSets[0].resources.empty()) {
+                return {};
+            }
+            return std::make_shared<ElevationData>(result->resourceSets[0].resources[0].elevations);
+        }
+        auto rowChunks = rows / 32.0;
+        auto colChunks = cols / 32.0;
+        auto latStepSize = (lat2 - lat1) / rows;
+        auto longStepSize = (long1 - long2) / cols;
+        auto data = std::make_shared<ElevationData>(rows, cols);
+        for (int rowStart = 0; rowStart < rows; rowStart += 32) {
+            auto colChunksCopy = colChunks;
+            auto rowEnd = rowChunks < 1.0f ? rowStart + (32 * rowChunks) : rowStart + 32;
+            for (int colStart = 0; colStart < cols; colStart += 32) {
+                auto colEnd = colChunksCopy < 1.0f ? colStart + (32 * colChunksCopy) : colStart + 32;
+                auto result = sendElevationRequest(
+                        lat1 + (rowStart * latStepSize),
+                        long2 + (colStart * longStepSize),
+                        lat1 + (rowEnd * latStepSize),
+                        long2 + (colEnd * longStepSize),
+                        rowEnd - rowStart,
+                        colEnd - colStart
+                );
+                auto elevations = result->resourceSets[0].resources[0].elevations;
+                data->setAt(rowStart, rowEnd, colStart, colEnd, elevations);
+                std::cout << rowStart << "-" << rowEnd << " " << colStart << "-" << colEnd << std::endl;
+                colChunksCopy--;
+            }
+            rowChunks--;
+        }
+        return data;
+    }
 
 
     std::tuple<std::vector<double>, double, double>
     BingApi::getElevationNormalized(double lat1, double long1, double lat2, double long2, int resolution) {
-        auto result = getElevation(lat1, long1, lat2, long2, resolution, resolution);
-        if (result == nullptr || result->resourceSets.empty() || result->resourceSets[0].resources.empty()) {
-            return {};
-        }
-        auto data = result->resourceSets[0].resources[0].elevations;
+        auto elevationData = getElevation(lat1, long1, lat2, long2, resolution, resolution);
         auto longDist = getDistanceBetweenPoints(lat1, long1, lat2, long1);
         auto latDist = getDistanceBetweenPoints(lat1, long1, lat1, long2);
+        auto data = *elevationData->getData();
+        //add latitude and longitude data for precise scaling
         data.push_back(0);
         data.push_back(longDist);
         data.push_back(latDist);
@@ -58,16 +91,17 @@ namespace MapGenerator {
             min = item < min ? item : min;
             max = item > max ? item : max;
         }
-        //this normalization is great but makes the world unrealistic - need to scale according to latitude and longitude as well
-        for(int i = 0; i < data.size() - 3; i++){
+        //normalize and get min/max of the normalized data without the last 3 (manually added) elements
+        for (size_t i = 0; i < data.size() - 3; i++) {
             data[i] = (data[i] - min) / (max - min);
             minNormalized = data[i] < minNormalized ? data[i] : minNormalized;
             maxNormalized = data[i] > maxNormalized ? data[i] : maxNormalized;
         }
-        data.resize(data.size()-3);
-        auto tmp = (minNormalized - (1-maxNormalized)) / 2;
-        for (auto& item: data) {
-            item = item - tmp;
+        data.resize(data.size() - 3);
+        //Shift so that midpoint in the model is at 0.5
+        auto shift = (minNormalized - (1 - maxNormalized)) / 2;
+        for (auto &item: data) {
+            item = item - shift;
         }
         return {data, latDist, longDist};
     }
@@ -82,6 +116,23 @@ namespace MapGenerator {
         auto c = 2 * atan2(sqrt(a), sqrt(1 - a));
         auto d = R * c;
         return d * 1000; // meters
+    }
+
+    std::shared_ptr<ElevationResult>
+    BingApi::sendElevationRequest(double lat1, double long1, double lat2, double long2, int rows, int cols) {
+        if (lat1 > lat2) {
+            std::swap(lat1, lat2);
+        }
+        if (long1 < long2) {
+            std::swap(long1, long2);
+        }
+        auto args = "Elevation/Bounds?bounds={0},{1},{2},{3}&rows={4}&cols={5}&key={6}";
+        auto url = getBaseAddress() + fmt::format(args, lat1, long1, lat2, long2, rows, cols, this->apiKey);
+        auto result = this->sendRequest<ElevationResult>(url);
+        if (result == nullptr) {
+            return nullptr;
+        }
+        return result;
     }
 
 }

@@ -16,11 +16,11 @@ namespace MapGenerator {
         timer->setInterval(16);
         connect(timer.get(), SIGNAL(timeout()), this, SLOT(updateSteps()));
         timer->start();
-        w_down = a_down = s_down = d_down = false;
-        position = glm::vec3(0.5,0.5,2);
+        w_down = a_down = s_down = d_down = space_down = ctrl_down =  false;
+        position = glm::vec3(0.5,0.5,-0.5);
         up = glm::vec3(0, 1, 0);
         worldUp = up;
-        front = glm::vec3(0, 0, -1);
+        front = glm::vec3(0, 0, 1);
         right = glm::vec3(1, 0, 0);
         pitch = 0;
         yaw = -90.0f;
@@ -28,41 +28,31 @@ namespace MapGenerator {
         moved = false;
     }
 
-    void Camera::keyPressEvent(QKeyEvent *event) {
-        switch (event->key()) {
-            case Qt::Key::Key_W:
-                w_down = true;
-                break;
-            case Qt::Key::Key_A:
-                a_down = true;
-                break;
-            case Qt::Key::Key_S:
-                s_down = true;
-                break;
-            case Qt::Key::Key_D:
-                d_down = true;
-                break;
-        }
-        event->accept();
-    }
 
     glm::mat4 Camera::getViewMatrix() {
         return glm::lookAt(this->position, this->position + this->front, this->up);
     }
 
-    void Camera::keyReleaseEvent(QKeyEvent *event) {
+    void Camera::keyEvent(QKeyEvent *event) {
+        auto pressed = event->type() == QEvent::KeyPress;
         switch (event->key()) {
             case Qt::Key::Key_W:
-                w_down = false;
+                w_down = pressed;
                 break;
             case Qt::Key::Key_A:
-                a_down = false;
+                a_down = pressed;
                 break;
             case Qt::Key::Key_S:
-                s_down = false;
+                s_down = pressed;
                 break;
             case Qt::Key::Key_D:
-                d_down = false;
+                d_down = pressed;
+                break;
+            case Qt::Key::Key_Space:
+                space_down = pressed;
+                break;
+            case Qt::Key::Key_Control:
+                ctrl_down = pressed;
                 break;
         }
         event->accept();
@@ -85,7 +75,7 @@ namespace MapGenerator {
         const auto sensitivity = 0.2f;
 
         yaw += xMove * sensitivity;
-        pitch -= yMove * sensitivity;
+        pitch += yMove * sensitivity;
         pitch = pitch > 89.0f ? 89.0f : pitch < -89.0f ? -89.0f : pitch;
         xMove = 0;
         yMove = 0;
@@ -93,14 +83,15 @@ namespace MapGenerator {
         frontTmp.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         frontTmp.y = sin(glm::radians(pitch));
         frontTmp.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        front = glm::normalize(frontTmp);
+        front = -glm::normalize(frontTmp);
         // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         right = glm::normalize(glm::cross(front, worldUp));
         up = glm::normalize(glm::cross(right, front));
     }
 
     void Camera::updateKeyboardEvents() {
-        const float stepSize = 0.05;
+        auto y = position.y;
+        const float stepSize = 0.03;
         if (w_down) {
             position += front * stepSize;
             moved = true;
@@ -109,15 +100,22 @@ namespace MapGenerator {
             position -= front * stepSize;
             moved = true;
         }
-        if (a_down) {
-            position -= right * stepSize;
-            moved = true;
-        }
         if (d_down) {
             position += right * stepSize;
             moved = true;
         }
-        position.y = 0.5f;
+        if (a_down) {
+            position -= right * stepSize;
+            moved = true;
+        }
+        position.y = y;
+        if (space_down) {
+            position += up * stepSize;
+            moved = true;
+        } if (ctrl_down) {
+            position -= up * stepSize;
+            moved = true;
+        }
 
     }
 
