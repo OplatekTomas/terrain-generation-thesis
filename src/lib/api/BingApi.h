@@ -14,9 +14,9 @@ namespace MapGenerator {
     public:
         explicit BingApi(std::string key);
         std::shared_ptr<ElevationData>
-        getElevation(double lat1, double long1, double lat2, double long2, int rows = 10, int cols = 10);
+        getElevation(double lat1, double long1, double lat2, double long2, int resolution);
         std::tuple<std::vector<double>, double, double>
-        getElevationNormalized(double lat1, double long1, double lat2, double long2, int resolution = 10);
+        getElevationNormalized(double lat1, double long1, double lat2, double long2, int *resolution);
 
     private:
         std::string getBaseAddress() override;
@@ -25,6 +25,9 @@ namespace MapGenerator {
 
 
         static double getDistanceBetweenPoints(double lat1, double long1, double lat2, double long2);
+
+
+
     };
 }
 

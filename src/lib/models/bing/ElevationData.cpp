@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include <iostream>
 
 namespace MapGenerator {
     ElevationData::ElevationData(const std::vector<double> &data) {
@@ -35,18 +36,11 @@ namespace MapGenerator {
     void ElevationData::setAt(int rowFrom, int rowTo, int colFrom, int colTo, const std::vector<double> &newData) {
         int rowCount = rowTo - rowFrom;
         int colCount = colTo - colFrom;
-        if(rowCount == colCount){
-            setSameDimension(rowFrom, colFrom, rowCount, colCount, newData);
-        }if(rowCount < colCount){
-            setDifferentDimension(rowFrom, colFrom, rowCount, colCount, newData);
-        }
-
-    }
-
-    void ElevationData::setSameDimension(int rowFrom, int colFrom,  int rowCount, int colCount ,const std::vector<double> &newData){
         int rIndex = rowFrom;
+
         for (int r = 0; r < rowCount; r++) {
             int cIndex = colFrom;
+
             for (int c = 0; c < colCount; c++) {
                 int dataIndex  = (r * rowCount) + (colCount - c - 1);
                 setAt(rIndex, cols - cIndex - 1, newData.at(dataIndex));
@@ -54,20 +48,7 @@ namespace MapGenerator {
             }
             rIndex++;
         }
-    }
 
-    void ElevationData::setDifferentDimension(int rowFrom, int colFrom, int rowCount, int colCount, const std::vector<double> &newData) {
-        int cIndex = colFrom + colCount - 1;
-
-        for (int c = 0; c < colCount; c++) {
-            int rIndex = rowFrom;
-            for (int r = 0; r < rowCount; r++) {
-                int dataIndex  = (r*rowCount) + c;
-                setAt(rIndex, cols - cIndex - 1, newData.at(dataIndex));
-                rIndex++;
-            }
-            cIndex--;
-        }
-    }
+    } 
 
 }

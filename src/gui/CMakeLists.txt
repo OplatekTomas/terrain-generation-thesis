@@ -11,6 +11,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CPM_DOWNLOAD_VERSION 0.32.0)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+
 
 #Create dummy files so that they at least exist when CMake project is loaded
 file(WRITE shaders/include/shader.fs "")

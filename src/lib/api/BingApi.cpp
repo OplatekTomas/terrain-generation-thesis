@@ -28,30 +28,28 @@ namespace MapGenerator {
 
 
     std::shared_ptr<ElevationData>
-    BingApi::getElevation(double lat1, double long1, double lat2, double long2, int rows, int cols) {
+    BingApi::getElevation(double lat1, double long1, double lat2, double long2, int resolution) {
         if (lat1 > lat2) {
             std::swap(lat1, lat2);
         }
         if (long1 < long2) {
             std::swap(long1, long2);
         }
-        if (rows * cols <= 1024) {
-            auto result = sendElevationRequest(lat1, long1, lat2, long2, rows, cols);
+        if (resolution * resolution <= 1024) {
+            auto result = sendElevationRequest(lat1, long1, lat2, long2, resolution, resolution);
             if (result == nullptr || result->resourceSets.empty() || result->resourceSets[0].resources.empty()) {
                 return {};
             }
             return std::make_shared<ElevationData>(result->resourceSets[0].resources[0].elevations);
         }
-        auto rowChunks = rows / 32.0;
-        auto colChunks = cols / 32.0;
-        auto latStepSize = (lat2 - lat1) / rows;
-        auto longStepSize = (long1 - long2) / cols;
-        auto data = std::make_shared<ElevationData>(rows, cols);
-        for (int rowStart = 0; rowStart < rows; rowStart += 32) {
-            auto colChunksCopy = colChunks;
-            auto rowEnd = rowChunks < 1.0f ? rowStart + (32 * rowChunks) : rowStart + 32;
-            for (int colStart = 0; colStart < cols; colStart += 32) {
-                auto colEnd = colChunksCopy < 1.0f ? colStart + (32 * colChunksCopy) : colStart + 32;
+        auto latStepSize = (lat2 - lat1) / resolution;
+        auto longStepSize = (long1 - long2) / resolution;
+        auto data = std::make_shared<ElevationData>(resolution, resolution);
+
+        for (int rowStart = 0; rowStart < resolution; rowStart += 32) {
+            auto rowEnd = rowStart + 32;
+            for (int colStart = 0; colStart < resolution; colStart += 32) {
+                auto colEnd = colStart + 32;
                 auto result = sendElevationRequest(
                         lat1 + (rowStart * latStepSize),
                         long2 + (colStart * longStepSize),
@@ -62,18 +60,18 @@ namespace MapGenerator {
                 );
                 auto elevations = result->resourceSets[0].resources[0].elevations;
                 data->setAt(rowStart, rowEnd, colStart, colEnd, elevations);
-                std::cout << rowStart << "-" << rowEnd << " " << colStart << "-" << colEnd << std::endl;
-                colChunksCopy--;
             }
-            rowChunks--;
         }
         return data;
     }
 
 
     std::tuple<std::vector<double>, double, double>
-    BingApi::getElevationNormalized(double lat1, double long1, double lat2, double long2, int resolution) {
-        auto elevationData = getElevation(lat1, long1, lat2, long2, resolution, resolution);
+    BingApi::getElevationNormalized(double lat1, double long1, double lat2, double long2, int* resolution) {
+        while(*resolution % 32 !=0){
+            (*resolution)++;
+        }
+        auto elevationData = getElevation(lat1, long1, lat2, long2, *resolution);
         auto longDist = getDistanceBetweenPoints(lat1, long1, lat2, long1);
         auto latDist = getDistanceBetweenPoints(lat1, long1, lat1, long2);
         auto data = *elevationData->getData();

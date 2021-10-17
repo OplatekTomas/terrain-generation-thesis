@@ -16,7 +16,10 @@ namespace MapGenerator {
 
     std::shared_ptr<VertexData>
     MapGenerator::getVertices(double lat1, double long1, double lat2, double long2, int resolution) {
-        auto [elevation, latDist, longDist] = bing->getElevationNormalized(lat1, long1, lat2, long2, resolution + 1);
+
+        resolution++;
+        auto [elevation, latDist, longDist] = bing->getElevationNormalized(lat1, long1, lat2, long2, &resolution);
+        resolution--;
         if (elevation.empty()) {
             return nullptr;
         }

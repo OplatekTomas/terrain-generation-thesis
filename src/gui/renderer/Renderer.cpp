@@ -63,9 +63,8 @@ namespace MapGenerator{
         gl = std::make_shared<ge::gl::Context>();
 
         std::vector<double> posHome {
-                49.886345859314645, 17.884317103291107,
-                49.890439664583255, 17.870389844778817
-                //49.89026759887128, 17.876138805985576
+                49.88902302728358, 17.880114353980076,
+                49.886885305432486, 17.881717327133448
         };
 
         std::vector<double> posBrno = {
@@ -77,9 +76,9 @@ namespace MapGenerator{
                 49.870291704376214, 17.860090558506485,
                 49.888954501165955, 17.88689223413519,
         };
-        auto draw = posHradec;
+        auto draw = posHome;
 
-        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 40);
+        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 150);
 
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
