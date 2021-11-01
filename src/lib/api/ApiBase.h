@@ -14,12 +14,16 @@ namespace MapGenerator{
     public:
         ApiBase(std::string apiKey);
         template<class T> std::shared_ptr<T> sendRequest(std::string uri);
+
     private:
         virtual std::string getBaseAddress() = 0;
     protected:
         std::string apiKey;
+        std::string encodeUrl(const std::string &url);
 
     };
+
+    void getMetadata();
 };
 
 #include "ApiBase_impl.h"

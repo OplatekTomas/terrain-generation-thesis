@@ -40,15 +40,30 @@ CPMAddPackage(
         GIT_TAG 290fbaff7321b3df66c4ac5b039815f25e4333bb
 )
 
+
 CPMAddPackage("gh:fmtlib/fmt#8.0.1")
 
+CPMAddPackage(
+        NAME Ccache.cmake
+        GITHUB_REPOSITORY TheLartians/Ccache.cmake
+        VERSION 1.2
+)
 
+FetchContent_Declare(
+        boolinq
+        URL https://raw.githubusercontent.com/k06a/boolinq/master/include/boolinq/boolinq.h
+        DOWNLOAD_NO_EXTRACT TRUE
+)
+
+FetchContent_MakeAvailable(boolinq)
 
 add_library (lib
         config/Config.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
-        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp config/ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h VertexData.cpp VertexData.h api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h)
-
+        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
+        config/ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h VertexData.cpp VertexData.h
+        api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h
+        models/openstreetmap/MetadataResult.h Helper.h)
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
@@ -56,6 +71,7 @@ endif()
 target_link_libraries(lib PUBLIC cpr::cpr fmt)
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(lib PUBLIC ${boolinq_SOURCE_DIR})
 
 
 

@@ -6,6 +6,7 @@
 
 #include <api/ApiBase.h>
 #include <cpr/cpr.h>
+#include <iomanip>
 
 namespace MapGenerator {
     template<class T>
@@ -25,4 +26,5 @@ namespace MapGenerator {
         auto sharedPtr = std::shared_ptr<T>(obj);
         return sharedPtr;
     }
+
 }

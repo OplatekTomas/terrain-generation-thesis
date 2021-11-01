@@ -63,8 +63,7 @@ namespace MapGenerator{
         gl = std::make_shared<ge::gl::Context>();
 
         std::vector<double> posHome {
-                49.88902302728358, 17.880114353980076,
-                49.886885305432486, 17.881717327133448
+                49.883325913713,17.8657865524292,49.89402618295204,17.890548706054688
         };
 
         std::vector<double> posBrno = {
@@ -76,10 +75,14 @@ namespace MapGenerator{
                 49.870291704376214, 17.860090558506485,
                 49.888954501165955, 17.88689223413519,
         };
+
+        std::vector<double> posBig={
+                49.91207875007256, 18.0234327857081,
+                49.86388284681711, 18.085937745375347
+        };
         auto draw = posHome;
-
-        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 150);
-
+        mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3]);
+        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 120);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
         indices = std::make_shared<ge::gl::Buffer>(data->indices->size() * sizeof(int), data->indices->data(),
@@ -90,8 +93,8 @@ namespace MapGenerator{
         vao->addElementBuffer(indices);
         drawCount = data->indices->size();
 
-        std::shared_ptr<ge::gl::Shader> vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
-        std::shared_ptr<ge::gl::Shader> fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER,
+        auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
+        auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER,
                                                                                           FragmentSource);
 
         shaderProgram = std::make_shared<ge::gl::Program>(vertexShader, fragmentShader);
