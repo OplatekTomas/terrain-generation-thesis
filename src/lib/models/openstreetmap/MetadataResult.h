@@ -35,6 +35,11 @@ namespace MapGenerator {
         std::shared_ptr<std::map<std::string, std::string>> tags;
         std::shared_ptr<std::vector<int64_t>> nodes;
         std::shared_ptr<std::vector<member>> members;
+
+        bool operator <( const element &rhs ) const
+        {
+            return (id < rhs.id);
+        }
     };
 
     struct osm3SInfo {

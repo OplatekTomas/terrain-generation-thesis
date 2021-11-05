@@ -7,6 +7,7 @@
 ## Useful odkazy
 - https://app.MapGenerator.io/
 
+
 ## Detaily
 - uživatel si ozančí ma mapě oblast - vygeneruje se 3d mapa, kde se na základě metadat dogenerujou další věci
 - gegl
@@ -48,3 +49,6 @@ out meta;
 - To mi vrátí všechny prvky s informacema o oblastech, domech atd atd
 - Pak v nodes je seznam nodů které ten objekt tvoří
 - Ty si můžu mrdnout třeba do dictionary a pak k nim přistupovat s O(1)
+- OSM vrací pouze body v oblasti, ale zároveň vrací informace o bodech které nejsou v bounding boxu ale mají nějakou
+spojitost s bounding boxem. Takže buď zjistím všechny co chybí a requestnu je nebo jestli jsou v pořadí (TODO vyzkoumat pořadí)
+tak prostě vezmu a requestnu okolní

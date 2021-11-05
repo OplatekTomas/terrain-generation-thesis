@@ -3,10 +3,8 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
 set(CPM_DOWNLOAD_VERSION 0.32.0)
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
 include(FetchContent)
 
 
@@ -63,7 +61,7 @@ add_library (lib
         models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
         config/ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h VertexData.cpp VertexData.h
         api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h
-        models/openstreetmap/MetadataResult.h Helper.h)
+        models/openstreetmap/MetadataResult.h Helper.h common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h)
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)

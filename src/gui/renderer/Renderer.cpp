@@ -81,7 +81,7 @@ namespace MapGenerator{
                 49.86388284681711, 18.085937745375347
         };
         auto draw = posHome;
-        mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3]);
+        mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], 512);
         auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 120);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);

@@ -6,7 +6,7 @@
 
 #include <fmt/printf.h>
 #include <boolinq.h>
-#include <Helper.h>
+#include <common/LandTypeGenerator.h>
 
 using namespace boolinq;
 
@@ -46,15 +46,13 @@ namespace MapGenerator {
                 int row2 = (j + 1) * (resolution + 1);
                 data->addIndex(row1 + i, row1 + i + 1, row2 + i + 1);
                 data->addIndex(row1 + i, row2 + i + 1, row2 + i);
-
             }
         }
-
         return data;
     }
 
 
-    std::shared_ptr<MetadataResult> MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2) {
+    std::shared_ptr<MetadataResult> MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
         if (lat1 > lat2) {
             std::swap(lat1, lat2);
         }
@@ -62,16 +60,8 @@ namespace MapGenerator {
             std::swap(long1, long2);
         }
         auto result = osm->getMetadata(lat1, long1, lat2, long2);
-        std::vector<std::string> tagTypes = {"landuse", "highways", "waterways"};
-        // C#'s Linq like stuff. Works surprisingly well.
-        auto ways = from(result->elements)
-            .where([](const element &x) {
-                return x.type == nodeType::way && x.tags != nullptr;
-            }).where([&](const element &x) {
-                return from(tagTypes).any([&](const std::string &t) { return mapContainsKey(*x.tags, t); });
-            }).toStdVector();
-        auto nodes = from(result->elements).where([](const element &x) { return x.type == nodeType::node; });
-
+        LandTypeGenerator generator(lat1, long1, lat2, long2, resolution);
+        auto tex = generator.generateTexture(result);
         return result;
     }
 
