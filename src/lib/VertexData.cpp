@@ -18,6 +18,8 @@ namespace MapGenerator {
         vertices->push_back(v1);
         vertices->push_back(v2);
         vertices->push_back(v3);
+        vertices->push_back(v1);
+        vertices->push_back(v3);
     }
 
     void VertexData::addIndex(int i1, int i2, int i3) {

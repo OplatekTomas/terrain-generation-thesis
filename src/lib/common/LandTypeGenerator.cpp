@@ -33,22 +33,37 @@ namespace MapGenerator {
                 .where([](const element &x) { return x.type == nodeType::node; })
                 .orderBy([](const element &x) { return x.id; }).toStdVector();
         std::shared_ptr<std::vector<char>> texture = std::make_shared<std::vector<char>>(resolution * resolution * 4);
-        for (const auto &way: wayData) {
-            AreaOnMap area;
-            for (auto nodeId: *way.nodes) {
-                auto node = getNode(nodeId);
-                area.addNode(node);
-            }
-            ways.emplace(way, area);
-            std::cout << endl;
+        /* for (const auto &way: wayData) {
+             AreaOnMap area;
+             for (auto nodeId: *way.nodes) {
+                 auto node = getNode(nodeId);
+                 area.addNode(node);
+             }
+             ways.emplace(way, area);
+             std::cout << endl;
+         }*/
+        auto way = wayData.at(0);
+        AreaOnMap area;
+        for (auto nodeId: *way.nodes) {
+            auto node = getNode(nodeId);
+            area.addNode(node);
         }
-
+        ways.emplace(way, area);
         for (int x = 0; x < resolution; x++) {
             for (int y = 0; y < resolution; y++) {
-
+                auto lon = xStart + x * xStep;
+                auto lat = yStart + y * yStep;
+                if(!area.isInsideArea(lat, lon)){
+                    continue;
+                }
+                int index = (x * resolution + y) * 4;
+                texture->at(index) = (char)255;
+                texture->at(index + 1) = 0;
+                texture->at(index + 2) = 0;
+                texture->at(index + 3) = 0;
             }
         }
-        return std::shared_ptr<std::vector<char>>();
+        return texture;
     }
 
     element MapGenerator::LandTypeGenerator::getNode(long id) {
@@ -56,6 +71,9 @@ namespace MapGenerator {
     }
 
     element MapGenerator::LandTypeGenerator::getNode(long id, int from, int to) {
+        if (from > to) {
+            return {};
+        }
         auto midPoint = (to + from) / 2;
         if (nodes[midPoint].id == id) {
             return nodes.at(midPoint);

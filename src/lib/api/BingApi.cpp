@@ -126,10 +126,11 @@ namespace MapGenerator {
         }
         auto args = "Elevation/Bounds?bounds={0},{1},{2},{3}&rows={4}&cols={5}&key={6}";
         auto url = getBaseAddress() + fmt::format(args, lat1, long1, lat2, long2, rows, cols, this->apiKey);
-        auto result = this->sendRequest<ElevationResult>(url);
-        if (result == nullptr) {
-            return nullptr;
-        }
+
+        //TODO: return proper data
+        auto result = this->readData<ElevationResult>("../../../examples/bing.json");
+
+        //auto result = this->sendRequest<ElevationResult>(url);
         return result;
     }
 

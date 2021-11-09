@@ -19,7 +19,10 @@ namespace MapGenerator {
         auto query = "[out:json];\n(node({0},{1},{2},{3});<;);out meta;";
         auto queryResult = encodeUrl(fmt::format(query, lat1, long1, lat2, long2));
         auto url = getBaseAddress() + queryResult;
-        auto result = this->sendRequest<MetadataResult>(url);
+
+        auto result = this->readData<MetadataResult>("../../../examples/osm.json");
+
+        //auto result = this->sendRequest<MetadataResult>(url);
         return result;
     }
 

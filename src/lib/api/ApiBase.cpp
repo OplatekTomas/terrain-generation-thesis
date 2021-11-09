@@ -3,6 +3,11 @@
 //
 
 #include <api/ApiBase.h>
+#include <cpr/cpr.h>
+#include <iomanip>
+#include <string>
+#include <iostream>
+
 
 namespace MapGenerator{
     ApiBase::ApiBase(std::string apiKey) {
@@ -29,8 +34,6 @@ namespace MapGenerator{
 
         return escaped.str();
     }
-
-
 }
 
 

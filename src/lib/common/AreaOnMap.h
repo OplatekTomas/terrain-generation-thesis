@@ -13,17 +13,20 @@ namespace MapGenerator{
     class AreaOnMap {
     public:
         AreaOnMap();
+        bool isInsideArea(double lat, double lon);
 
-        bool isInside(double lat, double lon);
+        bool isInsideBounds(double lat, double lon);
         void getColor(char* r, char* g, char* b);
         void addNode(const element& el);
-        double latMin = DBL_MAX;
-        double latMax = DBL_TRUE_MIN;
-        double lonMin = DBL_MAX;
-        double lonMax = DBL_TRUE_MIN;
+        double minLat = DBL_MAX;
+        double maxLat = DBL_TRUE_MIN;
+        double minLon = DBL_MAX;
+        double maxLon = DBL_TRUE_MIN;
 
     private:
         std::vector<element> points;
+
+
     };
 }
 

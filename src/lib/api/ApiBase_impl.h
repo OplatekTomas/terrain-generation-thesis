@@ -27,4 +27,16 @@ namespace MapGenerator {
         return sharedPtr;
     }
 
+    template<class T>
+    std::shared_ptr<T> ApiBase::readData(std::string path) {
+        std::ifstream t(path);
+        std::stringstream buffer;
+        buffer << t.rdbuf();
+        auto jsonObj = nlohmann::json::parse(buffer.str());
+        auto obj = new T();
+        nlohmann::from_json(jsonObj, *obj);
+        auto sharedPtr = std::shared_ptr<T>(obj);
+        return sharedPtr;
+    }
+
 }

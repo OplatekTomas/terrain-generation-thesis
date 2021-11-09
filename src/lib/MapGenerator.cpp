@@ -28,7 +28,7 @@ namespace MapGenerator {
             return nullptr;
         }
         auto scale = longDist / latDist;
-        auto data = std::make_shared<VertexData>((resolution + 1) * (resolution + 1) * 3, resolution * resolution);
+        auto data = std::make_shared<VertexData>((resolution + 1) * (resolution + 1) * 5, resolution * resolution);
         for (int x = 0; x <= resolution; x++) {
             for (int y = 0; y <= resolution; y++) {
                 auto index = (x * (resolution + 1) + y);

@@ -20,6 +20,7 @@ namespace MapGenerator{
     protected:
         std::string apiKey;
         std::string encodeUrl(const std::string &url);
+        template<class T> std::shared_ptr<T> readData(std::string path);
 
     };
 

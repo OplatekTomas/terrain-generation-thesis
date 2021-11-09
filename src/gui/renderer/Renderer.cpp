@@ -17,7 +17,7 @@
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace MapGenerator{
+namespace MapGenerator {
     Renderer::Renderer(QWindow *parent) {
         initialized = false;
         context = nullptr;
@@ -51,10 +51,10 @@ namespace MapGenerator{
                 //fail gracefully TODO:actually fail
                 ::raise(SIGSEGV);
             }
-            camera = std::make_shared<Camera>((Renderer*)this);
+            camera = std::make_shared<Camera>((Renderer *) this);
             connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
-            connect(this, SIGNAL(mouseMoveEvent(QMouseEvent *)), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
+            connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
         }
 
         //let's say to the OS that we want to work with this context
@@ -62,8 +62,8 @@ namespace MapGenerator{
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
 
-        std::vector<double> posHome {
-                49.883325913713,17.8657865524292,49.89402618295204,17.890548706054688
+        std::vector<double> posHome{
+                49.883325913713, 17.8657865524292, 49.89402618295204, 17.890548706054688
         };
 
         std::vector<double> posBrno = {
@@ -76,32 +76,35 @@ namespace MapGenerator{
                 49.888954501165955, 17.88689223413519,
         };
 
-        std::vector<double> posBig={
+        std::vector<double> posBig = {
                 49.91207875007256, 18.0234327857081,
                 49.86388284681711, 18.085937745375347
         };
         auto draw = posHome;
         mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], 512);
-        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 120);
+        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 30);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
         indices = std::make_shared<ge::gl::Buffer>(data->indices->size() * sizeof(int), data->indices->data(),
                                                    GL_STATIC_DRAW);
 
         vao = std::make_shared<ge::gl::VertexArray>();
-        vao->addAttrib(vertices, 0, 3, GL_FLOAT);
+        vao->addAttrib(vertices, 0, 3, GL_FLOAT, 5, 0);
+        vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5, 3);
+
+        //vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5,3);
         vao->addElementBuffer(indices);
         drawCount = data->indices->size();
 
         auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
         auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER,
-                                                                                          FragmentSource);
+                                                               FragmentSource);
 
         shaderProgram = std::make_shared<ge::gl::Program>(vertexShader, fragmentShader);
 
         initialized = true;
         //Draw as wireframe
-        gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
+        gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
     }
@@ -113,7 +116,7 @@ namespace MapGenerator{
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         auto view = camera->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)width() / (float)height(), 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width() / (float) height(), 0.1f, 100.0f);
 
         shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
         shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));
