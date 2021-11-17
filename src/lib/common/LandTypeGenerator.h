@@ -21,7 +21,7 @@ namespace MapGenerator{
     class LandTypeGenerator {
     public:
         LandTypeGenerator(double lat1, double lon1, double lat2, double lon2, int resolution);
-        shared_ptr<vector<char>> generateTexture(const shared_ptr<MetadataResult>& metadata);
+        shared_ptr <vector<unsigned char>> generateTexture(const shared_ptr<MetadataResult>& metadata);
     private:
         const vector<string> tagTypes {"landuse", "highways", "waterways"};
         element getNode(long id);

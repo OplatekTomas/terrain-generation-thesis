@@ -27,6 +27,7 @@ namespace MapGenerator{
         std::vector<element> points;
 
 
+        bool isInsidePolygon(double lat, double lon);
     };
 }
 

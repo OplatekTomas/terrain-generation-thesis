@@ -11,16 +11,16 @@ namespace MapGenerator {
     LandTypeGenerator::LandTypeGenerator(double lat1, double lon1, double lat2, double lon2, int resolution) {
 
         vector<string> landTypes;
-        xSize = std::fabs(lat1 - lat2);
-        ySize = std::fabs(lon1 - lon2);
+        ySize = std::fabs(lat1 - lat2);
+        xSize = std::fabs(lon1 - lon2);
         this->resolution = resolution;
         xStep = xSize / resolution;
         yStep = ySize / resolution;
         yStart = min(lat1, lat2);
-        xStart = max(lon1, lon2);
+        xStart = min(lon1, lon2);
     }
 
-    std::shared_ptr<std::vector<char>> LandTypeGenerator::generateTexture(const shared_ptr<MetadataResult> &metadata) {
+    std::shared_ptr<std::vector<unsigned char>> LandTypeGenerator::generateTexture(const shared_ptr<MetadataResult> &metadata) {
         this->metadata = metadata;
         // C#'s Linq like stuff. Works surprisingly well.
         auto wayData = from(metadata->elements)
@@ -32,7 +32,7 @@ namespace MapGenerator {
         nodes = from(metadata->elements)
                 .where([](const element &x) { return x.type == nodeType::node; })
                 .orderBy([](const element &x) { return x.id; }).toStdVector();
-        std::shared_ptr<std::vector<char>> texture = std::make_shared<std::vector<char>>(resolution * resolution * 4);
+        auto texture = std::make_shared<std::vector<unsigned char>>(resolution * resolution * 4);
         /* for (const auto &way: wayData) {
              AreaOnMap area;
              for (auto nodeId: *way.nodes) {
@@ -56,11 +56,11 @@ namespace MapGenerator {
                 if(!area.isInsideArea(lat, lon)){
                     continue;
                 }
-                int index = (x * resolution + y) * 4;
+                int index = (y * resolution + (resolution - x)) * 4;
                 texture->at(index) = (char)255;
                 texture->at(index + 1) = 0;
                 texture->at(index + 2) = 0;
-                texture->at(index + 3) = 0;
+                texture->at(index + 3) = (char)255;
             }
         }
         return texture;

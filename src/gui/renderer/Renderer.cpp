@@ -81,7 +81,17 @@ namespace MapGenerator {
                 49.86388284681711, 18.085937745375347
         };
         auto draw = posHome;
-        mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], 512);
+        auto resolution = 1024;
+        auto texData = mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution);
+        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, resolution, resolution);
+        texture->bind(GL_TEXTURE_2D);
+        texture->setData2D(texData->data(), GL_RGBA, GL_UNSIGNED_BYTE, 0,GL_TEXTURE_2D,0,0,resolution, resolution);
+        texture->generateMipmap();
+        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
         auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 30);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
@@ -89,8 +99,10 @@ namespace MapGenerator {
                                                    GL_STATIC_DRAW);
 
         vao = std::make_shared<ge::gl::VertexArray>();
-        vao->addAttrib(vertices, 0, 3, GL_FLOAT, 5, 0);
-        vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5, 3);
+
+
+        vao->addAttrib(vertices, 0, 3, GL_FLOAT, 5 * sizeof(float), 0);
+        vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
 
         //vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5,3);
         vao->addElementBuffer(indices);
@@ -104,15 +116,15 @@ namespace MapGenerator {
 
         initialized = true;
         //Draw as wireframe
-        gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-
+        gl->glActiveTexture(GL_TEXTURE0);
     }
 
     void Renderer::render() {
         const qreal retinaScale = devicePixelRatio();
         gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
-        gl->glClearColor(0, 0, 0, 1.0);
+        gl->glClearColor(0.0, 0, 0, 1.0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         auto view = camera->getViewMatrix();
@@ -121,6 +133,7 @@ namespace MapGenerator {
         shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
         shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));
 
+        texture->bind(0);
         shaderProgram->use();
         vao->bind();
         gl->glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, nullptr);

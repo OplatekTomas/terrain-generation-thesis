@@ -20,7 +20,6 @@ namespace MapGenerator {
 
     std::shared_ptr<VertexData>
     MapGenerator::getVertices(double lat1, double long1, double lat2, double long2, int resolution) {
-
         resolution++;
         auto[elevation, latDist, longDist] = bing->getElevationNormalized(lat1, long1, lat2, long2, &resolution);
         resolution--;
@@ -52,7 +51,7 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<MetadataResult> MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
+    std::shared_ptr<std::vector<unsigned char>> MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
         if (lat1 > lat2) {
             std::swap(lat1, lat2);
         }
@@ -62,7 +61,7 @@ namespace MapGenerator {
         auto result = osm->getMetadata(lat1, long1, lat2, long2);
         LandTypeGenerator generator(lat1, long1, lat2, long2, resolution);
         auto tex = generator.generateTexture(result);
-        return result;
+        return tex;
     }
 
 }

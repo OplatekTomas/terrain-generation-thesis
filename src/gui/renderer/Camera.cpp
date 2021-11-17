@@ -109,11 +109,12 @@ namespace MapGenerator {
             moved = true;
         }
         position.y = y;
+
         if (space_down) {
-            position += up * stepSize;
+            position += worldUp * stepSize;
             moved = true;
         } if (ctrl_down) {
-            position -= up * stepSize;
+            position -= worldUp * stepSize;
             moved = true;
         }
 

@@ -54,6 +54,8 @@ namespace MapGenerator {
         std::shared_ptr<ge::gl::Buffer> vertices;
         std::shared_ptr<ge::gl::Program> shaderProgram;
         std::shared_ptr<ge::gl::VertexArray> vao;
+        std::shared_ptr<ge::gl::Texture> texture;
+
         std::shared_ptr<Camera> camera;
 
         QSurfaceFormat surfaceFormat;
