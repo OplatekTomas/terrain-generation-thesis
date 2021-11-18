@@ -61,7 +61,7 @@ add_library (lib
         models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
         config/ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h VertexData.cpp VertexData.h
         api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h
-        models/openstreetmap/MetadataResult.h Helper.h common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h)
+        models/openstreetmap/MetadataResult.h Helper.h common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h models/openstreetmap/OSMData.cpp models/openstreetmap/OSMData.h)
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)

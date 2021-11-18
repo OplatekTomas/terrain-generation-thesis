@@ -3,6 +3,7 @@
 //
 
 #include <common/AreaOnMap.h>
+#include <boolinq.h>
 
 namespace MapGenerator {
 
@@ -15,18 +16,18 @@ namespace MapGenerator {
         static double lma = 0;
         static int i;
         i++;
-        if(lmi > lon){
+        if (lmi > lon) {
             lmi = lon;
         }
-        if(lma < lon){
+        if (lma < lon) {
             lma = lon;
         }
-        if(i == 511*511){
+        if (i == 511 * 511) {
             std::cout << std::endl;
         }
         auto isInsideLat = lat >= minLat && lat <= maxLat;
         auto isInsideLon = lon >= minLon && lon <= maxLon;
-        if(isInsideLon || isInsideLat) {
+        if (isInsideLon || isInsideLat) {
             std::cout << std::endl;
         }
         return (lat >= minLat && lat <= maxLat && lon >= minLon && lon <= maxLon);
@@ -54,7 +55,8 @@ namespace MapGenerator {
         bool c = false;
         for (i = 0, j = points.size() - 1; i < points.size(); j = i++) {
             if (((*points[i].lat <= lat && lat < *points[j].lat) || (*points[j].lat <= lat && lat < *points[i].lat)) &&
-                (lon < (*points[j].lon - *points[i].lon) * (lat - *points[i].lat) / (*points[j].lat - *points[i].lat) + *points[i].lon)) {
+                (lon < (*points[j].lon - *points[i].lon) * (lat - *points[i].lat) / (*points[j].lat - *points[i].lat) +
+                       *points[i].lon)) {
                 c = !c;
             }
         }
@@ -62,12 +64,11 @@ namespace MapGenerator {
     }
 
 
-
-
-    void AreaOnMap::getColor(char *r, char *g, char *b) {
-        *r = (char) 255;
-        *g = 0;
-        *b = 0;
+    void AreaOnMap::getColor(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a) {
+        *r = this->r;
+        *g = this->g;
+        *b = this->b;
+        *a = 255;
     }
 
     void AreaOnMap::addNode(const element &el) {
@@ -76,6 +77,8 @@ namespace MapGenerator {
         maxLat = *el.lat > maxLat ? *el.lat : maxLat;
         minLon = *el.lon < minLon ? *el.lon : minLon;
         maxLon = *el.lon > maxLon ? *el.lon : maxLon;
+        area = (maxLat - minLat) * (maxLon - minLon);
+
     }
 
 }

@@ -13,7 +13,7 @@ namespace MapGenerator {
         return "http://overpass-api.de/api/interpreter?data=";
     }
 
-    std::shared_ptr<MetadataResult>
+    std::shared_ptr<OSMData>
     OpenStreetMapApi::getMetadata(double lat1, double long1, double lat2, double long2) {
 
         auto query = "[out:json];\n(node({0},{1},{2},{3});<;);out meta;";
@@ -23,8 +23,13 @@ namespace MapGenerator {
         auto result = this->readData<MetadataResult>("../../../examples/osm.json");
 
         //auto result = this->sendRequest<MetadataResult>(url);
-        return result;
+
+        auto data = std::make_shared<OSMData>(result);
+        auto missing = data->getMissingNodes();
+
+        return data;
     }
+
 
     MapGenerator::OpenStreetMapApi::OpenStreetMapApi(std::string key) : ApiBase(key) {
 

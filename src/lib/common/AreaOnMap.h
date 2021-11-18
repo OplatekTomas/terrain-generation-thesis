@@ -16,18 +16,24 @@ namespace MapGenerator{
         bool isInsideArea(double lat, double lon);
 
         bool isInsideBounds(double lat, double lon);
-        void getColor(char* r, char* g, char* b);
+        void getColor(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a);
         void addNode(const element& el);
+        double getArea(){return area;};
+    private:
+        std::vector<element> points;
+
+        unsigned char r = rand()%256;
+        unsigned char g = rand()%256;
+        unsigned char b = rand()%256;
+
+
+        double area = 0;
         double minLat = DBL_MAX;
         double maxLat = DBL_TRUE_MIN;
         double minLon = DBL_MAX;
         double maxLon = DBL_TRUE_MIN;
-
-    private:
-        std::vector<element> points;
-
-
         bool isInsidePolygon(double lat, double lon);
+
     };
 }
 

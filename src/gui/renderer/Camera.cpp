@@ -91,7 +91,7 @@ namespace MapGenerator {
 
     void Camera::updateKeyboardEvents() {
         auto y = position.y;
-        const float stepSize = 0.03;
+        const float stepSize = 0.03f;
         if (w_down) {
             position += front * stepSize;
             moved = true;

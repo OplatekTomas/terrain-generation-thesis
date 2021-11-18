@@ -15,6 +15,8 @@ namespace MapGenerator {
         this->config = config;
         bing = std::make_unique<BingApi>(config->keys[0].key);
         osm = std::make_unique<OpenStreetMapApi>("");
+        srand(time(0));
+
     }
 
 
@@ -51,16 +53,20 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<std::vector<unsigned char>> MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
+    std::shared_ptr<std::vector<unsigned char>>
+    MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
         if (lat1 > lat2) {
             std::swap(lat1, lat2);
         }
         if (long1 > long2) {
             std::swap(long1, long2);
         }
-        auto result = osm->getMetadata(lat1, long1, lat2, long2);
-        LandTypeGenerator generator(lat1, long1, lat2, long2, resolution);
-        auto tex = generator.generateTexture(result);
+        auto data = osm->getMetadata(lat1, long1, lat2, long2);
+        const vector<string> tagTypes{"landuse", "highways", "waterways"};
+
+
+        LandTypeGenerator generator(lat1, long1, lat2, long2, resolution,data);
+        auto tex = generator.generateTexture();
         return tex;
     }
 
