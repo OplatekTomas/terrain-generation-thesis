@@ -8,7 +8,7 @@
 
 namespace MapGenerator {
 
-    OSMData::OSMData(std::shared_ptr<MetadataResult> metadataResult) {
+    OSMData::OSMData(const std::shared_ptr<MetadataResult>& metadataResult) {
         this->metadataResult = metadataResult;
         const std::vector<std::string> tagTypes{"landuse", "highways", "waterways"};
         this->ways = boolinq::from(metadataResult->elements)
@@ -17,12 +17,17 @@ namespace MapGenerator {
                 }).where([&](const element &x) {
             return boolinq::from(tagTypes).any([&](const std::string &t) { return mapContainsKey(*x.tags, t); });
         }).toStdVector();
+
+        this->ways = boolinq::from(metadataResult->elements)
+                .where([](const element &x) {
+                    return x.type == nodeType::way && x.tags != nullptr;
+                }).toStdVector();
         this->nodes = boolinq::from(metadataResult->elements)
                 .where([](const element &x) { return x.type == nodeType::node; })
                 .orderBy([](const element &x) { return x.id; }).toStdVector();
     }
 
-    void OSMData::addNode(element node) {
+    void OSMData::addNode(const element& node) {
         //insert into correct position in an ordered list by id with binary search
         auto it = std::lower_bound(nodes.begin(), nodes.end(), node, [](const element &a, const element &b) {
             return a.id < b.id;

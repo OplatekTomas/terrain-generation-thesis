@@ -11,9 +11,9 @@ namespace MapGenerator{
 
     class OSMData{
     public:
-        explicit OSMData(std::shared_ptr<MetadataResult> metadataResult);
+        explicit OSMData(const std::shared_ptr<MetadataResult>& metadataResult);
         std::vector<long> getMissingNodes();
-        void addNode(element node);
+        void addNode(const element& node);
         element getNode(long id);
 
         std::vector<element> getNodes();

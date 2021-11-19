@@ -12,24 +12,6 @@ namespace MapGenerator {
     }
 
     bool AreaOnMap::isInsideBounds(double lat, double lon) {
-        static double lmi = 30;
-        static double lma = 0;
-        static int i;
-        i++;
-        if (lmi > lon) {
-            lmi = lon;
-        }
-        if (lma < lon) {
-            lma = lon;
-        }
-        if (i == 511 * 511) {
-            std::cout << std::endl;
-        }
-        auto isInsideLat = lat >= minLat && lat <= maxLat;
-        auto isInsideLon = lon >= minLon && lon <= maxLon;
-        if (isInsideLon || isInsideLat) {
-            std::cout << std::endl;
-        }
         return (lat >= minLat && lat <= maxLat && lon >= minLon && lon <= maxLon);
     }
 

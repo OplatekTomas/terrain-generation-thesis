@@ -28,6 +28,26 @@ namespace MapGenerator {
     }
 
     template<class T>
+    std::shared_ptr<T> ApiBase::postRequest(std::string uri, const std::string& bodyType, const std::string& body) {
+        auto url = cpr::Url{uri};
+        auto session = new cpr::Session();
+        session->SetHeader({{"Content-Type", bodyType}});
+        session->SetUrl(url);
+        session->SetBody(body);
+        auto result = session->Post();
+        delete session;
+        if (result.status_code != 200) {
+            return nullptr;
+        }
+        auto jsonObj = nlohmann::json::parse(result.text);
+        auto obj = new T();
+        nlohmann::from_json(jsonObj, *obj);
+        auto sharedPtr = std::shared_ptr<T>(obj);
+        return sharedPtr;
+    }
+
+
+    template<class T>
     std::shared_ptr<T> ApiBase::readData(std::string path) {
         std::ifstream t(path);
         std::stringstream buffer;

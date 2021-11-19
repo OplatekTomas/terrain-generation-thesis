@@ -62,9 +62,6 @@ namespace MapGenerator {
             std::swap(long1, long2);
         }
         auto data = osm->getMetadata(lat1, long1, lat2, long2);
-        const vector<string> tagTypes{"landuse", "highways", "waterways"};
-
-
         LandTypeGenerator generator(lat1, long1, lat2, long2, resolution,data);
         auto tex = generator.generateTexture();
         return tex;
