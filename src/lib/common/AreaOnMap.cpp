@@ -45,6 +45,10 @@ namespace MapGenerator {
         return c;
     }
 
+    bool AreaOnMap::isInsideLon(double lon) {
+        return (lon >= minLon && lon <= maxLon);
+    }
+
 
     void AreaOnMap::getColor(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a) {
         *r = this->r;

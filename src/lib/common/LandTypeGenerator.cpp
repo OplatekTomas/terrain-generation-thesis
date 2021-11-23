@@ -4,12 +4,16 @@
 //
 
 #include <common/LandTypeGenerator.h>
+#include <iostream>
 
 
 namespace MapGenerator {
 
     LandTypeGenerator::LandTypeGenerator(double lat1, double lon1, double lat2, double lon2, int resolution,
                                          std::shared_ptr<OSMData> osmData) {
+
+
+
         this->osmData = osmData;
         vector<string> landTypes;
         ySize = std::fabs(lat1 - lat2);
@@ -31,27 +35,25 @@ namespace MapGenerator {
             }
             areas.push_back(area);
         }
+        areas = from(areas).orderBy([](AreaOnMap area) {
+            return area.getArea();
+        }).toStdVector();
 
-
-
-
+#pragma omp parallel for default(none) shared(texture, cout)
         for (int x = 0; x < resolution; x++) {
+            auto lon = xStart + x * xStep;
+            auto lineData = from(areas).where([lon](AreaOnMap area) {
+                return area.isInsideLon(lon);
+            }).toStdVector();
             for (int y = 0; y < resolution; y++) {
-                auto lon = xStart + x * xStep;
+                auto start = std::chrono::high_resolution_clock::now();
                 auto lat = yStart + y * yStep;
-                auto possibleAreas = from(areas).where(
+                auto minArea = from(lineData).where(
                         [&](AreaOnMap x) {
                             return x.isInsideArea(lat, lon);
-                        }).toStdVector();
-                if (possibleAreas.empty()) {
+                        }).firstOrDefault();
+                if (minArea.getArea() == 0) {
                     continue;
-                }
-                //find the area with min getArea value
-                auto minArea = possibleAreas[0];
-                for (auto area: possibleAreas) {
-                    if (area.getArea() < minArea.getArea()) {
-                        minArea = area;
-                    }
                 }
                 auto index = (y * resolution + (resolution - x - 1)) * 4;
                 minArea.getColor(&texture->at(index), &texture->at(index + 1), &texture->at(index + 2),
