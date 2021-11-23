@@ -12,6 +12,8 @@
 namespace MapGenerator {
     class AreaOnMap {
     public:
+        explicit AreaOnMap(const Node &way);
+
         AreaOnMap();
 
         bool isInsideArea(double lat, double lon);
@@ -20,18 +22,16 @@ namespace MapGenerator {
 
         void getColor(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a);
 
-        void addNode(const element &el);
-
         bool isInsideLon(double lon);
 
         double getArea() { return area; };
     private:
-        std::vector<element> points;
+        Node node;
+        bool isRelation;
 
-        unsigned char r = rand() % 256;
-        unsigned char g = rand() % 256;
-        unsigned char b = rand() % 256;
-
+        unsigned char r;
+        unsigned char g;
+        unsigned char b;
 
         double area = 0;
         double minLat = DBL_MAX;
@@ -39,8 +39,12 @@ namespace MapGenerator {
         double minLon = DBL_MAX;
         double maxLon = DBL_TRUE_MIN;
 
-        bool isInsidePolygon(double lat, double lon);
 
+        void resolveColor();
+
+        bool isInsideWay(double lat, double lon, const ShapeBase &way);
+
+        bool isInsideRelation(double lat, double lon);
     };
 }
 

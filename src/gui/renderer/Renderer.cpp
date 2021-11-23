@@ -62,6 +62,13 @@ namespace MapGenerator {
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
 
+        const qreal retinaScale = devicePixelRatio();
+
+        gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+        gl->glClearColor(0.0, 0, 0, 1.0);
+        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        context->swapBuffers(this);
+
         std::vector<double> posHome{
                 49.883325913713, 17.8657865524292, 49.89402618295204, 17.890548706054688
         };

@@ -26,8 +26,6 @@ namespace MapGenerator {
         shared_ptr<vector<unsigned char>> generateTexture();
 
     private:
-        void generateAreas(shared_ptr<OSMData> osmData);
-
         std::shared_ptr<OSMData> osmData;
         std::vector<AreaOnMap> areas;
         int resolution;

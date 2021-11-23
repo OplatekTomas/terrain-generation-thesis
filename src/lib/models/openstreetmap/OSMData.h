@@ -13,16 +13,22 @@ namespace MapGenerator{
     public:
         explicit OSMData(const std::shared_ptr<MetadataResult>& metadataResult);
         std::vector<long> getMissingNodes();
-        void addNode(const element& node);
-        element getNode(long id);
+        void addNode(const Node& node);
+        Node getNode(long id);
 
-        std::vector<element> getNodes();
-        std::vector<element> getWays();
+        std::vector<Node> getNodes();
+        std::vector<Node> getWays();
 
     private :
         std::shared_ptr<MetadataResult> metadataResult;
-        std::vector<element> ways;
-        std::vector<element> nodes;
+        std::vector<Node> ways;
+        std::vector<Node> relations;
+    public:
+        const std::vector<Node> &getRelations() const;
+
+    private:
+
+        std::vector<Node> nodes;
         bool nodeExists(long nodeId);
     };
 }

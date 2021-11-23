@@ -5,6 +5,7 @@
 
 #include <common/LandTypeGenerator.h>
 #include <iostream>
+#include <utility>
 
 
 namespace MapGenerator {
@@ -14,7 +15,7 @@ namespace MapGenerator {
 
 
 
-        this->osmData = osmData;
+        this->osmData = std::move(osmData);
         vector<string> landTypes;
         ySize = std::fabs(lat1 - lat2);
         xSize = std::fabs(lon1 - lon2);
@@ -28,25 +29,24 @@ namespace MapGenerator {
     shared_ptr<vector<unsigned char>> LandTypeGenerator::generateTexture() {
         auto texture = std::make_shared<std::vector<unsigned char>>(resolution * resolution * 4);
         for (const auto &way: this->osmData->getWays()) {
-            AreaOnMap area;
-            for (auto nodeId: *way.nodes) {
-                auto node = this->osmData->getNode(nodeId);
-                area.addNode(node);
-            }
+            AreaOnMap area(way);
+            areas.push_back(area);
+        }
+        for(const auto &way: this->osmData->getRelations()){
+            AreaOnMap area(way);
             areas.push_back(area);
         }
         areas = from(areas).orderBy([](AreaOnMap area) {
             return area.getArea();
         }).toStdVector();
 
-#pragma omp parallel for default(none) shared(texture, cout)
+#pragma omp parallel for default(none) shared(texture)
         for (int x = 0; x < resolution; x++) {
             auto lon = xStart + x * xStep;
             auto lineData = from(areas).where([lon](AreaOnMap area) {
                 return area.isInsideLon(lon);
             }).toStdVector();
             for (int y = 0; y < resolution; y++) {
-                auto start = std::chrono::high_resolution_clock::now();
                 auto lat = yStart + y * yStep;
                 auto minArea = from(lineData).where(
                         [&](AreaOnMap x) {
