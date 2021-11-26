@@ -13,8 +13,6 @@ namespace MapGenerator {
     LandTypeGenerator::LandTypeGenerator(double lat1, double lon1, double lat2, double lon2, int resolution,
                                          std::shared_ptr<OSMData> osmData) {
 
-
-
         this->osmData = std::move(osmData);
         vector<string> landTypes;
         ySize = std::fabs(lat1 - lat2);
@@ -32,7 +30,7 @@ namespace MapGenerator {
             AreaOnMap area(way);
             areas.push_back(area);
         }
-        for(const auto &way: this->osmData->getRelations()){
+        for (const auto &way: this->osmData->getRelations()) {
             AreaOnMap area(way);
             areas.push_back(area);
         }
@@ -48,10 +46,9 @@ namespace MapGenerator {
             }).toStdVector();
             for (int y = 0; y < resolution; y++) {
                 auto lat = yStart + y * yStep;
-                auto minArea = from(lineData).where(
-                        [&](AreaOnMap x) {
-                            return x.isInsideArea(lat, lon);
-                        }).firstOrDefault();
+                auto minArea = from(lineData).where([&](AreaOnMap x) {
+                    return x.isInsideArea(lat, lon);
+                }).firstOrDefault();
                 if (minArea.getArea() == 0) {
                     continue;
                 }

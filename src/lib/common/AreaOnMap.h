@@ -45,6 +45,8 @@ namespace MapGenerator {
         bool isInsideWay(double lat, double lon, const ShapeBase &way);
 
         bool isInsideRelation(double lat, double lon);
+
+        void computeRoute();
     };
 }
 

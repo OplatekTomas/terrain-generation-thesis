@@ -23,3 +23,12 @@ template<typename A, typename B>
 inline bool mapContainsKeyAndValue(const std::map <A, B> &m, const A& a, const B& b) {
     return m.find(a) != m.end() && m.find(a)->second == b;
 }
+
+//Calculate hash for string
+inline int hash(const std::string &str) {
+    int hash = 5381;
+    for (char i : str) {
+        hash = ((hash << 5) + hash) + i;
+    }
+    return hash;
+}

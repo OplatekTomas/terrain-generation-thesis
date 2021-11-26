@@ -7,11 +7,12 @@
 #include <api/ApiBase.h>
 #include <cpr/cpr.h>
 #include <iomanip>
+#include <utility>
 
 namespace MapGenerator {
     template<class T>
     std::shared_ptr<T> ApiBase::sendRequest(std::string uri) {
-        auto url = cpr::Url{uri};
+        auto url = cpr::Url{std::move(uri)};
         auto session = new cpr::Session();
         session->SetHeader({{"Content-Type", "application/json"}});
         session->SetUrl(url);
@@ -29,7 +30,7 @@ namespace MapGenerator {
 
     template<class T>
     std::shared_ptr<T> ApiBase::postRequest(std::string uri, const std::string& bodyType, const std::string& body) {
-        auto url = cpr::Url{uri};
+        auto url = cpr::Url{std::move(uri)};
         auto session = new cpr::Session();
         session->SetHeader({{"Content-Type", bodyType}});
         session->SetUrl(url);
