@@ -248,6 +248,11 @@ namespace MapGenerator {
 
 
     bool AreaOnMap::isInsideBounds(double lat, double lon) {
+        if(isRoute){
+            //Check slightly outside the bounds
+            auto bias = 0.0001;
+            return (lat > min.lat - bias && lat < max.lat + bias && lon > min.lon - bias && lon < max.lon + bias);
+        }
         return (lat >= min.lat && lat <= max.lat && lon >= min.lon && lon <= max.lon);
     }
 

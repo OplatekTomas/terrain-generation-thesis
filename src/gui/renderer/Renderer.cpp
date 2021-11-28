@@ -89,7 +89,7 @@ namespace MapGenerator {
         };
 
         auto draw = posHome;
-        auto resolution = 4096;
+        auto resolution = 1024;
         auto texData = mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution);
         texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, resolution, resolution);
         texture->bind(GL_TEXTURE_2D);
@@ -136,7 +136,7 @@ namespace MapGenerator {
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         auto view = camera->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width() / (float) height(), 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width() / (float) height(), 0.01f, 100.0f);
 
         shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
         shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));
