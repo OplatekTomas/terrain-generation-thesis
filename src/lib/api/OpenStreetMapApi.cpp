@@ -22,7 +22,7 @@ namespace MapGenerator {
 
         auto result = this->readData<MetadataResult>("../../../examples/osm.json");
 
-       // auto result = this->sendRequest<MetadataResult>(url);
+        //auto result = this->sendRequest<MetadataResult>(url);
         if (result == nullptr) {
             return nullptr;
         }

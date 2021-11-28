@@ -87,8 +87,9 @@ namespace MapGenerator {
                 49.91207875007256, 18.0234327857081,
                 49.86388284681711, 18.085937745375347
         };
+
         auto draw = posHome;
-        auto resolution = 1024;
+        auto resolution = 4096;
         auto texData = mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution);
         texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, resolution, resolution);
         texture->bind(GL_TEXTURE_2D);

@@ -10,18 +10,17 @@ namespace MapGenerator {
 
     OSMData::OSMData(const std::shared_ptr<MetadataResult> &metadataResult) {
         this->metadataResult = metadataResult;
-        const std::vector<std::string> tagTypes{"landuse", "highways", "waterways"};
+        /*const std::vector<std::string> tagTypes{"landuse", "highway", "waterways"};
         this->ways = boolinq::from(metadataResult->elements)
                 .where([](const Node &x) {
                     return x.type == Type::way && x.tags != nullptr;
                 }).where([&](const Node &x) {
             return boolinq::from(tagTypes).any([&](const std::string &t) { return mapContainsKey(*x.tags, t); });
-        }).toStdVector();
+        }).toStdVector();*/
 
         this->ways = boolinq::from(metadataResult->elements)
                 .where([](const Node &x) {
-                    return x.type == Type::way && x.tags != nullptr && x.geometry->at(0).lat == x.geometry->at(x.geometry->size() - 1).lat &&
-                           x.geometry->at(0).lon == x.geometry->at(x.geometry->size() - 1).lon;
+                    return x.type == Type::way && x.tags != nullptr;
                 }).toStdVector();
         this->relations = boolinq::from(metadataResult->elements)
                 .where([](const Node &x) {

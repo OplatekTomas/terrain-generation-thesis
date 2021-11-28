@@ -25,10 +25,20 @@ inline bool mapContainsKeyAndValue(const std::map <A, B> &m, const A& a, const B
 }
 
 //Calculate hash for string
-inline int hash(const std::string &str) {
+inline uint32_t hash(const std::string &str) {
     int hash = 5381;
-    for (char i : str) {
-        hash = ((hash << 5) + hash) + i;
+    for (char c : str) {
+        hash = ((hash << 5) + hash) + c;
     }
     return hash;
 }
+
+constexpr uint32_t hash(const char* data, size_t const size) noexcept{
+    uint32_t hash = 5381;
+    for(const char *c = data; c < data + size; ++c)
+        hash = ((hash << 5) + hash) + (unsigned char) *c;
+
+    return hash;
+}
+
+

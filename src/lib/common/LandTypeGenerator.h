@@ -27,7 +27,7 @@ namespace MapGenerator {
 
     private:
         std::shared_ptr<OSMData> osmData;
-        std::vector<AreaOnMap> areas;
+        std::vector<std::shared_ptr<AreaOnMap>> areas;
         int resolution;
         double xSize;
         double ySize;

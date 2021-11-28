@@ -12,9 +12,8 @@
 namespace MapGenerator {
     class AreaOnMap {
     public:
-        explicit AreaOnMap(const Node &way);
-
-        AreaOnMap();
+        static std::shared_ptr<AreaOnMap>
+        create(double mapLatMin, double mapLatMax, double mapLonMin, double mapLonMax, Node& elem);
 
         bool isInsideArea(double lat, double lon);
 
@@ -24,29 +23,43 @@ namespace MapGenerator {
 
         bool isInsideLon(double lon);
 
-        double getArea() { return area; };
+        double getArea();
+        double getPriority(){
+            return priority;
+        };
+
     private:
+
         Node node;
         bool isRelation;
+        bool isRoute;
+        double routeWidth;
+        unsigned char rgb[3];
+        double area = -1;
+        int priority = 0;
+        Point min;
+        Point max;
 
-        unsigned char r;
-        unsigned char g;
-        unsigned char b;
-
-        double area = 0;
-        double minLat = DBL_MAX;
-        double maxLat = DBL_TRUE_MIN;
-        double minLon = DBL_MAX;
-        double maxLon = DBL_TRUE_MIN;
-
-
+        AreaOnMap(const Node &elem);
+        AreaOnMap();
         void resolveColor();
-
-        bool isInsideWay(double lat, double lon, const ShapeBase &way);
-
-        bool isInsideRelation(double lat, double lon);
-
         void computeRoute();
+
+        bool isInsideWay(Point p, const ShapeBase &way);
+
+        bool isInsideRelation(Point p);
+
+        bool isInsideRoute(Point p, const ShapeBase &shape);
+
+        static int getRouteWidth(const std::string &routeType);
+
+        double distanceToLine(Point p, Point a, Point b);
+
+        static Bounds calculateBounds(const ShapeBase &way);
+
+        static bool intersects(const Bounds &b1, const Bounds &b2);
+
+        static Node createWayFromBoundary(Node &elem);
     };
 }
 

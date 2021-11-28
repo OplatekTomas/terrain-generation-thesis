@@ -23,6 +23,7 @@ namespace MapGenerator {
     };
 
     struct Point {
+
         double lat;
         double lon;
     };
