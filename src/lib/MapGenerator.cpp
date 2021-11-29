@@ -36,7 +36,9 @@ namespace MapGenerator {
                 data->addVertex(
                         ((float) y / (float) resolution),
                         (float) elevation[index] - 0.2f,
-                        (((float) x / (float) resolution)) * (float) scale
+                        (((float) x / (float) resolution)) * (float) scale,
+                        ((float) y / (float) resolution),
+                        (((float) x / (float) resolution))
                 );
             }
         }
@@ -53,7 +55,7 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<std::vector<unsigned char>>
+    std::shared_ptr<std::vector<float>>
     MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
         if (lat1 > lat2) {
             std::swap(lat1, lat2);
@@ -65,7 +67,7 @@ namespace MapGenerator {
         if (data == nullptr) {
             return {};
         }
-        LandTypeGenerator generator(lat1, long1, lat2, long2, resolution,data);
+        LandTypeGenerator generator(lat1, long1, lat2, long2, resolution, data);
         auto tex = generator.generateTexture();
         return tex;
     }

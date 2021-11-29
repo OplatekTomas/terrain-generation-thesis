@@ -15,7 +15,7 @@ namespace MapGenerator{
     public:
         explicit MapGenerator(Config* config);
         std::shared_ptr<VertexData> getVertices(double lat1, double long1, double lat2, double long2, int resolution = 20);
-        std::shared_ptr<std::vector<unsigned char>>
+        std::shared_ptr<std::vector<float>>
         getMetadata(double lat1, double long1, double lat2, double long2, int resolution);
 
     private:

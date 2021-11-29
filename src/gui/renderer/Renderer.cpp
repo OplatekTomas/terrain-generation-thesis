@@ -74,31 +74,39 @@ namespace MapGenerator {
         };
 
         std::vector<double> posBrno = {
-                49.210677743172724, 16.62863105170431,
-                49.213095764793390, 16.625380048112635
+                49.2280826330813, 16.59357713886698,
+                49.22626684720634, 16.600258817898766
         };
 
-        std::vector<double> posHradec = {
-                49.870291704376214, 17.860090558506485,
-                49.888954501165955, 17.88689223413519,
+        std::vector<double> posMoni = {
+                49.20637141555205, 16.69411906986399,
+                49.20453830945842, 16.697963117309616
         };
 
-        std::vector<double> posBig = {
-                49.91207875007256, 18.0234327857081,
-                49.86388284681711, 18.085937745375347
+        std::vector<double> posRand = {
+                49.20322968539299, 16.60926962473714, 49.201543696771644, 16.61236590263251
+
+        };
+
+        std::vector <double> posMountains = {
+                50.10588121964279, 17.198770606455174,
+                50.05709781257081, 17.28661015961763
+
         };
 
         auto draw = posHome;
         auto resolution = 1024;
         auto texData = mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution);
-        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, resolution, resolution);
+        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA32F, 0, resolution, resolution);
         texture->bind(GL_TEXTURE_2D);
-        texture->setData2D(texData->data(), GL_RGBA, GL_UNSIGNED_BYTE, 0,GL_TEXTURE_2D,0,0,resolution, resolution);
+        texture->setData2D(texData->data(), GL_RGBA, GL_FLOAT, 0, GL_TEXTURE_2D, 0, 0, resolution, resolution);
         texture->generateMipmap();
         gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        //gl->glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16);
+
 
         auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 30);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
@@ -136,7 +144,8 @@ namespace MapGenerator {
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         auto view = camera->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width() / (float) height(), 0.01f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width() / (float) height(), 0.005f,
+                                                100.0f);
 
         shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
         shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));

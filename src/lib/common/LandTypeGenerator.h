@@ -23,7 +23,7 @@ namespace MapGenerator {
     public:
         LandTypeGenerator(double lat1, double lon1, double lat2, double lon2, int resolution, shared_ptr<OSMData> osmData);
 
-        shared_ptr<vector<unsigned char>> generateTexture();
+        shared_ptr<vector<float>> generateTexture();
 
     private:
         std::shared_ptr<OSMData> osmData;

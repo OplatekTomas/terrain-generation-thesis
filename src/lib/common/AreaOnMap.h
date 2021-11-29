@@ -19,7 +19,7 @@ namespace MapGenerator {
 
         bool isInsideBounds(double lat, double lon);
 
-        void getColor(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a);
+        void getMetadata(float *r, float *g, float *b, float *a);
 
         bool isInsideLon(double lon);
 
@@ -34,7 +34,7 @@ namespace MapGenerator {
         bool isRelation;
         bool isRoute;
         double routeWidth;
-        unsigned char rgb[3];
+        float rgba[4] = {0, 0, 0, 0};
         double area = -1;
         int priority = 0;
         Point min;

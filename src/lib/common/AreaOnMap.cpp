@@ -79,14 +79,17 @@ namespace MapGenerator {
             }
             auto lastNode = way.geometry->back();
             Member newCurrentWay;
-            newCurrentWay = boolinq::from(outerWays).firstOrDefault([lastNode](const Member &member) {
-                return member.geometry->front().lat == lastNode.lat && member.geometry->front().lon == lastNode.lon;
+            newCurrentWay = boolinq::from(outerWays).firstOrDefault([&](const Member &member) {
+                return member.geometry->front().lat == lastNode.lat && member.geometry->front().lon == lastNode.lon && !added.find(member.ref)->second;
             });
             if (newCurrentWay.ref == 0) {
                 shouldReverse = true;
-                newCurrentWay = boolinq::from(outerWays).firstOrDefault([lastNode](const Member &member) {
-                    return member.geometry->back().lat == lastNode.lat && member.geometry->back().lon == lastNode.lon;
+                newCurrentWay = boolinq::from(outerWays).firstOrDefault([&](const Member &member) {
+                    return member.geometry->back().lat == lastNode.lat && member.geometry->back().lon == lastNode.lon && !added.find(member.ref)->second;
                 });
+            }
+            if(newCurrentWay.ref == 0){
+                break;
             }
             currentWay = newCurrentWay;
         }
@@ -181,9 +184,9 @@ namespace MapGenerator {
         //Check if area is covered by a forest
 
         if (randColor) {
-            rgb[0] = rand() % 255;
-            rgb[1] = rand() % 255;
-            rgb[2] = rand() % 255;
+            rgba[0] = rand() % 255;
+            rgba[1] = rand() % 255;
+            rgba[2] = rand() % 255;
         }
 
         std::vector<std::string> landUseTypes = {"grassland", "meadow", "orchard", "vineyard", "farmland"};
@@ -191,64 +194,49 @@ namespace MapGenerator {
         std::vector<std::string> landUseLightTypes = {"village_green", "plant_nursery"};
         std::vector<std::string> leisureTypes = {"park", "garden", "plant_nursery", "pitch", "playground"};
 
+        //Check for forrest
         if (mapContainsKeyAndValue(tags, "natural", "wood") || mapContainsKeyAndValue(tags, "landuse", "forest")) {
-            rgb[0] = 0;
-            rgb[1] = 74;
-            rgb[2] = 11;
+            rgba[0] = 0.1f;
         }//Check for water
         else if (mapContainsKeyAndValue(tags, "natural", "water") ||
                  mapContainsKeyAndValue(tags, "waterway", "riverbank") ||
                  mapContainsKeyAndValue(tags, "waterway", "river") ||
                  mapContainsKeyAndValue(tags, "waterway", "stream")) {
-            rgb[0] = 0;
-            rgb[1] = 0;
-            rgb[2] = 255;
-
+            rgba[0] = 0.2f;
         }//Check for fields
         else if (boolinq::from(landUseTypes).any([&tags](const std::string &type) {
             return mapContainsKeyAndValue(tags, "landuse", type);
         })) {
-            rgb[0] = 200;
-            rgb[1] = 200;
-            rgb[2] = 0;
+            rgba[0] = 0.3f;
         } // Check for roads
         else if (mapContainsKey(tags, "highway")) {
-            rgb[0] = 179;
-            rgb[1] = 81;
-            rgb[2] = 20;
+            rgba[0] = 0.4f;
             priority = 10;
         } // Check for buildings
         else if (mapContainsKey(tags, "building")) {
-            rgb[0] = 200;
-            rgb[1] = 200;
-            rgb[2] = 200;
+            rgba[0] = 0.5f;
             priority = 2;
         } // Check for leisure
         else if (boolinq::from(leisureTypes).any([&](const std::string &type) {
             return mapContainsKeyAndValue(tags, "leisure", type);
         }) || boolinq::from(landUseLightTypes).any(
                 [&](const std::string &type) { return mapContainsKeyAndValue(tags, "landuse", type); })) {
-            rgb[0] = 0;
-            rgb[1] = 128;
-            rgb[2] = 0;
+            rgba[0] = 0.6f;
         } // Check if the area is residential
         else if (mapContainsKeyAndValue(tags, "landuse", "residential") ||
                  mapContainsKeyAndValue(tags, "landuse", "industrial")) {
-            rgb[0] = 128;
-            rgb[1] = 128;
-            rgb[2] = 128;
+            rgba[0] = 0.7f;
+
         } else {
-            rgb[0] = 128;
-            rgb[1] = 128;
-            rgb[2] = 128;
             //If the area is unknown, just make the priority low, so it will be drawn last
+            rgba[0] = 1.0f;
             priority = -1;
         }
     }
 
 
     bool AreaOnMap::isInsideBounds(double lat, double lon) {
-        if(isRoute){
+        if (isRoute) {
             //Check slightly outside the bounds
             auto bias = 0.0001;
             return (lat > min.lat - bias && lat < max.lat + bias && lon > min.lon - bias && lon < max.lon + bias);
@@ -343,11 +331,11 @@ namespace MapGenerator {
     }
 
 
-    void AreaOnMap::getColor(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a) {
-        *r = rgb[0];
-        *g = rgb[1];
-        *b = rgb[2];
-        *a = 255;
+    void AreaOnMap::getMetadata(float *r, float *g, float *b, float *a) {
+        *r = rgba[0];
+        *g = rgba[1];
+        *b = rgba[2];
+        *a = rgba[3];
     }
 
     double AreaOnMap::getArea() {

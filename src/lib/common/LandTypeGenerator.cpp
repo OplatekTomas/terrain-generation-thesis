@@ -24,8 +24,8 @@ namespace MapGenerator {
         xStart = min(lon1, lon2);
     }
 
-    shared_ptr<vector<unsigned char>> LandTypeGenerator::generateTexture() {
-        auto texture = std::make_shared<std::vector<unsigned char>>(resolution * resolution * 4);
+    shared_ptr<vector<float>> LandTypeGenerator::generateTexture() {
+        auto texture = std::make_shared<std::vector<float>>(resolution * resolution * 4);
         auto xEnd = xStart + xSize;
         auto yEnd = yStart + ySize;
         for (auto way: this->osmData->getWays()) {
@@ -62,7 +62,7 @@ namespace MapGenerator {
                         continue;
                     }
                     auto index = (y * resolution + (resolution - x - 1)) * 4;
-                    minArea->getColor(&texture->at(index), &texture->at(index + 1), &texture->at(index + 2),
+                    minArea->getMetadata(&texture->at(index), &texture->at(index + 1), &texture->at(index + 2),
                                       &texture->at(index + 3));
                 }
             }

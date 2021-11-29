@@ -13,13 +13,13 @@ namespace MapGenerator {
     }
 
 
-    void VertexData::addVertex(float v1, float v2, float v3) {
+    void VertexData::addVertex(float v1, float v2, float v3, float v4, float v5) {
         isUpdated = true;
         vertices->push_back(v1);
         vertices->push_back(v2);
         vertices->push_back(v3);
-        vertices->push_back(v1);
-        vertices->push_back(v3);
+        vertices->push_back(v4);
+        vertices->push_back(v5);
     }
 
     void VertexData::addIndex(int i1, int i2, int i3) {
