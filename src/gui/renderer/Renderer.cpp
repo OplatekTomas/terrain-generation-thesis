@@ -55,6 +55,8 @@ namespace MapGenerator {
             connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
+            connect(&watcher, &QFutureWatcher<std::tuple<std::shared_ptr<std::vector<float>>, int>>::finished, this, &Renderer::handleFinished);
+
         }
 
         //let's say to the OS that we want to work with this context
@@ -74,13 +76,8 @@ namespace MapGenerator {
         };
 
         std::vector<double> posBrno = {
-                49.2280826330813, 16.59357713886698,
-                49.22626684720634, 16.600258817898766
-        };
-
-        std::vector<double> posMoni = {
-                49.20637141555205, 16.69411906986399,
-                49.20453830945842, 16.697963117309616
+                49.19256141221154, 16.594543972568715,
+                49.19827707820228, 16.604973078397315
         };
 
         std::vector<double> posRand = {
@@ -88,53 +85,69 @@ namespace MapGenerator {
 
         };
 
-        std::vector <double> posMountains = {
+        std::vector<double> posMountains = {
                 50.10588121964279, 17.198770606455174,
                 50.05709781257081, 17.28661015961763
 
         };
-
-        auto draw = posHome;
-        auto resolution = 1024;
-        auto texData = mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution);
-        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA32F, 0, resolution, resolution);
-        texture->bind(GL_TEXTURE_2D);
-        texture->setData2D(texData->data(), GL_RGBA, GL_FLOAT, 0, GL_TEXTURE_2D, 0, 0, resolution, resolution);
-        texture->generateMipmap();
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        //gl->glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16);
-
-
-        auto data = mapGenerator->getVertices(draw[0], draw[1], draw[2], draw[3], 30);
+        drawArea = posHome;
+        //Getting the mesh
+        auto data = mapGenerator->getVertices(drawArea[0], drawArea[1], drawArea[2], drawArea[3], 30);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
         indices = std::make_shared<ge::gl::Buffer>(data->indices->size() * sizeof(int), data->indices->data(),
                                                    GL_STATIC_DRAW);
-
         vao = std::make_shared<ge::gl::VertexArray>();
-
-
         vao->addAttrib(vertices, 0, 3, GL_FLOAT, 5 * sizeof(float), 0);
         vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
-
-        //vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5,3);
         vao->addElementBuffer(indices);
         drawCount = data->indices->size();
+
+        //Getting the texture
+        startTextureGeneration(drawArea, 8);
+        //auto texData = mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution);
+        //createTexture(*texData, resolution, resolution);
 
         auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
         auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER,
                                                                FragmentSource);
-
         shaderProgram = std::make_shared<ge::gl::Program>(vertexShader, fragmentShader);
-
         initialized = true;
         //Draw as wireframe
         //gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        gl->glActiveTexture(GL_TEXTURE0);
+    }
+
+    void Renderer::startTextureGeneration(const std::vector<double> &draw, const int& resolution) {
+        auto generator = std::shared_ptr<MapGenerator>(mapGenerator);
+        auto future = QtConcurrent::run([draw, resolution, generator]() {
+            return std::make_tuple(generator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution), resolution);
+        });
+        watcher.setFuture(future);
+    }
+
+    void Renderer::handleFinished() {
+        auto res = watcher.result();
+        auto data = std::get<0>(res);
+        auto resolution= std::get<1>(res);
+        createTexture(*data, resolution, resolution);
+        std::cout << "Finished drawing: " << resolution << std::endl;
+        renderNow();
+        startTextureGeneration(drawArea, resolution * 2);
+        //watcher.disconnect();
+    }
+
+    void Renderer::createTexture(const std::vector<float> &data, int width, int height) {
+        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA32F, 0, width, height);
+        texture->bind(GL_TEXTURE_2D);
+        texture->setData2D(data.data(), GL_RGBA, GL_FLOAT, 0, GL_TEXTURE_2D, 0, 0, width, height);
+        //texture->generateMipmap();
+        texture->texParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
+        texture->texParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
+        texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        texture->bind(0);
+
     }
 
     void Renderer::render() {
@@ -150,7 +163,6 @@ namespace MapGenerator {
         shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
         shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));
 
-        texture->bind(0);
         shaderProgram->use();
         vao->bind();
         gl->glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, nullptr);

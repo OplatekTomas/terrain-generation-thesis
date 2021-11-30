@@ -13,13 +13,14 @@ namespace MapGenerator {
         Bounds mapBounds{mapLatMin, mapLonMin, mapLatMax, mapLonMax};
         if (elem.type == Type::relation) {
             //Check if the relation is a boundary
-            if (mapContainsKeyAndValue(*elem.tags, "boundary", "administrative")) {
+            if (mapContainsKeyAndValue(*elem.tags, "type", "boundary") ||
+                mapContainsKeyAndValue(*elem.tags, "type", "multipolygon")) {
                 elem = createWayFromBoundary(elem);
             } else {
                 auto members = elem.members;
                 Bounds b{DBL_MAX, DBL_MAX, DBL_TRUE_MIN, DBL_TRUE_MIN};
                 elem.members = std::make_shared<std::vector<Member>>();
-                //Filter out ways outside of bounds - we don't need them
+                //Filter out ways outside of bounds - we don't need them - probably
                 for (const auto &way: *members) {
                     if (way.type != Type::way) {
                         continue;
@@ -40,8 +41,6 @@ namespace MapGenerator {
                 *elem.bounds = b;
             }
         }
-
-
         auto area = std::shared_ptr<AreaOnMap>(new AreaOnMap(elem));
         area->resolveColor();
         area->computeRoute();
@@ -63,10 +62,23 @@ namespace MapGenerator {
                 .where([](const Member &member) {
                     return member.type == Type::way && member.role == "outer";
                 }).toStdVector();
+        if(outerWays.empty()){
+            return elem;
+        }
         for (const auto &outerWay: outerWays) {
             added.insert({outerWay.ref, false});
         }
-
+        Point lastPoint{};
+        auto frontPredicate = [&](const Member &member) {
+            return member.geometry->front().lat == lastPoint.lat &&
+                   member.geometry->front().lon == lastPoint.lon &&
+                   !added.find(member.ref)->second;
+        };
+        auto backPredicate = [&](const Member &member) {
+            return member.geometry->back().lat == lastPoint.lat &&
+                   member.geometry->back().lon == lastPoint.lon &&
+                   !added.find(member.ref)->second;
+        };
         auto currentWay = outerWays.at(0);
         bool shouldReverse = false;
         while (!added.find(currentWay.ref)->second) {
@@ -77,19 +89,24 @@ namespace MapGenerator {
             for (const auto &node: *currentWay.geometry) {
                 way.geometry->push_back(node);
             }
-            auto lastNode = way.geometry->back();
+            lastPoint = way.geometry->back();
             Member newCurrentWay;
-            newCurrentWay = boolinq::from(outerWays).firstOrDefault([&](const Member &member) {
-                return member.geometry->front().lat == lastNode.lat && member.geometry->front().lon == lastNode.lon && !added.find(member.ref)->second;
-            });
-            if (newCurrentWay.ref == 0) {
+            newCurrentWay = boolinq::from(outerWays).firstOrDefault(frontPredicate);
+            if (isMemDefault(newCurrentWay)) {
                 shouldReverse = true;
-                newCurrentWay = boolinq::from(outerWays).firstOrDefault([&](const Member &member) {
-                    return member.geometry->back().lat == lastNode.lat && member.geometry->back().lon == lastNode.lon && !added.find(member.ref)->second;
-                });
+                newCurrentWay = boolinq::from(outerWays).firstOrDefault(backPredicate);
             }
-            if(newCurrentWay.ref == 0){
-                break;
+            lastPoint = way.geometry->front();
+            if (isMemDefault(newCurrentWay)) {
+                shouldReverse = false;
+                newCurrentWay = boolinq::from(outerWays).firstOrDefault(frontPredicate);
+            }
+            if (isMemDefault(newCurrentWay)) {
+                //shouldReverse = true;
+                newCurrentWay = boolinq::from(outerWays).firstOrDefault(backPredicate);
+            }
+            if (isMemDefault(newCurrentWay)) {
+               break;
             }
             currentWay = newCurrentWay;
         }
@@ -98,10 +115,13 @@ namespace MapGenerator {
         return way;
     }
 
+    bool AreaOnMap::isMemDefault(const Member &node) {
+        return node.ref == 0;
+    }
+
     bool AreaOnMap::intersects(const Bounds &b1, const Bounds &b2) {
         return !(b1.maxLat < b2.minLat || b1.minLat > b2.maxLat || b1.maxLon < b2.minLon || b1.minLon > b2.maxLon);
     }
-
 
     Bounds AreaOnMap::calculateBounds(const ShapeBase &way) {
         Bounds b{DBL_MAX, DBL_MAX, DBL_TRUE_MIN, DBL_TRUE_MIN};
@@ -148,18 +168,18 @@ namespace MapGenerator {
             case hash("tertiary_link", 13):
                 width = 4;
                 break;
-            case hash("unclassified", 12):
-                width = 2;
-                break;
             case hash("residential", 11):
             case hash("living_street", 14):
                 width = 4;
+                break;
+            case hash("unclassified", 12):
+                width = 2;
                 break;
             case hash("footway", 7):
             case hash("path", 4):
             case hash("cycleway", 8):
             case hash("track", 5):
-                width = 2;
+                width = 1;
                 break;
         }
         return width;
@@ -191,7 +211,7 @@ namespace MapGenerator {
 
         std::vector<std::string> landUseTypes = {"grassland", "meadow", "orchard", "vineyard", "farmland"};
 
-        std::vector<std::string> landUseLightTypes = {"village_green", "plant_nursery"};
+        std::vector<std::string> landUseLightTypes = {"village_green", "plant_nursery", "grass"};
         std::vector<std::string> leisureTypes = {"park", "garden", "plant_nursery", "pitch", "playground"};
 
         //Check for forrest
@@ -287,7 +307,7 @@ namespace MapGenerator {
         return sqrt(xx * xx + yy * yy);
     }
 
-    bool AreaOnMap::isInsideRoute(Point p, const ShapeBase &shape) {
+    bool AreaOnMap::isInsideRoute(Point p, const ShapeBase &shape) const {
         //Check if the distance between the point and the line is less than routeWidth using distanceToLine
         double distance = 0;
         bool result = false;
@@ -299,7 +319,6 @@ namespace MapGenerator {
         }
         return result;
     }
-
 
     bool AreaOnMap::isInsideWay(Point p, const ShapeBase &way) {
         if (isRoute) {
@@ -326,21 +345,9 @@ namespace MapGenerator {
         return c;
     }
 
-    bool AreaOnMap::isInsideLon(double lon) {
-        return (lon >= min.lon && lon <= max.lon);
-    }
-
-
-    void AreaOnMap::getMetadata(float *r, float *g, float *b, float *a) {
-        *r = rgba[0];
-        *g = rgba[1];
-        *b = rgba[2];
-        *a = rgba[3];
-    }
-
     double AreaOnMap::getArea() {
         if (isRoute) {
-            return area;
+            return DBL_MAX;
         }
         if (area == -1) {
             if (node.type == Type::way) {
@@ -365,9 +372,24 @@ namespace MapGenerator {
                     area /= 2;
                 }
             }
-            //area = fabs(area);
         }
         return area;
+    }
+
+
+    void AreaOnMap::getMetadata(float *r, float *g, float *b, float *a) {
+        *r = rgba[0];
+        *g = rgba[1];
+        *b = rgba[2];
+        *a = rgba[3];
+    }
+
+    bool AreaOnMap::isInsideLon(double lon) {
+        return (lon >= min.lon && lon <= max.lon);
+    }
+
+    bool AreaOnMap::isInsideLatRange(double latStart, double latEnd) {
+        return latStart <= max.lat && latEnd >= min.lat;
     }
 
 }

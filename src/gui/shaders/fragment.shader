@@ -6,7 +6,7 @@ in vec2 TexCoord;
 uniform sampler2D Texture;
 
 bool equals(float a, float b) {
-	return abs(a - b) < 0.001;
+	return abs(a - b) < 0.01;
 }
 
 void main(){
@@ -16,7 +16,7 @@ void main(){
 	vec4 color;
 	if (equals(r, 1.0f)){ // Pixel is used as a "unkown" area
 		color = vec4(1.0);
-	} else if (equals(r, 0.1f)){ //Pixel is used as a forrest
+	} else if (equals(r, 0.1)){ //Pixel is used as a forrest
 		color = vec4(0, 0.29, 0.04, 1);
 	} else if (equals(r, 0.2)){ //Pixel is used as a water
 		color = vec4(0.0, 0.0, 0.5, 1.0);

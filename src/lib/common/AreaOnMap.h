@@ -17,6 +17,8 @@ namespace MapGenerator {
 
         bool isInsideArea(double lat, double lon);
 
+        bool isInsideLatRange(double latStart, double latEnd);
+
         bool isInsideBounds(double lat, double lon);
 
         void getMetadata(float *r, float *g, float *b, float *a);
@@ -28,10 +30,12 @@ namespace MapGenerator {
             return priority;
         };
 
+        bool isRelation;
+
+
     private:
 
         Node node;
-        bool isRelation;
         bool isRoute;
         double routeWidth;
         float rgba[4] = {0, 0, 0, 0};
@@ -49,17 +53,23 @@ namespace MapGenerator {
 
         bool isInsideRelation(Point p);
 
-        bool isInsideRoute(Point p, const ShapeBase &shape);
+        bool isInsideRoute(Point p, const ShapeBase &shape) const;
 
         static int getRouteWidth(const std::string &routeType);
 
-        double distanceToLine(Point p, Point a, Point b);
+        static double distanceToLine(Point p, Point a, Point b);
 
         static Bounds calculateBounds(const ShapeBase &way);
 
         static bool intersects(const Bounds &b1, const Bounds &b2);
 
         static Node createWayFromBoundary(Node &elem);
+
+        static bool floatEqs(float f1, float f2);
+
+        static bool floatEqs(double f1, double f2);
+
+        static bool isMemDefault(const Member &node);
     };
 }
 
