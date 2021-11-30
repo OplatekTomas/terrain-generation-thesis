@@ -34,6 +34,14 @@ namespace MapGenerator{
 
         return escaped.str();
     }
+
+    inline uint32_t ApiBase::hash(const std::string &str) {
+        int hash = 5381;
+        for (char c : str) {
+            hash = ((hash << 5) + hash) + c;
+        }
+        return hash;
+    }
 }
 
 

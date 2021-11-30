@@ -11,22 +11,16 @@
 
 namespace MapGenerator {
 
-    LandTypeGenerator::LandTypeGenerator(double lat1, double lon1, double lat2, double lon2, int resolution,
-                                         std::shared_ptr<OSMData> osmData) {
-
+    LandTypeGenerator::LandTypeGenerator(double lat1, double lon1, double lat2, double lon2,std::shared_ptr<OSMData> osmData) {
         this->osmData = std::move(osmData);
         vector<string> landTypes;
         ySize = std::fabs(lat1 - lat2);
         xSize = std::fabs(lon1 - lon2);
-        this->resolution = resolution;
-        xStep = xSize / resolution;
-        yStep = ySize / resolution;
         yStart = min(lat1, lat2);
         xStart = min(lon1, lon2);
     }
 
-    shared_ptr<vector<float>> LandTypeGenerator::generateTexture() {
-        auto texture = std::make_shared<std::vector<float>>(resolution * resolution * 4);
+    void LandTypeGenerator::prepareAreas(){
         auto xEnd = xStart + xSize;
         auto yEnd = yStart + ySize;
         for (auto way: this->osmData->getWays()) {
@@ -49,6 +43,16 @@ namespace MapGenerator {
         }).orderBy([&](const std::shared_ptr<AreaOnMap> &x) {
             return -x->getPriority();
         }).toStdVector();
+    }
+
+    shared_ptr<vector<float>> LandTypeGenerator::generateTexture(int res) {
+        this->resolution = res;
+        xStep = xSize / resolution;
+        yStep = ySize / resolution;
+        auto texture = std::make_shared<std::vector<float>>(resolution * resolution * 4);
+        if(areas.empty()){
+            prepareAreas();
+        }
         //Get current time
         auto start = std::chrono::system_clock::now();
         int chunkSize = resolution / 8;

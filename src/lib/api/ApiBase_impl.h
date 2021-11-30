@@ -8,7 +8,6 @@
 #include <cpr/cpr.h>
 #include <iomanip>
 #include <utility>
-
 namespace MapGenerator {
     template<class T>
     std::shared_ptr<T> ApiBase::sendRequest(std::string uri) {
@@ -25,6 +24,7 @@ namespace MapGenerator {
         auto obj = new T();
         nlohmann::from_json(jsonObj, *obj);
         auto sharedPtr = std::shared_ptr<T>(obj);
+        //requestCache.insert(std::make_pair(h, sharedPtr));
         return sharedPtr;
     }
 
@@ -44,6 +44,7 @@ namespace MapGenerator {
         auto obj = new T();
         nlohmann::from_json(jsonObj, *obj);
         auto sharedPtr = std::shared_ptr<T>(obj);
+        //requestCache.insert(std::make_pair(h, sharedPtr));
         return sharedPtr;
     }
 

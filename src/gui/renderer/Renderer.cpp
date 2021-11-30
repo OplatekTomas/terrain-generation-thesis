@@ -55,7 +55,8 @@ namespace MapGenerator {
             connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
-            connect(&watcher, &QFutureWatcher<std::tuple<std::shared_ptr<std::vector<float>>, int>>::finished, this, &Renderer::handleFinished);
+            connect(&watcher, &QFutureWatcher<std::tuple<std::shared_ptr<std::vector<float>>, int>>::finished, this,
+                    &Renderer::handleFinished);
 
         }
 
@@ -90,7 +91,11 @@ namespace MapGenerator {
                 50.05709781257081, 17.28661015961763
 
         };
-        drawArea = posHome;
+        std::vector<double> posBrnoVeryLarge{
+                49.228903344446756, 16.55474165845715, 49.17730661350608, 16.6705475842613
+        };
+
+        drawArea = posBrnoVeryLarge;
         //Getting the mesh
         auto data = mapGenerator->getVertices(drawArea[0], drawArea[1], drawArea[2], drawArea[3], 30);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
@@ -104,9 +109,8 @@ namespace MapGenerator {
         drawCount = data->indices->size();
 
         //Getting the texture
-        startTextureGeneration(drawArea, 8);
-        //auto texData = mapGenerator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution);
-        //createTexture(*texData, resolution, resolution);
+        startTextureGeneration(drawArea, 64);
+
 
         auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
         auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER,
@@ -118,7 +122,7 @@ namespace MapGenerator {
 
     }
 
-    void Renderer::startTextureGeneration(const std::vector<double> &draw, const int& resolution) {
+    void Renderer::startTextureGeneration(const std::vector<double> &draw, const int &resolution) {
         auto generator = std::shared_ptr<MapGenerator>(mapGenerator);
         auto future = QtConcurrent::run([draw, resolution, generator]() {
             return std::make_tuple(generator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution), resolution);
@@ -129,7 +133,7 @@ namespace MapGenerator {
     void Renderer::handleFinished() {
         auto res = watcher.result();
         auto data = std::get<0>(res);
-        auto resolution= std::get<1>(res);
+        auto resolution = std::get<1>(res);
         createTexture(*data, resolution, resolution);
         std::cout << "Finished drawing: " << resolution << std::endl;
         renderNow();

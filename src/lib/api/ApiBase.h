@@ -7,6 +7,7 @@
 
 #include <string>
 #include <utility>
+#include <cstdint>
 #include <nlohmann/json.hpp>
 
 namespace MapGenerator {
@@ -22,15 +23,16 @@ namespace MapGenerator {
 
     private:
         virtual std::string getBaseAddress() = 0;
+        std::map<uint32_t , std::shared_ptr<void>> requestCache;
 
     protected:
         std::string apiKey;
 
         std::string encodeUrl(const std::string &url);
 
-        template<class T>
-        std::shared_ptr<T> readData(std::string path);
+        template<class T>std::shared_ptr<T> readData(std::string path);
 
+        static uint32_t hash(const std::string &str);
     };
 
     void getMetadata();

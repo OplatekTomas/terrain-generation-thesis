@@ -7,6 +7,7 @@
 #include <config/Config.h>
 #include <api/BingApi.h>
 #include <VertexData.h>
+#include <common/LandTypeGenerator.h>
 #include <api/OpenStreetMapApi.h>
 #include <models/openstreetmap/MetadataResult.h>
 
@@ -22,6 +23,7 @@ namespace MapGenerator{
         Config* config;
         std::unique_ptr<BingApi> bing;
         std::unique_ptr<OpenStreetMapApi> osm;
+        std::shared_ptr<LandTypeGenerator> textureGenerator;
 
     };
 }

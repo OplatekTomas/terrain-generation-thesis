@@ -6,7 +6,6 @@
 
 #include <fmt/printf.h>
 #include <boolinq.h>
-#include <common/LandTypeGenerator.h>
 
 using namespace boolinq;
 
@@ -57,6 +56,9 @@ namespace MapGenerator {
 
     std::shared_ptr<std::vector<float>>
     MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
+        if (textureGenerator != nullptr) {
+            return textureGenerator->generateTexture(resolution);
+        }
         if (lat1 > lat2) {
             std::swap(lat1, lat2);
         }
@@ -67,8 +69,8 @@ namespace MapGenerator {
         if (data == nullptr) {
             return {};
         }
-        LandTypeGenerator generator(lat1, long1, lat2, long2, resolution, data);
-        auto tex = generator.generateTexture();
+        textureGenerator = std::make_shared<LandTypeGenerator>(lat1, long1, lat2, long2, data);
+        auto tex = textureGenerator->generateTexture(resolution);
         return tex;
     }
 

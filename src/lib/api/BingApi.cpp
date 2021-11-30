@@ -128,9 +128,9 @@ namespace MapGenerator {
         auto url = getBaseAddress() + fmt::format(args, lat1, long1, lat2, long2, rows, cols, this->apiKey);
 
         //TODO: return proper data
-        auto result = this->readData<ElevationResult>("../../../examples/bing.json");
+        //auto result = this->readData<ElevationResult>("../../../examples/bing.json");
 
-        //auto result = this->sendRequest<ElevationResult>(url);
+        auto result = this->sendRequest<ElevationResult>(url);
         return result;
     }
 
