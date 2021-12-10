@@ -82,7 +82,7 @@ namespace MapGenerator {
         };
 
         std::vector<double> posRand = {
-                49.20322968539299, 16.60926962473714, 49.201543696771644, 16.61236590263251
+                49.9619918488622, 17.8586352852208, 49.91684506727818, 17.94300583538308
 
         };
 
@@ -92,12 +92,12 @@ namespace MapGenerator {
 
         };
         std::vector<double> posBrnoVeryLarge{
-                49.228903344446756, 16.55474165845715, 49.17730661350608, 16.6705475842613
+                49.23019297366651, 16.565201713369547, 49.171611576900936, 16.71542469343281
         };
 
-        drawArea = posBrnoVeryLarge;
+        currentArea = posRand;
         //Getting the mesh
-        auto data = mapGenerator->getVertices(drawArea[0], drawArea[1], drawArea[2], drawArea[3], 30);
+        auto data = mapGenerator->getVertices(currentArea[0], currentArea[1], currentArea[2], currentArea[3], 30);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
                                                     GL_STATIC_DRAW);
         indices = std::make_shared<ge::gl::Buffer>(data->indices->size() * sizeof(int), data->indices->data(),
@@ -109,7 +109,7 @@ namespace MapGenerator {
         drawCount = data->indices->size();
 
         //Getting the texture
-        startTextureGeneration(drawArea, 64);
+        startTextureGeneration(currentArea, 128);
 
 
         auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
@@ -134,10 +134,16 @@ namespace MapGenerator {
         auto res = watcher.result();
         auto data = std::get<0>(res);
         auto resolution = std::get<1>(res);
+        if(data == nullptr){
+            std::cout << "Error while generating texture" << std::endl;
+            return;
+        }
         createTexture(*data, resolution, resolution);
         std::cout << "Finished drawing: " << resolution << std::endl;
         renderNow();
-        startTextureGeneration(drawArea, resolution * 2);
+        if(resolution <= 4096) {
+            startTextureGeneration(currentArea, resolution * 2);
+        }
         //watcher.disconnect();
     }
 
@@ -187,6 +193,12 @@ namespace MapGenerator {
             case QEvent::UpdateRequest:
                 renderNow();
                 return true;
+            case QEvent::Close:
+                if(watcher.isRunning()){
+                    watcher.future().cancel();
+                }
+                //deleteLater();
+                return QWindow::event(event);
             default:
                 return QWindow::event(event);
 

@@ -57,7 +57,7 @@ namespace MapGenerator {
         std::shared_ptr<ge::gl::Texture> texture;
 
         std::shared_ptr<Camera> camera;
-        std::vector<double> drawArea;
+        std::vector<double> currentArea;
         QSurfaceFormat surfaceFormat;
         QFutureWatcher<std::tuple<std::shared_ptr<std::vector<float>>, int>> watcher;
         int textureResolution;

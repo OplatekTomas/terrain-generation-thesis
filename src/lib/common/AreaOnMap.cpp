@@ -62,7 +62,7 @@ namespace MapGenerator {
                 .where([](const Member &member) {
                     return member.type == Type::way && member.role == "outer";
                 }).toStdVector();
-        if(outerWays.empty()){
+        if (outerWays.empty()) {
             return elem;
         }
         for (const auto &outerWay: outerWays) {
@@ -85,6 +85,7 @@ namespace MapGenerator {
             added.find(currentWay.ref)->second = true;
             if (shouldReverse) {
                 std::reverse(currentWay.geometry->begin(), currentWay.geometry->end());
+                shouldReverse = false;
             }
             for (const auto &node: *currentWay.geometry) {
                 way.geometry->push_back(node);
@@ -96,17 +97,8 @@ namespace MapGenerator {
                 shouldReverse = true;
                 newCurrentWay = boolinq::from(outerWays).firstOrDefault(backPredicate);
             }
-            lastPoint = way.geometry->front();
             if (isMemDefault(newCurrentWay)) {
-                shouldReverse = false;
-                newCurrentWay = boolinq::from(outerWays).firstOrDefault(frontPredicate);
-            }
-            if (isMemDefault(newCurrentWay)) {
-                //shouldReverse = true;
-                newCurrentWay = boolinq::from(outerWays).firstOrDefault(backPredicate);
-            }
-            if (isMemDefault(newCurrentWay)) {
-               break;
+                break;
             }
             currentWay = newCurrentWay;
         }
@@ -223,6 +215,7 @@ namespace MapGenerator {
                  mapContainsKeyAndValue(tags, "waterway", "river") ||
                  mapContainsKeyAndValue(tags, "waterway", "stream")) {
             rgba[0] = 0.2f;
+            priority = 2;
         }//Check for fields
         else if (boolinq::from(landUseTypes).any([&tags](const std::string &type) {
             return mapContainsKeyAndValue(tags, "landuse", type);
@@ -242,12 +235,19 @@ namespace MapGenerator {
         }) || boolinq::from(landUseLightTypes).any(
                 [&](const std::string &type) { return mapContainsKeyAndValue(tags, "landuse", type); })) {
             rgba[0] = 0.6f;
-        } // Check if the area is residential
+        } // Check if the area is residential, industrial or commercial
         else if (mapContainsKeyAndValue(tags, "landuse", "residential") ||
-                 mapContainsKeyAndValue(tags, "landuse", "industrial")) {
+                 mapContainsKeyAndValue(tags, "landuse", "industrial") ||
+                 mapContainsKeyAndValue(tags, "landuse", "commercial")
+                ) {
             rgba[0] = 0.7f;
 
-        } else {
+        } // Check if the area is a city boundary
+        else if (mapContainsKeyAndValue(tags, "boundary", "administrative")) {
+            rgba[0] = 0.7f;
+            priority = -1;
+        }
+        else {
             //If the area is unknown, just make the priority low, so it will be drawn last
             rgba[0] = 1.0f;
             priority = -1;
