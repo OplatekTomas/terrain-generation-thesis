@@ -3,15 +3,15 @@
 //
 
 #include <config/ConfigReader.h>
-#include <config/Config.h>
+#include <config/LibConfig.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 
 namespace MapGenerator{
-    Config ConfigReader::read(std::string path, bool *isError) {
+    LibConfig ConfigReader::read(std::string path, bool *isError) {
         std::error_code error;
-        Config c;
+        LibConfig c;
 
         if (!std::filesystem::exists(path, error)) {
             *isError = true;

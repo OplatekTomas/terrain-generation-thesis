@@ -10,12 +10,18 @@
 using namespace boolinq;
 
 namespace MapGenerator {
-    MapGenerator::MapGenerator(Config *config) {
-        this->config = config;
-        bing = std::make_unique<BingApi>(config->keys[0].key);
-        osm = std::make_unique<OpenStreetMapApi>("");
-        srand(time(0));
 
+    MapGenerator::MapGenerator(const LibConfig& config, const GeneratorOptions &options) {
+        this->config = config;
+        this->options = options;
+        bing = std::make_unique<BingApi>(config.keys[0].key);
+        osm = std::make_unique<OpenStreetMapApi>("");
+    }
+
+    /// This method will start the generation process. The data will be made available in the scene when ready.
+    /// \return
+    std::shared_ptr<class Scene> MapGenerator::generateMap() {
+        return std::shared_ptr<struct Scene>();
     }
 
 
@@ -73,7 +79,6 @@ namespace MapGenerator {
         auto tex = textureGenerator->generateTexture(resolution);
         return tex;
     }
-
 }
 
 

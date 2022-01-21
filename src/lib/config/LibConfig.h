@@ -17,15 +17,15 @@ namespace MapGenerator {
 
     typedef struct Config_T {
         std::vector<key> keys;
-    } Config;
+    } LibConfig;
 }
 
 namespace nlohmann {
     void from_json(const json & j, MapGenerator::key & x);
     void to_json(json & j, const MapGenerator::key & x);
 
-    void from_json(const json & j, MapGenerator::Config & x);
-    void to_json(json & j, const MapGenerator::Config & x);
+    void from_json(const json & j, MapGenerator::LibConfig & x);
+    void to_json(json & j, const MapGenerator::LibConfig & x);
 
     inline void from_json(const json & j, MapGenerator::key& x) {
         x.service = j.at("service").get<std::string>();
@@ -38,11 +38,11 @@ namespace nlohmann {
         j["key"] = x.key;
     }
 
-    inline void from_json(const json & j, MapGenerator::Config& x) {
+    inline void from_json(const json & j, MapGenerator::LibConfig& x) {
         x.keys = j.at("keys").get<std::vector<MapGenerator::key>>();
     }
 
-    inline void to_json(json & j, const MapGenerator::Config & x) {
+    inline void to_json(json & j, const MapGenerator::LibConfig & x) {
         j = json::object();
         j["keys"] = x.keys;
     }

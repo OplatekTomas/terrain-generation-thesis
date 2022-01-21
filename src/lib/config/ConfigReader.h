@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <config/Config.h>
+#include <config/LibConfig.h>
 #include <string>
 
 namespace MapGenerator {
@@ -12,7 +12,7 @@ namespace MapGenerator {
     class ConfigReader {
 
     public:
-        static Config read(std::string path, bool* isError);
+        static LibConfig read(std::string path, bool* isError);
     };
 }
 

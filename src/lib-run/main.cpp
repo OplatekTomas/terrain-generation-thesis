@@ -1,6 +1,6 @@
 #include <iostream>
 #include <MapGenerator.h>
-#include <config/Config.h>
+#include <config/LibConfig.h>
 #include <config/ConfigReader.h>
 
 using namespace std;

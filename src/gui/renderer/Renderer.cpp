@@ -6,7 +6,6 @@
 #include <renderer/Renderer.h>
 #include <geGL/geGL.h>
 #include <thread>
-
 #include <csignal>
 #include <shaders/Shaders.h>
 #include <config/ConfigReader.h>
@@ -36,7 +35,8 @@ namespace MapGenerator {
         if (hasError) {
             return false;
         }
-        this->mapGenerator = std::make_shared<MapGenerator>(&config);
+        GeneratorOptions options;
+        this->mapGenerator = std::make_shared<MapGenerator>(config, options);
         return true;
     }
 
@@ -76,6 +76,11 @@ namespace MapGenerator {
                 49.883325913713, 17.8657865524292, 49.89402618295204, 17.890548706054688
         };
 
+        std::vector<double> posHomeL{
+                49.96736286729904, 17.860572894482512,
+
+                49.8718795233479, 17.955027618972238        };
+
         std::vector<double> posBrno = {
                 49.19256141221154, 16.594543972568715,
                 49.19827707820228, 16.604973078397315
@@ -95,7 +100,7 @@ namespace MapGenerator {
                 49.23019297366651, 16.565201713369547, 49.171611576900936, 16.71542469343281
         };
 
-        currentArea = posRand;
+        currentArea = posHomeL;
         //Getting the mesh
         auto data = mapGenerator->getVertices(currentArea[0], currentArea[1], currentArea[2], currentArea[3], 30);
         vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
@@ -113,8 +118,7 @@ namespace MapGenerator {
 
 
         auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
-        auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER,
-                                                               FragmentSource);
+        auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, FragmentSource);
         shaderProgram = std::make_shared<ge::gl::Program>(vertexShader, fragmentShader);
         initialized = true;
         //Draw as wireframe
@@ -123,25 +127,26 @@ namespace MapGenerator {
     }
 
     void Renderer::startTextureGeneration(const std::vector<double> &draw, const int &resolution) {
+        GeneratorOptions options;
         auto generator = std::shared_ptr<MapGenerator>(mapGenerator);
         auto future = QtConcurrent::run([draw, resolution, generator]() {
             return std::make_tuple(generator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution), resolution);
         });
         watcher.setFuture(future);
-    }
+    }\
 
     void Renderer::handleFinished() {
         auto res = watcher.result();
         auto data = std::get<0>(res);
         auto resolution = std::get<1>(res);
-        if(data == nullptr){
+        if (data == nullptr) {
             std::cout << "Error while generating texture" << std::endl;
             return;
         }
         createTexture(*data, resolution, resolution);
         std::cout << "Finished drawing: " << resolution << std::endl;
         renderNow();
-        if(resolution <= 4096) {
+        if (resolution <= 4096) {
             startTextureGeneration(currentArea, resolution * 2);
         }
         //watcher.disconnect();
@@ -194,7 +199,7 @@ namespace MapGenerator {
                 renderNow();
                 return true;
             case QEvent::Close:
-                if(watcher.isRunning()){
+                if (watcher.isRunning()) {
                     watcher.future().cancel();
                 }
                 //deleteLater();
@@ -204,6 +209,7 @@ namespace MapGenerator {
 
         }
     }
+
 
     void Renderer::exposeEvent(QExposeEvent *event) {
         if (isExposed()) {
