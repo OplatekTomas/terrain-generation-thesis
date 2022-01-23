@@ -11,73 +11,88 @@ using namespace boolinq;
 
 namespace MapGenerator {
 
-    MapGenerator::MapGenerator(const LibConfig& config, const GeneratorOptions &options) {
+    MapGenerator::MapGenerator(const LibConfig& config, GeneratorOptions options) {
         this->config = config;
         this->options = options;
         bing = std::make_unique<BingApi>(config.keys[0].key);
         osm = std::make_unique<OpenStreetMapApi>("");
+        while(options.terrainResolution % 32 !=0){
+            options.terrainResolution++;
+        }
+        if (options.lat1 > options.lat2) {
+            std::swap(options.lat1, options.lat2);
+        }
+        if (options.lon1 > options.lon2) {
+            std::swap(options.lon1, options.lon2);
+        }
     }
 
     /// This method will start the generation process. The data will be made available in the scene when ready.
     /// \return
     std::shared_ptr<class Scene> MapGenerator::generateMap() {
-        return std::shared_ptr<struct Scene>();
+        auto scene = std::make_shared<Scene>();
+        auto surface = createSurface();
+        auto surfaceId = scene->addModel(surface);
+        std::async(std::launch::async, [&](){
+            int prevId = -1;
+            int currentResolution = options.minTextureResolution;
+            while(currentResolution <= options.maxTextureResolution){
+                auto texture = createLandTexture(currentResolution);
+                auto texId = scene->addTexture(texture);
+                if(prevId != -1){
+                    scene->unbindTexture(prevId, surfaceId);
+                }
+                prevId = texId;
+                currentResolution *= options.textureResolutionStep;
+            }
+        });
+        return scene;
     }
 
-
-    std::shared_ptr<VertexData>
-    MapGenerator::getVertices(double lat1, double long1, double lat2, double long2, int resolution) {
-        resolution++;
-        auto[elevation, latDist, longDist] = bing->getElevationNormalized(lat1, long1, lat2, long2, &resolution);
-        resolution--;
-        if (elevation.empty()) {
+    std::shared_ptr<Model> MapGenerator::createSurface() {
+        auto data = bing->getElevationNormalized(options.lat1, options.lon1, options.lat2, options.lon2, options.terrainResolution);
+        if(data->getData()->empty()){
             return nullptr;
         }
-        auto scale = longDist / latDist;
-        auto data = std::make_shared<VertexData>((resolution + 1) * (resolution + 1) * 5, resolution * resolution);
-        for (int x = 0; x <= resolution; x++) {
-            for (int y = 0; y <= resolution; y++) {
-                auto index = (x * (resolution + 1) + y);
-                data->addVertex(
-                        ((float) y / (float) resolution),
-                        (float) elevation[index] - 0.2f,
-                        (((float) x / (float) resolution)) * (float) scale,
-                        ((float) y / (float) resolution),
-                        (((float) x / (float) resolution))
-                );
+        auto model = std::make_shared<Model>();
+        //Let's create the model
+        auto fRes = (float)options.terrainResolution;
+        auto iRes = options.terrainResolution;
+        for(auto x = 0; x < options.terrainResolution; x++){
+            for(auto y = 0; y < options.terrainResolution; y++){
+               auto index = (x * (options.terrainResolution) + y);
+               auto yPos = (float) y / fRes;
+               auto xPos = (float) x / fRes;
+               auto height = (float)data->getData()->at(index);
+               model->addVertex(yPos, height, xPos * data->getScale(), yPos, xPos);
             }
         }
-        //Setting up indices
-        for (int j = 0; j < resolution; ++j) {
-            for (int i = 0; i < resolution; ++i) {
-                int row1 = j * (resolution + 1);
-                int row2 = (j + 1) * (resolution + 1);
-                data->addIndex(row1 + i, row1 + i + 1, row2 + i + 1);
-                data->addIndex(row1 + i, row2 + i + 1, row2 + i);
+
+        //And add the indices
+        for (int i = 0; i < iRes; ++i) {
+            for (int j = 0; j < iRes; ++j) {
+                int row1 = i * (iRes + 1);
+                int row2 = (i + 1) * (iRes + 1);
+                model->addIndex(row1 + j, row1 + j + 1, row2 + j + 1);
+                model->addIndex(row1 + j, row2 + j + 1, row2 + j);
             }
         }
-        return data;
+        return model;
     }
 
-
-    std::shared_ptr<std::vector<float>>
-    MapGenerator::getMetadata(double lat1, double long1, double lat2, double long2, int resolution) {
+    std::shared_ptr<Texture> MapGenerator::createLandTexture(int resolution) {
+        //Texture generator already exists and has all metadata pulled from the API - no need to do it again.
         if (textureGenerator != nullptr) {
             return textureGenerator->generateTexture(resolution);
         }
-        if (lat1 > lat2) {
-            std::swap(lat1, lat2);
-        }
-        if (long1 > long2) {
-            std::swap(long1, long2);
-        }
-        auto data = osm->getMetadata(lat1, long1, lat2, long2);
+        auto data = osm->getMetadata(options.lat1, options.lon1, options.lat2, options.lon2);
         if (data == nullptr) {
             return {};
         }
-        textureGenerator = std::make_shared<LandTypeGenerator>(lat1, long1, lat2, long2, data);
+        textureGenerator = std::make_shared<LandTypeGenerator>(data);
         auto tex = textureGenerator->generateTexture(resolution);
         return tex;
+        return std::shared_ptr<Texture>();
     }
 }
 

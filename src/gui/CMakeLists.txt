@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CPM_DOWNLOAD_VERSION 0.32.0)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
@@ -19,7 +19,7 @@ file(WRITE shaders/include/shader.fs "")
 file(WRITE shaders/include/shader.vs "")
 
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
+find_package(QT NAMES Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 #set correct directory for CPM
@@ -41,6 +41,7 @@ include(FetchContent)
 
 CPMAddPackage(
         NAME GPUEngine
+        OPTIONS "GPUENGINE_BUILD_GESG ON"
         GITHUB_REPOSITORY Rendering-FIT/GPUEngine
         GIT_TAG 53c587c52d99b57e77817bb4df1d625fcea1d5be
 )
@@ -50,7 +51,7 @@ set(PROJECT_SOURCES
         MainWindow.cpp MainWindow.h MainWindow.ui
         shaders/Shaders.h shaders/include/shader.fs shaders/include/shader.vs
         renderer/Renderer.cpp renderer/Renderer.h
-        renderer/Camera.cpp renderer/Camera.h)
+        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}  MANUAL_FINALIZATION ${PROJECT_SOURCES})
@@ -60,7 +61,7 @@ endif()
 
 find_package(GPUEngine COMPONENTS geGL geSG geUtil)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets geGL geUtil lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets geGL geSG geUtil lib)
 
 #Create fake target that calls the shaders/CMakeLists.txt file just before compile time to include the current version
 #of a shader and not the one that would be read during loading of the project

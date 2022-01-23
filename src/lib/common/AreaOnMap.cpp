@@ -208,43 +208,43 @@ namespace MapGenerator {
 
         //Check for forrest
         if (mapContainsKeyAndValue(tags, "natural", "wood") || mapContainsKeyAndValue(tags, "landuse", "forest")) {
-            rgba[0] = 0.1f;
+            rgba[0] = 1;
         }//Check for water
         else if (mapContainsKeyAndValue(tags, "natural", "water") ||
                  mapContainsKeyAndValue(tags, "waterway", "riverbank") ||
                  mapContainsKeyAndValue(tags, "waterway", "river") ||
                  mapContainsKeyAndValue(tags, "waterway", "stream")) {
-            rgba[0] = 0.2f;
+            rgba[0] = 2;
             priority = 2;
         }//Check for fields
         else if (boolinq::from(landUseTypes).any([&tags](const std::string &type) {
             return mapContainsKeyAndValue(tags, "landuse", type);
         })) {
-            rgba[0] = 0.3f;
+            rgba[0] = 3;
         } // Check for roads
         else if (mapContainsKey(tags, "highway")) {
-            rgba[0] = 0.4f;
+            rgba[0] = 4;
             priority = 10;
         } // Check for buildings
         else if (mapContainsKey(tags, "building")) {
-            rgba[0] = 0.5f;
+            rgba[0] = 5;
             priority = 2;
         } // Check for leisure
         else if (boolinq::from(leisureTypes).any([&](const std::string &type) {
             return mapContainsKeyAndValue(tags, "leisure", type);
         }) || boolinq::from(landUseLightTypes).any(
                 [&](const std::string &type) { return mapContainsKeyAndValue(tags, "landuse", type); })) {
-            rgba[0] = 0.6f;
+            rgba[0] = 6;
         } // Check if the area is residential, industrial or commercial
         else if (mapContainsKeyAndValue(tags, "landuse", "residential") ||
                  mapContainsKeyAndValue(tags, "landuse", "industrial") ||
                  mapContainsKeyAndValue(tags, "landuse", "commercial")
                 ) {
-            rgba[0] = 0.7f;
+            rgba[0] = 7;
 
         } // Check if the area is a city boundary
         else if (mapContainsKeyAndValue(tags, "boundary", "administrative")) {
-            rgba[0] = 0.7f;
+            rgba[0] = 7;
             priority = -1;
         }
         else {
@@ -377,7 +377,7 @@ namespace MapGenerator {
     }
 
 
-    void AreaOnMap::getMetadata(float *r, float *g, float *b, float *a) {
+    void AreaOnMap::getMetadata(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a) {
         *r = rgba[0];
         *g = rgba[1];
         *b = rgba[2];

@@ -23,6 +23,6 @@ namespace MapGenerator{
         // How much does the texture scale up with each iteration
         int textureResolutionStep = 2;
         // Right now unused
-        int seed;
+        int seed{};
     } GeneratorOptions;
 }

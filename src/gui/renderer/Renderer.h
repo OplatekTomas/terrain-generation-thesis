@@ -15,9 +15,11 @@
 #include <MapGenerator.h>
 #include <QThread>
 #include <QResizeEvent>
+#include <renderer/Scene3D.h>
 
 namespace MapGenerator {
     class Camera;
+    class Scene3D;
     class Renderer : public QWindow {
     Q_OBJECT
     public:
@@ -45,6 +47,8 @@ namespace MapGenerator {
         void exposeEvent(QExposeEvent *event) override;
 
         std::shared_ptr<MapGenerator> mapGenerator;
+
+        std::shared_ptr<Scene3D> scene;
 
         bool initialized;
         int drawCount;

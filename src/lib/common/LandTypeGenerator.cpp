@@ -11,14 +11,14 @@
 
 namespace MapGenerator {
 
-    LandTypeGenerator::LandTypeGenerator(double lat1, double lon1, double lat2, double lon2,std::shared_ptr<OSMData> osmData) {
+    LandTypeGenerator::LandTypeGenerator(std::shared_ptr<OSMData> osmData) {
+        ySize = std::fabs(osmData->lat1 - osmData->lat2);
+        xSize = std::fabs(osmData->lon1 - osmData->lon2);
+        yStart = min(osmData->lat1, osmData->lat2);
+        xStart = min(osmData->lon1, osmData->lon2);
         this->osmData = std::move(osmData);
-        vector<string> landTypes;
-        ySize = std::fabs(lat1 - lat2);
-        xSize = std::fabs(lon1 - lon2);
-        yStart = min(lat1, lat2);
-        xStart = min(lon1, lon2);
     }
+
 
     void LandTypeGenerator::prepareAreas(){
         auto xEnd = xStart + xSize;
@@ -45,11 +45,11 @@ namespace MapGenerator {
         }).toStdVector();
     }
 
-    shared_ptr<vector<float>> LandTypeGenerator::generateTexture(int res) {
+    shared_ptr<Texture> LandTypeGenerator::generateTexture(int res) {
         this->resolution = res;
         xStep = xSize / resolution;
         yStep = ySize / resolution;
-        auto texture = std::make_shared<std::vector<float>>(resolution * resolution * 4);
+        auto texture = std::vector<unsigned char>(resolution * resolution * 4);
         if(areas.empty()){
             prepareAreas();
         }
@@ -78,8 +78,8 @@ namespace MapGenerator {
                         continue;
                     }
                     auto index = (y * resolution + (resolution - x - 1)) * 4;
-                    area->getMetadata(&texture->at(index), &texture->at(index + 1), &texture->at(index + 2),
-                                      &texture->at(index + 3));
+                    area->getMetadata(&texture.at(index), &texture.at(index + 1), &texture.at(index + 2),
+                                      &texture.at(index + 3));
                 }
             }
         }
@@ -87,7 +87,10 @@ namespace MapGenerator {
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << "Time to render map: " << elapsed_seconds.count() << "s\n";
-        return texture;
+        auto tex = std::make_shared<Texture>(resolution, resolution, texture);
+        return tex;
     }
+
+
 }
 

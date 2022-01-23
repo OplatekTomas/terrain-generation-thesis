@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 set(CPM_DOWNLOAD_VERSION 0.32.0)
 include(FetchContent)
 
@@ -60,7 +59,7 @@ IF(USE_OpenMP)
     FIND_PACKAGE(OpenMP)
     IF(OPENMP_FOUND)
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -O3")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     ENDIF()
 ENDIF()
 
@@ -68,9 +67,11 @@ add_library (lib
         config/LibConfig.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
         models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
-        config/ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h VertexData.cpp VertexData.h
-        api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h
-        models/openstreetmap/MetadataResult.h Helper.h common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h models/openstreetmap/OSMData.cpp models/openstreetmap/OSMData.h scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h common/GeneratorOptions.h scene/Draw.cpp scene/Draw.h)
+        config/ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h
+        api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h  models/openstreetmap/OSMData.cpp models/openstreetmap/OSMData.h
+        models/openstreetmap/MetadataResult.h Helper.h
+        common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h
+        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h common/GeneratorOptions.h )
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)

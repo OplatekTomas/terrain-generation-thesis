@@ -4,10 +4,15 @@
 
 #pragma once
 
-template<typename T>
-struct identity {
-    typedef T type;
-};
+
+constexpr uint32_t hash(const char* data, size_t const size) noexcept{
+    uint32_t hash = 5381;
+    for (const char *c = data; c < data + size; ++c){
+        hash = ((hash << 5) + hash) + (unsigned char) *c;
+    }
+    return hash;
+}
+
 
 template<typename A, typename B>
 inline bool mapContainsKey(const std::map <A, B> &m, const std::string &str) {
@@ -29,14 +34,6 @@ inline uint32_t hash(const std::string &str) {
     int hash = 5381;
     for (char c : str) {
         hash = ((hash << 5) + hash) + c;
-    }
-    return hash;
-}
-
-inline constexpr uint32_t hash(const char* data, size_t const size) noexcept{
-    uint32_t hash = 5381;
-    for(const char *c = data; c < data + size; ++c){
-        hash = ((hash << 5) + hash) + (unsigned char) *c;
     }
     return hash;
 }

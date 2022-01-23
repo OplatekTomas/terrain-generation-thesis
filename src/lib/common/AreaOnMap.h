@@ -21,7 +21,7 @@ namespace MapGenerator {
 
         bool isInsideBounds(double lat, double lon);
 
-        void getMetadata(float *r, float *g, float *b, float *a);
+        void getMetadata(unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *a);
 
         bool isInsideLon(double lon);
 
@@ -38,7 +38,7 @@ namespace MapGenerator {
         Node node;
         bool isRoute;
         double routeWidth;
-        float rgba[4] = {0, 0, 0, 0};
+        unsigned char rgba[4] = {0, 0, 0, 0};
         double area = -1;
         int priority = 0;
         Point min;
@@ -64,10 +64,6 @@ namespace MapGenerator {
         static bool intersects(const Bounds &b1, const Bounds &b2);
 
         static Node createWayFromBoundary(Node &elem);
-
-        static bool floatEqs(float f1, float f2);
-
-        static bool floatEqs(double f1, double f2);
 
         static bool isMemDefault(const Member &node);
     };

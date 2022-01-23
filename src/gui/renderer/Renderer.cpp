@@ -36,41 +36,6 @@ namespace MapGenerator {
             return false;
         }
         GeneratorOptions options;
-        this->mapGenerator = std::make_shared<MapGenerator>(config, options);
-        return true;
-    }
-
-
-    void Renderer::initialize() {
-        if (initialized) return;
-        if (!context) {
-            context = new QOpenGLContext(this);
-            context->setFormat(surfaceFormat);
-            bool success = context->create();
-            if (!success) {
-                //fail gracefully TODO:actually fail
-                ::raise(SIGSEGV);
-            }
-            camera = std::make_shared<Camera>((Renderer *) this);
-            connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
-            connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
-            connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
-            connect(&watcher, &QFutureWatcher<std::tuple<std::shared_ptr<std::vector<float>>, int>>::finished, this,
-                    &Renderer::handleFinished);
-
-        }
-
-        //let's say to the OS that we want to work with this context
-        context->makeCurrent(this);
-        ge::gl::init();
-        gl = std::make_shared<ge::gl::Context>();
-
-        const qreal retinaScale = devicePixelRatio();
-
-        gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
-        gl->glClearColor(0.0, 0, 0, 1.0);
-        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        context->swapBuffers(this);
 
         std::vector<double> posHome{
                 49.883325913713, 17.8657865524292, 49.89402618295204, 17.890548706054688
@@ -100,22 +65,47 @@ namespace MapGenerator {
                 49.23019297366651, 16.565201713369547, 49.171611576900936, 16.71542469343281
         };
 
-        currentArea = posHomeL;
-        //Getting the mesh
-        auto data = mapGenerator->getVertices(currentArea[0], currentArea[1], currentArea[2], currentArea[3], 30);
-        vertices = std::make_shared<ge::gl::Buffer>(data->vertices->size() * sizeof(float), data->vertices->data(),
-                                                    GL_STATIC_DRAW);
-        indices = std::make_shared<ge::gl::Buffer>(data->indices->size() * sizeof(int), data->indices->data(),
-                                                   GL_STATIC_DRAW);
-        vao = std::make_shared<ge::gl::VertexArray>();
-        vao->addAttrib(vertices, 0, 3, GL_FLOAT, 5 * sizeof(float), 0);
-        vao->addAttrib(vertices, 1, 2, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
-        vao->addElementBuffer(indices);
-        drawCount = data->indices->size();
+        auto currentPos = posHome;
 
-        //Getting the texture
-        startTextureGeneration(currentArea, 128);
+        options.lat1 = currentPos[0];
+        options.lon1 = currentPos[1];
+        options.lat2 = currentPos[2];
+        options.lon2 = currentPos[3];
+        this->mapGenerator = std::make_shared<MapGenerator>(config, options);
+        return true;
+    }
 
+
+    void Renderer::initialize() {
+        if (initialized) return;
+        if (!context) {
+            context = new QOpenGLContext(this);
+            context->setFormat(surfaceFormat);
+            bool success = context->create();
+            if (!success) {
+                //fail gracefully TODO:actually fail
+                ::raise(SIGSEGV);
+            }
+            camera = std::make_shared<Camera>((Renderer *) this);
+            connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
+            connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
+            connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
+        }
+
+        //let's say to the OS that we want to work with this context
+        context->makeCurrent(this);
+        ge::gl::init();
+        gl = std::make_shared<ge::gl::Context>();
+
+        const qreal retinaScale = devicePixelRatio();
+
+        gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+        gl->glClearColor(0.0, 0, 0, 1.0);
+        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        context->swapBuffers(this);
+
+        auto map = mapGenerator->generateMap();
+        scene = std::make_shared<Scene3D>(map, gl, camera);
 
         auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
         auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, FragmentSource);
@@ -126,50 +116,13 @@ namespace MapGenerator {
 
     }
 
-    void Renderer::startTextureGeneration(const std::vector<double> &draw, const int &resolution) {
-        GeneratorOptions options;
-        auto generator = std::shared_ptr<MapGenerator>(mapGenerator);
-        auto future = QtConcurrent::run([draw, resolution, generator]() {
-            return std::make_tuple(generator->getMetadata(draw[0], draw[1], draw[2], draw[3], resolution), resolution);
-        });
-        watcher.setFuture(future);
-    }\
-
-    void Renderer::handleFinished() {
-        auto res = watcher.result();
-        auto data = std::get<0>(res);
-        auto resolution = std::get<1>(res);
-        if (data == nullptr) {
-            std::cout << "Error while generating texture" << std::endl;
-            return;
-        }
-        createTexture(*data, resolution, resolution);
-        std::cout << "Finished drawing: " << resolution << std::endl;
-        renderNow();
-        if (resolution <= 4096) {
-            startTextureGeneration(currentArea, resolution * 2);
-        }
-        //watcher.disconnect();
-    }
-
-    void Renderer::createTexture(const std::vector<float> &data, int width, int height) {
-        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA32F, 0, width, height);
-        texture->bind(GL_TEXTURE_2D);
-        texture->setData2D(data.data(), GL_RGBA, GL_FLOAT, 0, GL_TEXTURE_2D, 0, 0, width, height);
-        //texture->generateMipmap();
-        texture->texParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
-        texture->texParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
-        texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        texture->bind(0);
-
-    }
-
     void Renderer::render() {
         const qreal retinaScale = devicePixelRatio();
         gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
         gl->glClearColor(0.0, 0, 0, 1.0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        scene->draw(height(), width());
 
         auto view = camera->getViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width() / (float) height(), 0.005f,

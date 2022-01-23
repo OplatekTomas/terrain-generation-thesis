@@ -12,6 +12,7 @@
 #include <boolinq.h>
 #include <common/AreaOnMap.h>
 #include <models/openstreetmap/OSMData.h>
+#include <scene/Scene.h>
 
 namespace MapGenerator {
     using namespace std;
@@ -20,9 +21,8 @@ namespace MapGenerator {
 
     class LandTypeGenerator {
     public:
-        LandTypeGenerator(double lat1, double lon1, double lat2, double lon2, shared_ptr<OSMData> osmData);
-
-        shared_ptr <vector<float>> generateTexture(int resolution);
+        LandTypeGenerator(shared_ptr<OSMData> osmData);
+        shared_ptr <Texture> generateTexture(int resolution);
 
     private:
         std::shared_ptr<OSMData> osmData;

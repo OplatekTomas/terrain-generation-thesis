@@ -27,16 +27,18 @@ namespace MapGenerator{
         void unbindProgram(int id, int modelId);
         void unbindTexture(int id, int modelId);
 
-
+        std::map<int, std::shared_ptr<Model>> getModels();
+        std::vector<int> getTexturesForModel(int modelId);
+        std::shared_ptr<Texture> getTexture(int id);
     private:
         template<typename T> int generateId(std::map<int, T> &map);
 
         std::map<int, std::shared_ptr<class Model>> models;
         std::map<int, std::shared_ptr<class Texture>> textures;
-        std::map<int, std::vector<int>> model_to_texture;
-        std::map<int, int> model_to_program;
-        std::map<int, std::string> fragment_shaders;
-        std::map<int, std::string> vertex_shaders;
+        std::map<int, std::vector<int>> modelToTexture;
+        std::map<int, int> modelToProgram;
+        std::map<int, std::string> fragmentShaders;
+        std::map<int, std::string> vertexShaders;
         std::map<int, std::tuple<int, int>> programs;
     };
 };

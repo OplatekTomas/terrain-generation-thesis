@@ -18,15 +18,18 @@ namespace MapGenerator{
         std::shared_ptr<std::vector<double>> getData(){
             return this->data;
         }
+        void setScale(float scale){
+            this->scale = scale;
+        }
+        float getScale(){
+            return this->scale;
+        }
 
     private:
         int rows;
         int cols;
+        float scale;
         std::shared_ptr<std::vector<double>> data;
-
-        void setSameDimension(int rowFrom, int colFrom, int rowCount, int colCount, const std::vector<double> &newData);
-        void setDifferentDimension(int rowFrom, int colFrom, int rowCount, int colCount, const std::vector<double> &newData);
-
     };
 }
 

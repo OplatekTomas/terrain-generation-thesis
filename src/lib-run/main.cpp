@@ -16,13 +16,13 @@ int main(int argc, char *argv[]) {
         cout << "CSV Parsing failed!" << endl;
         return 1;
     }
-    auto generator = new MapGenerator::MapGenerator(&config);
+    //auto generator = new MapGenerator::MapGenerator(&config);
     std::vector<double> posHradec = {
             49.870291704376214, 17.860090558506485,
             49.888954501165955, 17.88689223413519,
     };
     auto draw = posHradec;
-    auto data = generator->getVertices(draw[0], draw[1], draw[2], draw[3], 40);
+    //auto data = generator->getVertices(draw[0], draw[1], draw[2], draw[3], 40);
     cout << endl;
 
     return 0;
