@@ -16,7 +16,7 @@ namespace MapGenerator {
 
     int Scene3D::draw(int height, int width) {
         auto view = camera->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) height / (float) width, 0.005f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
         for (auto &modelPair: scene->getModels()) {
             auto modelId = modelPair.first;
             //Setup shaders/program
@@ -27,7 +27,6 @@ namespace MapGenerator {
             program->setMatrix4fv("view", glm::value_ptr(view));
             program->setMatrix4fv("projection", glm::value_ptr(projection));
             auto drawCount = useModel(modelId);
-
             //Draw the model
             gl->glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, nullptr);
 
@@ -41,14 +40,12 @@ namespace MapGenerator {
         if (models.find(id) != models.end()) {
             auto vao = models[id];
             vao->bind();
-            return model->indices->size();
+            return model->indices.size();
         }
 
-
-        auto vertices = std::make_shared<ge::gl::Buffer>(model->vertices->size() * sizeof(float),
-                                                         model->vertices->data(),
+        auto vertices = std::make_shared<ge::gl::Buffer>(model->vertices.size() * sizeof(float), model->vertices.data(),
                                                          GL_STATIC_DRAW);
-        auto indices = std::make_shared<ge::gl::Buffer>(model->indices->size() * sizeof(int), model->indices->data(),
+        auto indices = std::make_shared<ge::gl::Buffer>(model->indices.size() * sizeof(int), model->indices.data(),
                                                         GL_STATIC_DRAW);
         buffers.push_back(vertices);
         buffers.push_back(indices);
@@ -61,7 +58,7 @@ namespace MapGenerator {
         vao->addElementBuffer(indices);
         models[id] = vao;
         vao->bind();
-        return model->indices->size();
+        return model->indices.size();
     }
 
     void Scene3D::useTextures(int modelId) {
@@ -69,7 +66,7 @@ namespace MapGenerator {
         if (modelTextures.empty()) {
             return;
         }
-        for (size_t i = 0; i < textures.size(); i++) {
+        for (size_t i = 0; i < modelTextures.size(); i++) {
             auto texture = getTexture(modelTextures[i], *scene->getTexture(modelTextures[i]));
             texture->bind(i);
         }
@@ -109,6 +106,7 @@ namespace MapGenerator {
         texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         textures[id] = texture;
+
         return texture;
     }
 

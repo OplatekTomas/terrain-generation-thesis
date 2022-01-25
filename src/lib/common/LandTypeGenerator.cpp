@@ -86,7 +86,7 @@ namespace MapGenerator {
         //get current time
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
-        std::cout << "Time to render map: " << elapsed_seconds.count() << "s\n";
+        std::cout << "Time to render map with resolution " << resolution << ": " << elapsed_seconds.count() << "s\n";
         auto tex = std::make_shared<Texture>(resolution, resolution, texture);
         return tex;
     }

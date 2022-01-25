@@ -17,7 +17,7 @@ namespace MapGenerator {
         connect(timer.get(), SIGNAL(timeout()), this, SLOT(updateSteps()));
         timer->start();
         w_down = a_down = s_down = d_down = space_down = ctrl_down =  false;
-        position = glm::vec3(0.5,0.5,-0.5);
+        position = glm::vec3(0.5,0.7,-0.5);
         up = glm::vec3(0, 1, 0);
         worldUp = up;
         front = glm::vec3(0, 0, 1);

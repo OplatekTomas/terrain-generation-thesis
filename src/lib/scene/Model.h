@@ -15,8 +15,8 @@ namespace MapGenerator {
 
         void addIndex(int i1, int i2, int i3);
 
-        std::shared_ptr<std::vector<float>> vertices;
-        std::shared_ptr<std::vector<int>> indices;
+        std::vector<float> vertices;
+        std::vector<int> indices;
     };
 }
 

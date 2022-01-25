@@ -249,7 +249,7 @@ namespace MapGenerator {
         }
         else {
             //If the area is unknown, just make the priority low, so it will be drawn last
-            rgba[0] = 1.0f;
+            rgba[0] = 255;
             priority = -1;
         }
     }

@@ -97,7 +97,6 @@ namespace MapGenerator {
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
 
-
         clearView();
         context->swapBuffers(this);
 
@@ -112,7 +111,7 @@ namespace MapGenerator {
 
         if (scene != nullptr) {
             //draw as wireframe
-            gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            //gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
             scene->draw(height(), width());
         }

@@ -12,12 +12,12 @@ using namespace boolinq;
 
 namespace MapGenerator {
 
-    MapGenerator::MapGenerator(const LibConfig& config, GeneratorOptions options) {
+    MapGenerator::MapGenerator(const LibConfig &config, GeneratorOptions options) {
         this->config = config;
         this->options = options;
         bing = std::make_unique<BingApi>(config.keys[0].key);
         osm = std::make_unique<OpenStreetMapApi>("");
-        while(options.terrainResolution % 32 !=0){
+        while (options.terrainResolution % 32 != 0) {
             options.terrainResolution++;
         }
         if (options.lat1 > options.lat2) {
@@ -34,45 +34,48 @@ namespace MapGenerator {
         scene = std::make_shared<Scene>();
         auto surface = createSurface();
         auto surfaceId = scene->addModel(surface);
-        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::VertexSource() ,Shader::VERTEX));
+        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::VertexSource(), Shader::VERTEX));
         auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::FragmentSource(), Shader::FRAGMENT));
         auto programId = scene->createProgram(vertexId, fragmentId);
         scene->bindProgram(surfaceId, programId);
-
-        /*std::async(std::launch::async, [&](){
-            int prevId = -1;
-            int currentResolution = options.minTextureResolution;
-            while(currentResolution <= options.maxTextureResolution){
-                auto texture = createLandTexture(currentResolution);
-                auto texId = scene->addTexture(texture);
-                if(prevId != -1){
-                    scene->unbindTexture(prevId, surfaceId);
-                }
-                prevId = texId;
-                currentResolution *= options.textureResolutionStep;
-            }
-        });*/
+        std::thread t1(&MapGenerator::generateTexturesAsync, this, surfaceId);
+        t1.detach();
         return scene;
+    };
+    void MapGenerator::generateTexturesAsync(int surfaceId) {
+        int prevId = -1;
+        int currentResolution = options.minTextureResolution;
+        while (currentResolution <= options.maxTextureResolution) {
+            auto texture = createLandTexture(currentResolution);
+            auto texId = scene->addTexture(texture);
+            if (prevId != -1) {
+                scene->unbindTexture(prevId, surfaceId);
+            }
+            scene->bindTexture(texId, surfaceId);
+            prevId = texId;
+            currentResolution = currentResolution * options.textureResolutionStep;
+        }
+
     }
 
-
-
     std::shared_ptr<Model> MapGenerator::createSurface() {
-        auto data = bing->getElevationNormalized(options.lat1, options.lon1, options.lat2, options.lon2, options.terrainResolution);
-        if(data->getData()->empty()){
+        auto data = bing->getElevationNormalized(options.lat1, options.lon1, options.lat2, options.lon2,
+                                                 options.terrainResolution);
+        if (data->getData()->empty()) {
             return nullptr;
         }
         auto model = std::make_shared<Model>();
+        auto res = options.terrainResolution - 1;
         //Let's create the model
-        auto fRes = (float)options.terrainResolution;
-        auto iRes = options.terrainResolution;
-        for(auto x = 0; x < options.terrainResolution; x++){
-            for(auto y = 0; y < options.terrainResolution; y++){
-               auto index = (x * (options.terrainResolution) + y);
-               auto yPos = (float) y / fRes;
-               auto xPos = (float) x / fRes;
-               auto height = (float)data->getData()->at(index);
-               model->addVertex(yPos, height, xPos * data->getScale(), yPos, xPos);
+        auto fRes = (float) res;
+        auto iRes = res;
+        for (auto x = 0; x <= res; x++) {
+            for (auto y = 0; y <= res; y++) {
+                auto index = (x * (res + 1) + y);
+                auto yPos = (float) y / fRes;
+                auto xPos = (float) x / fRes;
+                auto height = (float) data->getData()->at(index);
+                model->addVertex(yPos, height, xPos * data->getScale(), yPos, xPos);
             }
         }
 
@@ -101,6 +104,10 @@ namespace MapGenerator {
         auto tex = textureGenerator->generateTexture(resolution);
         return tex;
     }
+
 }
+
+
+
 
 

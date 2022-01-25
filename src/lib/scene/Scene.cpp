@@ -15,19 +15,19 @@ namespace MapGenerator {
 
     int Scene::addShader(std::shared_ptr<Shader> shader) {
         int id = generateId(shaders);
-        shaders[id] = std::move(shader);
+        shaders[id] = shader;
         return id;
     }
 
     int Scene::addTexture(std::shared_ptr<Texture> texture) {
         int id = generateId(textures);
-        textures[id] = std::move(texture);
+        textures[id] = texture;
         return id;
     }
 
     int Scene::addModel(std::shared_ptr<Model> model) {
         int id = generateId(models);
-        models[id] = std::move(model);
+        models[id] = model;
         return id;
     }
 

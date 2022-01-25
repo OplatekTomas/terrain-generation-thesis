@@ -37,6 +37,7 @@ namespace MapGenerator {
         std::shared_ptr<Texture> createLandTexture(int resolution);
         //std::shared_ptr<std::vector<float>> getMetadata(double lat1, double long1, double lat2, double long2, int resolution);
 
+        void generateTexturesAsync(int id);
     };
 }
 
