@@ -7,7 +7,7 @@
 #include <geGL/geGL.h>
 #include <thread>
 #include <csignal>
-#include <shaders/Shaders.h>
+#include "shaders/Shaders.h"
 #include <config/ConfigReader.h>
 #include <QCoreApplication>
 #include <QKeyEvent>
@@ -104,36 +104,21 @@ namespace MapGenerator {
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         context->swapBuffers(this);
 
+
         auto map = mapGenerator->generateMap();
         scene = std::make_shared<Scene3D>(map, gl, camera);
-
-        auto vertexShader = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, VertexSource);
-        auto fragmentShader = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, FragmentSource);
-        shaderProgram = std::make_shared<ge::gl::Program>(vertexShader, fragmentShader);
         initialized = true;
-        //Draw as wireframe
-        //gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     }
 
     void Renderer::render() {
         const qreal retinaScale = devicePixelRatio();
         gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
-        gl->glClearColor(0.0, 0, 0, 1.0);
+        gl->glClearColor(0, 0, 0, 1.0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        scene->draw(height(), width());
-
-        auto view = camera->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width() / (float) height(), 0.005f,
-                                                100.0f);
-
-        shaderProgram->setMatrix4fv("view", glm::value_ptr(view));
-        shaderProgram->setMatrix4fv("projection", glm::value_ptr(projection));
-
-        shaderProgram->use();
-        vao->bind();
-        gl->glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, nullptr);
+        if(scene != nullptr) {
+            scene->draw(height(), width());
+        }
         context->swapBuffers(this);
 
     }

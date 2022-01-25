@@ -13,15 +13,9 @@ namespace MapGenerator {
 
     }
 
-    int Scene::addFragmentShader(std::string shader) {
-        int id = generateId(fragmentShaders);
-        fragmentShaders[id] = std::move(shader);
-        return id;
-    }
-
-    int Scene::addVertexShader(std::string shader) {
-        int id = generateId(vertexShaders);
-        vertexShaders[id] = std::move(shader);
+    int Scene::addShader(std::shared_ptr<Shader> shader) {
+        int id = generateId(shaders);
+        shaders[id] = std::move(shader);
         return id;
     }
 
@@ -43,7 +37,7 @@ namespace MapGenerator {
         return id;
     }
 
-    void Scene::bindProgram(int id, int modelId) {
+    void Scene::bindProgram(int modelId, int id) {
         if (programs.find(id) == programs.end()) {
             throw std::runtime_error("Program with id " + std::to_string(id) + " does not exist");
         }
@@ -130,6 +124,34 @@ namespace MapGenerator {
             return nullptr;
         }
         return textures[id];
+    }
+
+    std::shared_ptr<Model> Scene::getModel(int id) {
+        if(models.find(id) == models.end()){
+            return nullptr;
+        }
+        return models[id];
+    }
+
+    int Scene::getProgramForModel(int modelId) {
+        if(modelToProgram.find(modelId) == modelToProgram.end()){
+            return -1;
+        }
+        return modelToProgram[modelId];
+    }
+
+    std::tuple<int, int> Scene::getProgram(int programId) {
+        if(programs.find(programId) == programs.end()){
+            return {-1, -1};
+        }
+        return programs[programId];
+    }
+
+    std::shared_ptr<Shader> Scene::getShader(int id) {
+        if(shaders.find(id) == shaders.end()){
+            return nullptr;
+        }
+        return shaders[id];
     }
 
 

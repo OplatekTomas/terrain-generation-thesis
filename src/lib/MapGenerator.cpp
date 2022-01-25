@@ -5,6 +5,7 @@
 #include <MapGenerator.h>
 
 #include <fmt/printf.h>
+#include <shaders/Shaders.h>
 #include <boolinq.h>
 
 using namespace boolinq;
@@ -30,10 +31,15 @@ namespace MapGenerator {
     /// This method will start the generation process. The data will be made available in the scene when ready.
     /// \return
     std::shared_ptr<class Scene> MapGenerator::generateMap() {
-        auto scene = std::make_shared<Scene>();
+        scene = std::make_shared<Scene>();
         auto surface = createSurface();
         auto surfaceId = scene->addModel(surface);
-        std::async(std::launch::async, [&](){
+        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::VertexSource() ,Shader::VERTEX));
+        auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::FragmentSource(), Shader::FRAGMENT));
+        auto programId = scene->createProgram(vertexId, fragmentId);
+        scene->bindProgram(surfaceId, programId);
+
+        /*std::async(std::launch::async, [&](){
             int prevId = -1;
             int currentResolution = options.minTextureResolution;
             while(currentResolution <= options.maxTextureResolution){
@@ -45,9 +51,11 @@ namespace MapGenerator {
                 prevId = texId;
                 currentResolution *= options.textureResolutionStep;
             }
-        });
+        });*/
         return scene;
     }
+
+
 
     std::shared_ptr<Model> MapGenerator::createSurface() {
         auto data = bing->getElevationNormalized(options.lat1, options.lon1, options.lat2, options.lon2, options.terrainResolution);
@@ -92,7 +100,6 @@ namespace MapGenerator {
         textureGenerator = std::make_shared<LandTypeGenerator>(data);
         auto tex = textureGenerator->generateTexture(resolution);
         return tex;
-        return std::shared_ptr<Texture>();
     }
 }
 

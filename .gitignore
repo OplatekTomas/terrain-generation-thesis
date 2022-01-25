@@ -6,5 +6,5 @@ cmake-build-release/
 /src/keys.csv
 src/build-gui-Desktop-Debug
 *.user
-/src/gui/shaders/include/
+/src/lib/shaders/include/
 /src/config.json

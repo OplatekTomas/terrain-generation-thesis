@@ -13,29 +13,80 @@ namespace MapGenerator {
         this->camera = camera;
     }
 
-    void Scene3D::prepareScene() {
 
+    int Scene3D::draw(int height, int width) {
+        auto view = camera->getViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) height / (float) width, 0.005f, 100.0f);
+        for (auto &modelPair: scene->getModels()) {
+            auto modelId = modelPair.first;
+            auto drawCount = useModel(modelId);
+            //Setup shaders/program
+            auto program = useProgram(modelId);
+            //Setup textures - sets up all textures for the model and binds them to the correct texture units
+            useTextures(modelId);
+            //Setup uniforms (right now only view and projection are supported)
+            program->setMatrix4fv("view", glm::value_ptr(view));
+            program->setMatrix4fv("projection", glm::value_ptr(projection));
+            //Draw the model
+            gl->glDrawElements(GL_TRIANGLES, 1, GL_UNSIGNED_INT, nullptr);
+
+        }
+
+        return 0;
     }
 
-    std::shared_ptr<ge::gl::VertexArray> Scene3D::getModel(int id, const Model &model) {
+    int Scene3D::useModel(int id) {
+        auto model = scene->getModel(id);
         if (models.find(id) != models.end()) {
-            return models[id];
+            auto vao = models[id];
+            vao->bind();
+            return model->indices->size();
         }
         auto vao = std::make_shared<ge::gl::VertexArray>();
         vao = std::make_shared<ge::gl::VertexArray>();
         auto vertices = std::make_shared<ge::gl::Buffer>();
         auto indices = std::make_shared<ge::gl::Buffer>();
-        vertices = std::make_shared<ge::gl::Buffer>(model.vertices->size() * sizeof(float), model.vertices->data(),
+        vertices = std::make_shared<ge::gl::Buffer>(model->vertices->size() * sizeof(float), model->vertices->data(),
                                                     GL_STATIC_DRAW);
-        indices = std::make_shared<ge::gl::Buffer>(model.indices->size() * sizeof(int), model.indices->data(),
+        indices = std::make_shared<ge::gl::Buffer>(model->indices->size() * sizeof(int), model->indices->data(),
                                                    GL_STATIC_DRAW);
         vao->addAttrib(vertices, 0, 3, GL_FLOAT, 8 * sizeof(float), 0);
         vao->addAttrib(vertices, 1, 2, GL_FLOAT, 8 * sizeof(float), 3 * sizeof(float));
         vao->addAttrib(vertices, 2, 3, GL_FLOAT, 8 * sizeof(float), 5 * sizeof(float));
         vao->addElementBuffer(indices);
         models[id] = vao;
-        return vao;
+        vao->bind();
+        return model->indices->size();
     }
+
+    void Scene3D::useTextures(int modelId) {
+        auto modelTextures = scene->getTexturesForModel(modelId);
+        if (modelTextures.empty()) {
+            return;
+        }
+        for (size_t i = 0; i < textures.size(); i++) {
+            auto texture = getTexture(modelTextures[i], *scene->getTexture(modelTextures[i]));
+            texture->bind(i);
+        }
+    }
+
+    std::shared_ptr<ge::gl::Program> Scene3D::useProgram(int modelId) {
+        auto program = scene->getProgramForModel(modelId);
+        //The program exists - use it
+        if (programs.find(program) != programs.end()) {
+            programs[program]->use();
+            return programs[program];
+        }
+        //Let's grab the shaders and crate the program
+        auto[vShader, fShader] = scene->getProgram(program);
+        auto vertexShader = getShader(vShader);
+        auto fragShader = getShader(fShader);
+        auto programObject = std::make_shared<ge::gl::Program>(vertexShader, fragShader);
+        programs[program] = programObject;
+        programObject->use();
+        return programObject;
+    }
+
 
     std::shared_ptr<ge::gl::Texture> Scene3D::getTexture(int id, const Texture &tex) {
         if (textures.find(id) != textures.end()) {
@@ -56,39 +107,17 @@ namespace MapGenerator {
         return texture;
     }
 
-    std::shared_ptr<ge::gl::Shader> Scene3D::getShader(int id, const Shader &shader) {
-
-    }
-
-    void Scene3D::useTextures(int modelId){
-        auto modelTextures = scene->getTexturesForModel(modelId);
-        if (modelTextures.empty()) {
-            return;
+    std::shared_ptr<ge::gl::Shader> Scene3D::getShader(int id) {
+        if (shaders.find(id) != shaders.end()) {
+            return shaders[id];
         }
-        for (int i = 0; i < textures.size(); i++) {
-            auto texture = getTexture(modelTextures[i], *scene->getTexture(modelTextures[i]));
-            texture->bind(i);
-        }
-    }
-
-
-    int Scene3D::draw(int height, int width) {
-        auto view = camera->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) height / (float) width, 0.005f, 100.0f);
-
-        for (auto &modelPair: scene->getModels()) {
-            auto modelId = modelPair.first;
-            auto model = modelPair.second;
-            //Setup vao - getModel pushes the data to the GPU if necessary
-            auto vao = getModel(modelId, *model);
-            vao->bind();
-            //Setup textures - sets up all textures for the model and binds them to the correct texture units
-            useTextures(modelId);
-            //Setup shaders/program
-
-        }
-
-        return 0;
+        auto shader = scene->getShader(id);
+        auto shaderType = shader->getType();
+        auto shaderSource = shader->getSource();
+        auto geGLShaderType = shaderType == Shader::VERTEX ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+        auto shaderObj = std::make_shared<ge::gl::Shader>(geGLShaderType, shaderSource);
+        shaders[id] = shaderObj;
+        return shaderObj;
     }
 
 }

@@ -25,6 +25,8 @@ namespace MapGenerator {
         std::shared_ptr<class Scene> generateMap();
 
     private:
+        std::shared_ptr<class Scene> scene;
+
         LibConfig config;
         GeneratorOptions options;
         std::unique_ptr<BingApi> bing;

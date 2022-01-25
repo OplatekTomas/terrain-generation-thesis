@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
 
+project("lib")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CPM_DOWNLOAD_VERSION 0.32.0)
 include(FetchContent)
+
+#Create dummy files so that they at least exist when CMake project is loaded
+file(WRITE shaders/include/shader.fs "")
+file(WRITE shaders/include/shader.vs "")
 
 
 #set correct directory for CPM
@@ -64,6 +70,7 @@ IF(USE_OpenMP)
 ENDIF()
 
 add_library (lib
+        shaders/Shaders.h shaders/include/shader.fs shaders/include/shader.vs
         config/LibConfig.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
         models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
@@ -71,11 +78,21 @@ add_library (lib
         api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h  models/openstreetmap/OSMData.cpp models/openstreetmap/OSMData.h
         models/openstreetmap/MetadataResult.h Helper.h
         common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h
-        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h common/GeneratorOptions.h )
+        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h common/GeneratorOptions.h scene/Shader.cpp scene/Shader.h)
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
 endif()
+
+#Create fake target that calls the shaders/CMakeLists.txt file just before compile time to include the current version
+#of a shader and not the one that would be read during loading of the project
+set(FAKE_TARGET fakeTarget)
+add_custom_target(fakeTarget
+        COMMAND ${CMAKE_COMMAND} -P "shaders/CMakeLists.txt"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        )
+add_dependencies(${PROJECT_NAME} ${FAKE_TARGET})
+
 target_link_libraries(lib PUBLIC cpr::cpr fmt)
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
