@@ -25,7 +25,6 @@ namespace MapGenerator {
         std::shared_ptr<class Scene> generateMap();
 
     private:
-        std::shared_ptr<class Scene> scene;
 
         LibConfig config;
         GeneratorOptions options;
@@ -34,10 +33,13 @@ namespace MapGenerator {
         std::shared_ptr<LandTypeGenerator> textureGenerator;
 
         std::shared_ptr<Model> createSurface();
+
         std::shared_ptr<Texture> createLandTexture(int resolution);
         //std::shared_ptr<std::vector<float>> getMetadata(double lat1, double long1, double lat2, double long2, int resolution);
 
         void generateTexturesAsync(int id);
+
+        std::shared_ptr<Scene> scene;
     };
 }
 

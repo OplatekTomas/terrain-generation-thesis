@@ -22,7 +22,8 @@ namespace MapGenerator{
     class Camera;
     class Scene3D {
     public:
-        Scene3D(std::shared_ptr<Scene> scene, std::shared_ptr<ge::gl::Context> ctx, std::shared_ptr<Camera> camera);
+        Scene3D(const shared_ptr<Scene> &scene, shared_ptr<ge::gl::Context> ctx, shared_ptr<Camera> camera);
+
         int draw(int height, int width);
     private:
         shared_ptr<ge::gl::Context> gl;

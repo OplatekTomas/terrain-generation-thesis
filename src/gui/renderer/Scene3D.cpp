@@ -6,7 +6,7 @@
 #include <Helper.h>
 
 namespace MapGenerator {
-    Scene3D::Scene3D(std::shared_ptr<Scene> scene, std::shared_ptr<ge::gl::Context> ctx,
+    Scene3D::Scene3D(const std::shared_ptr<Scene>& scene, std::shared_ptr<ge::gl::Context> ctx,
                      std::shared_ptr<Camera> camera) {
         this->scene = scene;
         this->gl = ctx;
@@ -42,11 +42,11 @@ namespace MapGenerator {
             vao->bind();
             return model->indices.size();
         }
-
         auto vertices = std::make_shared<ge::gl::Buffer>(model->vertices.size() * sizeof(float), model->vertices.data(),
                                                          GL_STATIC_DRAW);
         auto indices = std::make_shared<ge::gl::Buffer>(model->indices.size() * sizeof(int), model->indices.data(),
                                                         GL_STATIC_DRAW);
+
         buffers.push_back(vertices);
         buffers.push_back(indices);
         auto vao = std::make_shared<ge::gl::VertexArray>();

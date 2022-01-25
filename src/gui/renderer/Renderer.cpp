@@ -71,6 +71,8 @@ namespace MapGenerator {
         options.lon1 = currentPos[1];
         options.lat2 = currentPos[2];
         options.lon2 = currentPos[3];
+        options.minTextureResolution = 64;
+        options.maxTextureResolution = options.minTextureResolution;
         this->mapGenerator = std::make_shared<MapGenerator>(config, options);
         return true;
     }
