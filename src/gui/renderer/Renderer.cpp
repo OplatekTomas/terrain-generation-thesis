@@ -44,7 +44,7 @@ namespace MapGenerator {
         std::vector<double> posHomeL{
                 49.96736286729904, 17.860572894482512,
 
-                49.8718795233479, 17.955027618972238        };
+                49.8718795233479, 17.955027618972238};
 
         std::vector<double> posBrno = {
                 49.19256141221154, 16.594543972568715,
@@ -97,11 +97,8 @@ namespace MapGenerator {
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
 
-        const qreal retinaScale = devicePixelRatio();
 
-        gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
-        gl->glClearColor(0.0, 0, 0, 1.0);
-        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        clearView();
         context->swapBuffers(this);
 
 
@@ -111,16 +108,23 @@ namespace MapGenerator {
     }
 
     void Renderer::render() {
-        const qreal retinaScale = devicePixelRatio();
-        gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
-        gl->glClearColor(0, 0, 0, 1.0);
-        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        clearView();
 
-        if(scene != nullptr) {
+        if (scene != nullptr) {
+            //draw as wireframe
+            gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
             scene->draw(height(), width());
         }
         context->swapBuffers(this);
 
+    }
+
+    void Renderer::clearView() {
+        const qreal retinaScale = devicePixelRatio();
+        gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+        gl->glClearColor(0, 0, 0, 1.0);
+        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
     void Renderer::renderNow() {
@@ -130,6 +134,7 @@ namespace MapGenerator {
         };
         render();
     }
+
 
     bool Renderer::event(QEvent *event) {
         switch (event->type()) {

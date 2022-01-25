@@ -74,6 +74,8 @@ namespace MapGenerator {
         void handleFinished();
 
         void startTextureGeneration(const std::vector<double> &draw, const int &resolution);
+
+        void clearView();
     };
 
 }

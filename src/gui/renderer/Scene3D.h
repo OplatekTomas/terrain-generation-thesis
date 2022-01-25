@@ -32,6 +32,7 @@ namespace MapGenerator{
         map<int, shared_ptr<ge::gl::Texture>> textures;
         map<int, shared_ptr<ge::gl::Program>> programs;
         map<int, shared_ptr<ge::gl::Shader>> shaders;
+        std::vector<shared_ptr<ge::gl::Buffer> > buffers;
 
         shared_ptr<ge::gl::Texture> getTexture(int id, const Texture &texture);
         shared_ptr<ge::gl::Shader> getShader(int id);

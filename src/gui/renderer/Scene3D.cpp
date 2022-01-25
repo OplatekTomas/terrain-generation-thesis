@@ -19,7 +19,6 @@ namespace MapGenerator {
         glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) height / (float) width, 0.005f, 100.0f);
         for (auto &modelPair: scene->getModels()) {
             auto modelId = modelPair.first;
-            auto drawCount = useModel(modelId);
             //Setup shaders/program
             auto program = useProgram(modelId);
             //Setup textures - sets up all textures for the model and binds them to the correct texture units
@@ -27,8 +26,10 @@ namespace MapGenerator {
             //Setup uniforms (right now only view and projection are supported)
             program->setMatrix4fv("view", glm::value_ptr(view));
             program->setMatrix4fv("projection", glm::value_ptr(projection));
+            auto drawCount = useModel(modelId);
+
             //Draw the model
-            gl->glDrawElements(GL_TRIANGLES, 1, GL_UNSIGNED_INT, nullptr);
+            gl->glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, nullptr);
 
         }
 
@@ -42,14 +43,18 @@ namespace MapGenerator {
             vao->bind();
             return model->indices->size();
         }
+
+
+        auto vertices = std::make_shared<ge::gl::Buffer>(model->vertices->size() * sizeof(float),
+                                                         model->vertices->data(),
+                                                         GL_STATIC_DRAW);
+        auto indices = std::make_shared<ge::gl::Buffer>(model->indices->size() * sizeof(int), model->indices->data(),
+                                                        GL_STATIC_DRAW);
+        buffers.push_back(vertices);
+        buffers.push_back(indices);
         auto vao = std::make_shared<ge::gl::VertexArray>();
-        vao = std::make_shared<ge::gl::VertexArray>();
-        auto vertices = std::make_shared<ge::gl::Buffer>();
-        auto indices = std::make_shared<ge::gl::Buffer>();
-        vertices = std::make_shared<ge::gl::Buffer>(model->vertices->size() * sizeof(float), model->vertices->data(),
-                                                    GL_STATIC_DRAW);
-        indices = std::make_shared<ge::gl::Buffer>(model->indices->size() * sizeof(int), model->indices->data(),
-                                                   GL_STATIC_DRAW);
+        vao->bind();
+
         vao->addAttrib(vertices, 0, 3, GL_FLOAT, 8 * sizeof(float), 0);
         vao->addAttrib(vertices, 1, 2, GL_FLOAT, 8 * sizeof(float), 3 * sizeof(float));
         vao->addAttrib(vertices, 2, 3, GL_FLOAT, 8 * sizeof(float), 5 * sizeof(float));

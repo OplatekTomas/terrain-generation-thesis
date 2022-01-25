@@ -33,7 +33,7 @@ void main(){
 	} else {
 		color = vec4(r, r, r, 1.0f);
 	}
-	FragColor = color;
+	FragColor = vec4(1.0);
 
 	//FragColor = color;
 	//FragColor = texture(Texture, TexCoord);
