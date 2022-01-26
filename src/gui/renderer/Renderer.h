@@ -43,30 +43,20 @@ namespace MapGenerator {
 
     protected:
         bool event(QEvent *event) override;
-
+        void renderLoop();
         void exposeEvent(QExposeEvent *event) override;
 
         std::shared_ptr<MapGenerator> mapGenerator;
 
         std::shared_ptr<Scene3D> scene;
+        bool renderLoopRunning = false;
 
         bool initialized;
-        int drawCount;
         QOpenGLContext *context;
         std::shared_ptr<ge::gl::Context> gl;
-        std::shared_ptr<ge::gl::Buffer> indices;
-        std::shared_ptr<ge::gl::Buffer> vertices;
-        std::shared_ptr<ge::gl::Program> shaderProgram;
-        std::shared_ptr<ge::gl::VertexArray> vao;
-        std::shared_ptr<ge::gl::Texture> texture;
-
         std::shared_ptr<Camera> camera;
-        std::vector<double> currentArea;
         QSurfaceFormat surfaceFormat;
-        QFutureWatcher<std::tuple<std::shared_ptr<std::vector<float>>, int>> watcher;
-        int textureResolution;
-        std::shared_ptr<std::vector<float>> textureData;
-
+        std::unique_ptr<QTimer> renderTimer;
         bool setupLib();
 
         void createTexture(const std::vector<float> &data, int width, int height);

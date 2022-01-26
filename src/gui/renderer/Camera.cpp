@@ -12,10 +12,6 @@
 namespace MapGenerator {
     Camera::Camera(Renderer *parent) {
         this->parent = parent;
-        timer = std::unique_ptr<QTimer>(new QTimer(this));
-        timer->setInterval(16);
-        connect(timer.get(), SIGNAL(timeout()), this, SLOT(updateSteps()));
-        timer->start();
         w_down = a_down = s_down = d_down = space_down = ctrl_down =  false;
         position = glm::vec3(0.5,0.7,-0.5);
         up = glm::vec3(0, 1, 0);
@@ -25,7 +21,11 @@ namespace MapGenerator {
         pitch = 0;
         yaw = -90.0f;
         xMove = yMove = 0;
-        moved = false;
+        //Right now the camera and position updates every 1/60th of a second (60fps)
+        timer = std::make_unique<QTimer>(this);
+        timer->setInterval(16);
+        connect(timer.get(), SIGNAL(timeout()), this, SLOT(updateSteps()));
+        timer->start();
     }
 
 
@@ -61,17 +61,12 @@ namespace MapGenerator {
     void Camera::updateSteps() {
         updateKeyboardEvents();
         updateMouseEvents();
-        if (moved) {
-            parent->renderNow();
-        }
-        moved = false;
     }
 
     void Camera::updateMouseEvents() {
         if(xMove == 0 && yMove == 0){
             return;
         }
-        moved = true;
         const auto sensitivity = 0.2f;
 
         yaw += xMove * sensitivity;
@@ -94,28 +89,22 @@ namespace MapGenerator {
         const float stepSize = 0.03f;
         if (w_down) {
             position += front * stepSize;
-            moved = true;
         }
         if (s_down) {
             position -= front * stepSize;
-            moved = true;
         }
         if (d_down) {
             position += right * stepSize;
-            moved = true;
         }
         if (a_down) {
             position -= right * stepSize;
-            moved = true;
         }
         position.y = y;
 
         if (space_down) {
             position += worldUp * stepSize;
-            moved = true;
         } if (ctrl_down) {
             position -= worldUp * stepSize;
-            moved = true;
         }
 
     }

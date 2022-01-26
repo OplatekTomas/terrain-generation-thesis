@@ -20,19 +20,25 @@ namespace MapGenerator {
     class Camera : public QObject {
     Q_OBJECT
     public:
-        Camera(Renderer* parent);
+        Camera(Renderer *parent);
+
         glm::mat4 getViewMatrix();
 
     public slots:
-        void keyEvent(QKeyEvent* event);
+
+        void keyEvent(QKeyEvent *event);
+
         void mouseMoved(QMouseEvent *event);
+
         void updateSteps();
 
     private:
         void updateKeyboardEvents();
+
         void updateMouseEvents();
 
-        Renderer* parent;
+        Renderer *parent;
+        std::unique_ptr<QTimer> timer;
 
         glm::vec3 position;
         glm::vec3 front;
@@ -41,23 +47,14 @@ namespace MapGenerator {
         glm::vec3 worldUp;
         float yaw;
         float pitch;
-
-        std::unique_ptr<QTimer> timer;
         bool w_down;
         bool a_down;
         bool s_down;
         bool d_down;
         bool ctrl_down;
         bool space_down;
-
-
         int xMove;
         int yMove;
-        int mouseCounter;
-
-        bool moved;
-
-
 
     };
 

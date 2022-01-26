@@ -5,6 +5,7 @@
 #include <iostream>
 #include <renderer/Renderer.h>
 #include <geGL/geGL.h>
+#include <memory>
 #include <thread>
 #include <csignal>
 #include "shaders/Shaders.h"
@@ -29,8 +30,8 @@ namespace MapGenerator {
     }
 
     bool Renderer::setupLib() {
-
         bool hasError = false;
+        //TODO: fix this - it can crash when there is no launch argument
         auto config = ConfigReader::read(QCoreApplication::arguments().at(1).toStdString(), &hasError);
         if (hasError) {
             return false;
@@ -71,8 +72,6 @@ namespace MapGenerator {
         options.lon1 = currentPos[1];
         options.lat2 = currentPos[2];
         options.lon2 = currentPos[3];
-        options.minTextureResolution = 64;
-        options.maxTextureResolution = options.minTextureResolution;
         this->mapGenerator = std::make_shared<MapGenerator>(config, options);
         return true;
     }
@@ -88,37 +87,34 @@ namespace MapGenerator {
                 //fail gracefully TODO:actually fail
                 ::raise(SIGSEGV);
             }
+            //Set up the camera
             camera = std::make_shared<Camera>((Renderer *) this);
             connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
         }
-
-        //let's say to the OS that we want to work with this context
+        //set up the context and get ready for rendering
         context->makeCurrent(this);
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
-
-        clearView();
-        context->swapBuffers(this);
-
+        //start rendering loop
+        renderTimer = std::make_unique<QTimer>(this);
+        renderTimer->setInterval(16);
+        connect(renderTimer.get(), SIGNAL(timeout()), this, SLOT(renderNow()));
+        renderTimer->start();
+        initialized = true;
+        //Grab the map and create the scene
 
         auto map = mapGenerator->generateMap();
         scene = std::make_shared<Scene3D>(map, gl, camera);
-        initialized = true;
     }
 
     void Renderer::render() {
         clearView();
-
         if (scene != nullptr) {
-            //draw as wireframe
-            //gl->glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
             scene->draw(height(), width());
         }
         context->swapBuffers(this);
-
     }
 
     void Renderer::clearView() {
@@ -143,9 +139,7 @@ namespace MapGenerator {
                 renderNow();
                 return true;
             case QEvent::Close:
-                if (watcher.isRunning()) {
-                    watcher.future().cancel();
-                }
+                //TODO stop render thread
                 //deleteLater();
                 return QWindow::event(event);
             default:
