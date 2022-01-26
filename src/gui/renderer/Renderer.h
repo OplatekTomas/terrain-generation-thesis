@@ -9,6 +9,8 @@
 #include <geGL/OpenGLContext.h>
 #include <QWidget>
 #include <QSurfaceFormat>
+#include <QScreen>
+
 #include <QWindow>
 #include <QOpenGLContext>
 #include <renderer/Camera.h>
@@ -36,21 +38,19 @@ namespace MapGenerator {
     signals:
 
         void keyPressEvent(QKeyEvent *event) override;
-
         void keyReleaseEvent(QKeyEvent *event) override;
         void mouseMoveEvent(QMouseEvent *) override;
         void resizeEvent(QResizeEvent *) override;
 
     protected:
         bool event(QEvent *event) override;
-        void renderLoop();
         void exposeEvent(QExposeEvent *event) override;
 
         std::shared_ptr<MapGenerator> mapGenerator;
 
         std::shared_ptr<Scene3D> scene;
         bool renderLoopRunning = false;
-
+        double refreshRate;
         bool initialized;
         QOpenGLContext *context;
         std::shared_ptr<ge::gl::Context> gl;
@@ -58,13 +58,6 @@ namespace MapGenerator {
         QSurfaceFormat surfaceFormat;
         std::unique_ptr<QTimer> renderTimer;
         bool setupLib();
-
-        void createTexture(const std::vector<float> &data, int width, int height);
-
-        void handleFinished();
-
-        void startTextureGeneration(const std::vector<double> &draw, const int &resolution);
-
         void clearView();
     };
 

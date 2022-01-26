@@ -75,7 +75,8 @@ namespace MapGenerator {
                 auto yPos = (float) y / fRes;
                 auto xPos = (float) x / fRes;
                 auto height = (float) data->getData()->at(index);
-                model->addVertex(yPos, height, xPos * data->getScale(), yPos, xPos);
+                // the (data scale / 4) is there to put it at the center of the 0-1 range
+                model->addVertex(yPos, height, (xPos * data->getScale()) + (data->getScale() / 4), yPos, xPos);
             }
         }
 

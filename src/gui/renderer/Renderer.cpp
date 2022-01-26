@@ -16,6 +16,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <QGuiApplication>
 
 namespace MapGenerator {
     Renderer::Renderer(QWindow *parent) {
@@ -99,7 +100,10 @@ namespace MapGenerator {
         gl = std::make_shared<ge::gl::Context>();
         //start rendering loop
         renderTimer = std::make_unique<QTimer>(this);
-        renderTimer->setInterval(16);
+        //grab the monitor refresh rate and set the timer to that
+        auto screen = QGuiApplication::primaryScreen();
+        refreshRate = 1000 / screen->refreshRate();
+        renderTimer->setInterval((int)refreshRate);
         connect(renderTimer.get(), SIGNAL(timeout()), this, SLOT(renderNow()));
         renderTimer->start();
         initialized = true;

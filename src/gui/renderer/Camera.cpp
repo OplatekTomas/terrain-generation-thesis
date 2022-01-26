@@ -4,6 +4,7 @@
 
 #include <renderer/Camera.h>
 #include <QKeyEvent>
+#include <QGuiApplication>
 #include <QTimer>
 #include <memory>
 #include <glm/ext/matrix_transform.hpp>
@@ -12,8 +13,8 @@
 namespace MapGenerator {
     Camera::Camera(Renderer *parent) {
         this->parent = parent;
-        w_down = a_down = s_down = d_down = space_down = ctrl_down =  false;
-        position = glm::vec3(0.5,0.7,-0.5);
+        w_down = a_down = s_down = d_down = space_down = ctrl_down = false;
+        position = glm::vec3(0.5, 0.7, -0.5);
         up = glm::vec3(0, 1, 0);
         worldUp = up;
         front = glm::vec3(0, 0, 1);
@@ -23,14 +24,35 @@ namespace MapGenerator {
         xMove = yMove = 0;
         //Right now the camera and position updates every 1/60th of a second (60fps)
         timer = std::make_unique<QTimer>(this);
-        timer->setInterval(16);
+        auto screen = QGuiApplication::primaryScreen();
+        refreshRate = 1000 / screen->refreshRate();
+        idleTimeoutIterations = 4000 / refreshRate;
+        timer->setInterval((int) refreshRate);
         connect(timer.get(), SIGNAL(timeout()), this, SLOT(updateSteps()));
         timer->start();
     }
 
 
     glm::mat4 Camera::getViewMatrix() {
-        return glm::lookAt(this->position, this->position + this->front, this->up);
+        static float pos = 0;
+        glm::vec3 eyeLocal;
+        glm::vec3 centerLocal;
+        glm::vec3 upLocal;
+        if (rotate) {
+            pos += 0.0075;
+            const float radius = 0.5f;
+            float camX = sin(pos) * radius;
+            float camZ = cos(pos) * radius;
+            centerLocal = glm::vec3(0.5, 0.5, 0.5);
+            eyeLocal = glm::vec3(0.5 - camX, 1.0, 0.5 - camZ);
+            upLocal = glm::vec3(0, 1, 0);
+        } else {
+            pos = 0;
+            eyeLocal = position;
+            centerLocal = this->position + this->front;
+            upLocal = this->up;
+        }
+        return glm::lookAt(eyeLocal, centerLocal, upLocal);
     }
 
     void Camera::keyEvent(QKeyEvent *event) {
@@ -59,13 +81,24 @@ namespace MapGenerator {
     }
 
     void Camera::updateSteps() {
-        updateKeyboardEvents();
-        updateMouseEvents();
+        static int iterations = 0;
+        auto keyboardMoved = updateKeyboardEvents();
+        auto mouseMoved = updateMouseEvents();
+        if (keyboardMoved || mouseMoved) {
+            iterations = 0;
+            rotate = false;
+        } else {
+            iterations++;
+            if (iterations > idleTimeoutIterations) {
+                iterations = 0;
+                rotate = true;
+            }
+        }
     }
 
-    void Camera::updateMouseEvents() {
-        if(xMove == 0 && yMove == 0){
-            return;
+    bool Camera::updateMouseEvents() {
+        if (xMove == 0 && yMove == 0) {
+            return false;
         }
         const auto sensitivity = 0.2f;
 
@@ -82,9 +115,10 @@ namespace MapGenerator {
         // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         right = glm::normalize(glm::cross(front, worldUp));
         up = glm::normalize(glm::cross(right, front));
+        return true;
     }
 
-    void Camera::updateKeyboardEvents() {
+    bool Camera::updateKeyboardEvents() {
         auto y = position.y;
         const float stepSize = 0.03f;
         if (w_down) {
@@ -103,10 +137,11 @@ namespace MapGenerator {
 
         if (space_down) {
             position += worldUp * stepSize;
-        } if (ctrl_down) {
+        }
+        if (ctrl_down) {
             position -= worldUp * stepSize;
         }
-
+        return w_down || s_down || d_down || a_down || space_down || ctrl_down;
     }
 
     void Camera::mouseMoved(QMouseEvent *event) {

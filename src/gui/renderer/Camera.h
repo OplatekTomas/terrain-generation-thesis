@@ -33,13 +33,14 @@ namespace MapGenerator {
         void updateSteps();
 
     private:
-        void updateKeyboardEvents();
+        bool updateKeyboardEvents();
 
-        void updateMouseEvents();
-
+        bool updateMouseEvents();
+        bool rotate = false;
+        double refreshRate;
+        int idleTimeoutIterations;
         Renderer *parent;
         std::unique_ptr<QTimer> timer;
-
         glm::vec3 position;
         glm::vec3 front;
         glm::vec3 up;
