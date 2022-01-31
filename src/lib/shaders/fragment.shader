@@ -22,7 +22,7 @@ void main(){
 	} else if (equals(r, 2.0)){ //Pixel is used as a water
 		color = vec4(0.0, 0.0, 0.5, 1.0);
 	} else if (equals(r, 3.0)){ //Pixel is used as a field
-		color = vec4(0.5, 0.5, 0.0, 1.0);
+		color = vec4(0.96, 0.835, 0.013, 1.0);
 	} else if (equals(r, 4.0)){ //Pixel is used as a road
 		color = vec4(0.7, 0.32, 0.08, 1.0);
 	} else if (equals(r, 5.0)){ //Pixel is used as a building

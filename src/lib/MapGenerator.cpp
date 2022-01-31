@@ -38,6 +38,8 @@ namespace MapGenerator {
         auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::FragmentSource(), Shader::FRAGMENT));
         auto programId = scene->createProgram(vertexId, fragmentId);
         scene->bindProgram(surfaceId, programId);
+        //generateTexturesAsync(surfaceId);
+
         std::thread t1(&MapGenerator::generateTexturesAsync, this, surfaceId);
         t1.detach();
         return scene;
@@ -76,7 +78,7 @@ namespace MapGenerator {
                 auto xPos = (float) x / fRes;
                 auto height = (float) data->getData()->at(index);
                 // the (data scale / 4) is there to put it at the center of the 0-1 range
-                model->addVertex(yPos, height, (xPos * data->getScale()) + (data->getScale() / 4), yPos, xPos);
+                model->addVertex(yPos, height, (xPos * data->getScale()) , yPos, xPos);
             }
         }
 
@@ -96,6 +98,12 @@ namespace MapGenerator {
         //Texture generator already exists and has all metadata pulled from the API - no need to do it again.
         if (textureGenerator != nullptr) {
             return textureGenerator->generateTexture(resolution);
+        }
+        if(options.lat1 > options.lat2) {
+            std::swap(options.lat1, options.lat2);
+        }
+        if(options.lon1 > options.lon2) {
+            std::swap(options.lon1, options.lon2);
         }
         auto data = osm->getMetadata(options.lat1, options.lon1, options.lat2, options.lon2);
         if (data == nullptr) {

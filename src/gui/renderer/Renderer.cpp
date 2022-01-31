@@ -67,7 +67,13 @@ namespace MapGenerator {
                 49.23019297366651, 16.565201713369547, 49.171611576900936, 16.71542469343281
         };
 
-        auto currentPos = posHome;
+
+        std::vector<double> posBrnoMar{
+                49.22180961852175, 16.709822931409207,
+                49.21089342837836, 16.720446925933608
+        };
+
+        auto currentPos = posBrnoMar;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];

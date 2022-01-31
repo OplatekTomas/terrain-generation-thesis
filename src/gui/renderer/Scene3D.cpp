@@ -66,7 +66,7 @@ namespace MapGenerator {
             return;
         }
         for (size_t i = 0; i < modelTextures.size(); i++) {
-            auto texture = getTexture(modelTextures[i], *scene->getTexture(modelTextures[i]));
+            auto texture = getTexture(modelTextures[i], scene->getTexture(modelTextures[i]));
             texture->bind(i);
         }
     }
@@ -89,16 +89,15 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<ge::gl::Texture> Scene3D::getTexture(int id, const Texture &tex) {
+    std::shared_ptr<ge::gl::Texture> Scene3D::getTexture(int id, const std::shared_ptr<Texture> &tex) {
         if (textures.find(id) != textures.end()) {
             return textures[id];
         }
-
         auto texture = std::make_shared<ge::gl::Texture>();
-        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, tex.getWidth(), tex.getHeight());
+        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, tex->getWidth(), tex->getHeight());
         texture->bind(GL_TEXTURE_2D);
-        texture->setData2D(tex.getData(), GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D, 0, 0, tex.getWidth(),
-                           tex.getHeight());
+        texture->setData2D(tex->getData(), GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D, 0, 0, tex->getWidth(),
+                           tex->getHeight());
         //texture->generateMipmap();
         texture->texParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
         texture->texParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
