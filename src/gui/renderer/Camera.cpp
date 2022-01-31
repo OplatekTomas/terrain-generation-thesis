@@ -40,11 +40,11 @@ namespace MapGenerator {
         glm::vec3 upLocal;
         if (rotate) {
             pos += 0.0075;
-            const float radius = 0.5f;
+            const float radius = 0.7f;
             float camX = sin(pos) * radius;
             float camZ = cos(pos) * radius;
             centerLocal = glm::vec3(0.5, 0.5, 0.5);
-            eyeLocal = glm::vec3(0.5 - camX, 1.0, 0.5 - camZ);
+            eyeLocal = glm::vec3(0.5 - camX, 0.65, 0.5 - camZ);
             upLocal = glm::vec3(0, 1, 0);
         } else {
             pos = 0;

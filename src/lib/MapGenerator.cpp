@@ -71,14 +71,22 @@ namespace MapGenerator {
         //Let's create the model
         auto fRes = (float) res;
         auto iRes = res;
+        auto changeY = data->getScale() > 1;
+        auto scale = changeY ? 1/data->getScale() : data->getScale();
+
+
         for (auto x = 0; x <= res; x++) {
             for (auto y = 0; y <= res; y++) {
                 auto index = (x * (res + 1) + y);
                 auto yPos = (float) y / fRes;
                 auto xPos = (float) x / fRes;
                 auto height = (float) data->getData()->at(index);
-                // the (data scale / 4) is there to put it at the center of the 0-1 range
-                model->addVertex(yPos, height, (xPos * data->getScale()) , yPos, xPos);
+                // the (scale / 4) is there to put it at the center of the 0-1 range
+                if(changeY){
+                    model->addVertex((yPos * scale) + (scale / 4), height, xPos , yPos, xPos);
+                }else{
+                    model->addVertex(yPos, height, (xPos * scale) + (scale / 4) , yPos, xPos);
+                }
             }
         }
 
