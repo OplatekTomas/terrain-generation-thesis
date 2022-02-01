@@ -26,6 +26,7 @@ namespace MapGenerator {
                 QWindow::OpenGLSurface); //this needs to be set otherwise makeCurrent and other gl context related functions will fail
         surfaceFormat.setVersion(4, 5);
         surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+        surfaceFormat.setDepthBufferSize(8);
         setupLib();
 
     }
@@ -73,7 +74,12 @@ namespace MapGenerator {
                 49.20984129157041, 16.72238587076677
         };
 
-        auto currentPos = posBrnoMar;
+        std::vector<double> brazil{
+                -22.940051163948276, -43.226979529278665,
+                -22.96603878773571, -43.18380161954447
+        };
+
+        auto currentPos = brazil;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];
@@ -89,6 +95,7 @@ namespace MapGenerator {
         if (!context) {
             context = new QOpenGLContext(this);
             context->setFormat(surfaceFormat);
+
             bool success = context->create();
             if (!success) {
                 //fail gracefully TODO:actually fail
@@ -104,6 +111,8 @@ namespace MapGenerator {
         context->makeCurrent(this);
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
+        gl->glEnable(GL_DEPTH_TEST);
+
         //start rendering loop
         renderTimer = std::make_unique<QTimer>(this);
         //grab the monitor refresh rate and set the timer to that
