@@ -93,24 +93,24 @@ vec3 getH(int i, int j){
     vec3 A = Normal_CS_in[i] + Normal_CS_in[j];
     vec3 B = WorldPos_CS_in[j] - WorldPos_CS_in[i];
     float v = dot(B, A) / dot(B,B);
-    return A - 2 * v * B;
+    return A - 2.0 * v * B;
 }
 
 
 void CalcNormals(){
     //Create normals
-    oPatch.Normal_B200 = Normal_CS_in[2];
-    oPatch.Normal_B020 = Normal_CS_in[0];
-    oPatch.Normal_B002 = Normal_CS_in[1];
+    oPatch.Normal_B200 = Normal_CS_in[0];
+    oPatch.Normal_B020 = Normal_CS_in[1];
+    oPatch.Normal_B002 = Normal_CS_in[2];
 
     vec3 h110 = getH(0,1);
-    oPatch.Normal_B110 = h110 / normalize(h110);
+    oPatch.Normal_B110 = normalize(h110);
 
     vec3 h011 = getH(1,2);
-    oPatch.Normal_B011 = h011 / normalize(h011);
+    oPatch.Normal_B011 =  normalize(h011);
 
     vec3 h101 = getH(2,0);
-    oPatch.Normal_B101 = h101 / normalize(h101);
+    oPatch.Normal_B101 = normalize(h101);
 
 }
 

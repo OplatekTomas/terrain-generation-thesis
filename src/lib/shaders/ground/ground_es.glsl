@@ -72,15 +72,13 @@ void main()
     oPatch.WorldPos_B012 * 3.0 * u * vPow2 +
     oPatch.WorldPos_B111 * 6.0 * w * u * v;
 
-
     Normal_FS_in =
     uPow2 * oPatch.Normal_B200 +
-    vPow2 * oPatch.Normal_B020+
+    vPow2 * oPatch.Normal_B020 +
     wPow2 * oPatch.Normal_B002 +
     u * v * oPatch.Normal_B110 +
     u * w * oPatch.Normal_B101 +
     v * w * oPatch.Normal_B011;
-
 
   //  Normal_FS_in = interpolate3D(oPatch.Normal[0], oPatch.Normal[1], oPatch.Normal[2]);
 
