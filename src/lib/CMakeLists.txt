@@ -8,10 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CPM_DOWNLOAD_VERSION 0.32.0)
 include(FetchContent)
 
-#Create dummy files so that they at least exist when CMake project is loaded
-file(WRITE shaders/include/shader.fs "")
-file(WRITE shaders/include/shader.vs "")
-
 
 #set correct directory for CPM
 if(CPM_SOURCE_CACHE)
@@ -69,8 +65,23 @@ IF(USE_OpenMP)
     ENDIF()
 ENDIF()
 
+
+#Create dummy files so that they at least exist when CMake project is loaded
+file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.glsl)
+set(SHADERS_DST_FILES "")
+foreach(file ${SHADERS_SRC_FILES})
+    #Get file name after shaders dir
+    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/shaders/" "" PATH_IN_SHADERS_DIR "${file}")
+    #Create a dummy file
+    set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.shader")
+    message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
+    file(WRITE "${DUMMY_FILE}" "")
+    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h)
+endforeach()
+message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
+
 add_library (lib
-        shaders/Shaders.h shaders/include/shader.fs shaders/include/shader.vs
+        shaders/Shaders.h ${SHADERS_DST_FILES}
         config/LibConfig.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
         models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
@@ -78,7 +89,9 @@ add_library (lib
         api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h  models/openstreetmap/OSMData.cpp models/openstreetmap/OSMData.h
         models/openstreetmap/MetadataResult.h Helper.h
         common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h
-        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h common/GeneratorOptions.h scene/Shader.cpp scene/Shader.h)
+        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h common/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
+        scene/Vertex.h scene/Vertex.cpp
+        )
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)

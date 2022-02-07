@@ -73,7 +73,12 @@ namespace MapGenerator {
                 49.20984129157041, 16.72238587076677
         };
 
-        auto currentPos = posBrnoMar;
+        std::vector<double> posBrazil{
+                -22.942729532432153, -43.248409703222464,
+                -22.980064213095194, -43.16607762873154
+        };
+
+        auto currentPos = posBrazil;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];

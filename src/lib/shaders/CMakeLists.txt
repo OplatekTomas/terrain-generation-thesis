@@ -1,8 +1,12 @@
 
 #Used to transfer shaders files to custom files that can be included in C++ code by Shaders.h
 
-file(READ shaders/fragment.shader FRAG_SHADER)
-file(WRITE shaders/include/shader.fs "R\"=====(${FRAG_SHADER})=====\"")
-
-file(READ shaders/vertex.shader VERTEX_SHADER)
-file(WRITE shaders/include/shader.vs "R\"=====(${VERTEX_SHADER})=====\"")
+file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.glsl)
+foreach(file ${SHADERS_SRC_FILES})
+    #Get file name after shaders dir
+    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/shaders/" "" PATH_IN_SHADERS_DIR "${file}")
+    #Fill the file with shader data
+    set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.shader")
+    file(READ "${file}" DUMMY_CONTENT)
+    file(WRITE "${DUMMY_FILE}" "R\"=====(${DUMMY_CONTENT})=====\"")
+endforeach()

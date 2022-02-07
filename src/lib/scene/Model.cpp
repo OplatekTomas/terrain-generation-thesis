@@ -9,15 +9,17 @@ namespace MapGenerator {
         vertices = std::vector<float>();
         indices = std::vector<int>();
     }
-    void Model::addVertex(float v1, float v2, float v3, float t1, float t2, float n1, float n2, float n3) {
-        vertices.push_back(v1);
-        vertices.push_back(v2);
-        vertices.push_back(v3);
+
+    void Model::addVertex(Vertex v, Vertex n ,float t1, float t2) {
+        vertices.push_back(v.x);
+        vertices.push_back(v.y);
+        vertices.push_back(v.z);
+        vertices.push_back(n.x);
+        vertices.push_back(n.y);
+        vertices.push_back(n.z);
         vertices.push_back(t1);
         vertices.push_back(t2);
-        vertices.push_back(n1);
-        vertices.push_back(n2);
-        vertices.push_back(n3);
+
     }
 
     void Model::addIndex(int i1, int i2, int i3) {

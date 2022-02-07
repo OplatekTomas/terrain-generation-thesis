@@ -11,6 +11,7 @@
 #include <scene/Model.h>
 #include <scene/Shader.h>
 #include <scene/Texture.h>
+#include <scene/Program.h>
 #include <stdexcept>
 
 namespace MapGenerator{
@@ -23,7 +24,7 @@ namespace MapGenerator{
         int addShader(std::shared_ptr<Shader> shader);
         void bindTexture(int id, int modelId);
         void bindProgram(int id, int modelId);
-        int createProgram(int vertexShaderId, int fragmentShaderId);
+        int createProgram(std::shared_ptr<Program> program);
         void unbindProgram(int id, int modelId);
         void unbindTexture(int id, int modelId);
 
@@ -32,7 +33,7 @@ namespace MapGenerator{
         std::shared_ptr<Texture> getTexture(int id);
         std::shared_ptr<Model> getModel(int id);
         int getProgramForModel(int modelId);
-        std::tuple<int, int> getProgram(int id);
+        std::shared_ptr<Program> getProgram(int id);
         std::shared_ptr<Shader> getShader(int id);
     private:
         template<typename T> int generateId(std::map<int, T> &map);
@@ -42,7 +43,7 @@ namespace MapGenerator{
         std::map<int, std::vector<int>> modelToTexture;
         std::map<int, int> modelToProgram;
         std::map<int, std::shared_ptr<class Shader>> shaders;
-        std::map<int, std::tuple<int, int>> programs;
+        std::map<int, std::shared_ptr<class Program>> programs;
     };
 };
 

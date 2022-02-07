@@ -31,9 +31,10 @@ namespace MapGenerator {
         return id;
     }
 
-    int Scene::createProgram(int vertexShaderId, int fragmentShaderId) {
+
+    int Scene::createProgram(std::shared_ptr<Program> program) {
         int id = generateId(programs);
-        programs[id] = std::make_tuple(vertexShaderId, fragmentShaderId);
+        programs[id] = program;
         return id;
     }
 
@@ -62,7 +63,7 @@ namespace MapGenerator {
 
     template<typename T>
     int Scene::generateId(std::map<int, T> &map) {
-        int id = 0;
+        static int id = 0;
 #pragma omp critical
         {
             while (map.find(id) != map.end()) {
@@ -140,9 +141,9 @@ namespace MapGenerator {
         return modelToProgram[modelId];
     }
 
-    std::tuple<int, int> Scene::getProgram(int programId) {
+    std::shared_ptr<Program> Scene::getProgram(int programId) {
         if(programs.find(programId) == programs.end()){
-            return {-1, -1};
+            return nullptr;
         }
         return programs[programId];
     }
@@ -153,6 +154,7 @@ namespace MapGenerator {
         }
         return shaders[id];
     }
+
 
 
 }

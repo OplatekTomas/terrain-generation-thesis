@@ -14,7 +14,11 @@ namespace MapGenerator {
     public:
         enum ShaderType {
             VERTEX,
-            FRAGMENT
+            FRAGMENT,
+            GEOMETRY,
+            TESS_CONTROL,
+            TESS_EVALUATION,
+            COMPUTE
         };
 
         Shader(std::string code, ShaderType type);
