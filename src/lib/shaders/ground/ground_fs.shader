@@ -35,7 +35,6 @@ void main(){
     } else {
         color = vec4(r, r, r, 1.0f);
     }
-    float shading =  1 - ((1 - dot(Normal_FS_in, vec3(0.0, -1.0, 0.0))) * 1.0);
-    //FragColor = color * vec4(vec3(shading), 1.0);
-    FragColor = vec4(vec3(shading), 1.0);
+    float shading =  1 - ((1 - dot(Normal_FS_in, vec3(0.0, -1.0, 0.0))) * 4.0);
+    FragColor = color * vec4(vec3(shading), 1.0);
 }

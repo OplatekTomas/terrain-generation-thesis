@@ -67,13 +67,13 @@ ENDIF()
 
 
 #Create dummy files so that they at least exist when CMake project is loaded
-file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.glsl)
+file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.shader)
 set(SHADERS_DST_FILES "")
 foreach(file ${SHADERS_SRC_FILES})
     #Get file name after shaders dir
     string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/shaders/" "" PATH_IN_SHADERS_DIR "${file}")
     #Create a dummy file
-    set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.shader")
+    set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
     file(WRITE "${DUMMY_FILE}" "")
     set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h)

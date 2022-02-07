@@ -9,24 +9,24 @@
 
 const char *main_vs =
 
-#include <shaders/include/common/main_vs.glsl.shader>
+#include <shaders/include/common/main_vs.shader.out>
         ;
 
 const char *ground_fs =
 
-#include <shaders/include/ground/ground_fs.glsl.shader>
+#include <shaders/include/ground/ground_fs.shader.out>
         ;
 
 const char *buildings_fs =
 
-#include <shaders/include/buildings/buildings_fs.glsl.shader>
+#include <shaders/include/buildings/buildings_fs.shader.out>
         ;
 
 const char *ground_tcs =
-#include <shaders/include/ground/ground_tcs.glsl.shader>
+#include <shaders/include/ground/ground_tcs.shader.out>
         ;
 const char * ground_es =
-#include <shaders/include/ground/ground_es.glsl.shader>
+#include <shaders/include/ground/ground_es.shader.out>
         ;
 
 class Shaders {

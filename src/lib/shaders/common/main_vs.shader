@@ -12,5 +12,5 @@ uniform mat4 projection;
 void main(){
 	WorldPos_CS_in = aPos;
 	TexCoord_CS_in = aTexCoord;
-	Normal_CS_in = aNormal;
+	Normal_CS_in = normalize(aNormal);
 }
