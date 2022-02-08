@@ -5,8 +5,8 @@
 #pragma once
 
 #include <api/ApiBase.h>
-#include <models/openstreetmap/MetadataResult.h>
-#include <models/openstreetmap/OSMData.h>
+#include <api/models/openstreetmap/MetadataResult.h>
+#include <api/models/openstreetmap/OSMData.h>
 
 namespace MapGenerator{
     class OpenStreetMapApi : ApiBase {

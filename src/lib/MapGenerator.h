@@ -6,11 +6,11 @@
 
 #include <config/LibConfig.h>
 #include <api/BingApi.h>
-#include <common/LandTypeGenerator.h>
+#include <generators/landtype/LandTypeGenerator.h>
 #include <api/OpenStreetMapApi.h>
-#include <models/openstreetmap/MetadataResult.h>
+#include <api/models/openstreetmap/MetadataResult.h>
 #include <scene/Scene.h>
-#include <common/GeneratorOptions.h>
+#include <config/GeneratorOptions.h>
 #include <iostream>
 #include <future>
 #include <thread>

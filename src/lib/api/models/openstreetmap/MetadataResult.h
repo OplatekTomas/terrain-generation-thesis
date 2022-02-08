@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-#include <JsonHelper.h>
+#include "nlohmann/json.hpp"
+#include "JsonHelper.h"
 
 namespace MapGenerator {
     using nlohmann::json;

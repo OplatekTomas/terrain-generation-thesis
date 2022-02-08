@@ -2,9 +2,9 @@
 // Created by tomas on 03.11.21.
 //
 
-#include <common/AreaOnMap.h>
-#include <boolinq.h>
-#include <Helper.h>
+#include "AreaOnMap.h"
+#include "boolinq.h"
+#include "Helper.h"
 
 namespace MapGenerator {
 

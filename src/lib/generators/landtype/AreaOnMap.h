@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <models/openstreetmap/MetadataResult.h>
+#include <api/models/openstreetmap/MetadataResult.h>
 #include <bits/stdc++.h>
 
 

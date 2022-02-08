@@ -76,7 +76,7 @@ foreach(file ${SHADERS_SRC_FILES})
     set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
     file(WRITE "${DUMMY_FILE}" "")
-    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h)
+    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h)
 endforeach()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
 
@@ -84,12 +84,12 @@ add_library (lib
         shaders/Shaders.h ${SHADERS_DST_FILES}
         config/LibConfig.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
-        models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
+        api/models/bing/ElevationResult.h api/ApiBase.cpp api/ApiBase_impl.h config/ConfigReader.cpp
         config/ConfigReader.h JsonHelper.h MapGenerator.cpp MapGenerator.h
-        api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h models/bing/ElevationData.cpp models/bing/ElevationData.h  models/openstreetmap/OSMData.cpp models/openstreetmap/OSMData.h
-        models/openstreetmap/MetadataResult.h Helper.h
-        common/LandTypeGenerator.cpp common/LandTypeGenerator.h common/AreaOnMap.cpp common/AreaOnMap.h
-        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h common/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
+        api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h api/models/bing/ElevationData.cpp api/models/bing/ElevationData.h api/models/openstreetmap/OSMData.cpp api/models/openstreetmap/OSMData.h
+        api/models/openstreetmap/MetadataResult.h Helper.h
+        generators/landtype/LandTypeGenerator.cpp generators/landtype/LandTypeGenerator.h generators/landtype/AreaOnMap.cpp generators/landtype/AreaOnMap.h
+        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h config/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
         scene/Vertex.h scene/Vertex.cpp
         )
 

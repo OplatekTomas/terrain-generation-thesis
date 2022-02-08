@@ -2,7 +2,7 @@
 // Created by tomas on 16.10.21.
 //
 
-#include <models/bing/ElevationData.h>
+#include "ElevationData.h"
 
 #include <utility>
 

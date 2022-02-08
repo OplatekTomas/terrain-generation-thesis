@@ -6,8 +6,8 @@
 #pragma once
 
 #include <api/ApiBase.h>
-#include <models/bing/ElevationResult.h>
-#include <models/bing/ElevationData.h>
+#include <api/models/bing/ElevationResult.h>
+#include <api/models/bing/ElevationData.h>
 
 namespace MapGenerator {
     class BingApi : ApiBase {

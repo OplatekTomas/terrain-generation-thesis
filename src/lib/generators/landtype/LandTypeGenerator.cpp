@@ -3,7 +3,7 @@
 // Created by tomas on 03.11.21.
 //
 
-#include <common/LandTypeGenerator.h>
+#include "LandTypeGenerator.h"
 #include <iostream>
 #include <utility>
 #include <omp.h>

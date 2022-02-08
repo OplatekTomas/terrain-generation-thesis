@@ -2,7 +2,7 @@
 // Created by tomas on 14.10.21.
 //
 
-#include <models/openstreetmap/MetadataResult.h>
+#include <api/models/openstreetmap/MetadataResult.h>
 #include "OpenStreetMapApi.h"
 #include <iostream>
 #include <fmt/format.h>

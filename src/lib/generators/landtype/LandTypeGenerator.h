@@ -8,10 +8,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <models/openstreetmap/MetadataResult.h>
+#include <api/models/openstreetmap/MetadataResult.h>
 #include <boolinq.h>
-#include <common/AreaOnMap.h>
-#include <models/openstreetmap/OSMData.h>
+#include <generators/landtype/AreaOnMap.h>
+#include <api/models/openstreetmap/OSMData.h>
 #include <scene/Scene.h>
 
 namespace MapGenerator {

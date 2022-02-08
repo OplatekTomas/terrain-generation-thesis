@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <models/openstreetmap/MetadataResult.h>
+#include "MetadataResult.h"
 #include <memory>
 #include <vector>
 namespace MapGenerator{

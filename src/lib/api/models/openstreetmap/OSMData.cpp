@@ -2,9 +2,9 @@
 // Created by tomas on 18.11.21.
 //
 
-#include <models/openstreetmap/OSMData.h>
-#include <boolinq.h>
-#include <Helper.h>
+#include "OSMData.h"
+#include "boolinq.h"
+#include "Helper.h"
 
 namespace MapGenerator {
 

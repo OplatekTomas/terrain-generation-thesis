@@ -15,7 +15,7 @@
 #include <csignal>
 #include <cmath>
 #include <iostream>
-#include <models/bing/ElevationData.h>
+#include <api/models/bing/ElevationData.h>
 
 #define _USE_MATH_DEFINES
 
