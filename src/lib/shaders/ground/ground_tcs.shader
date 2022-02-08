@@ -5,9 +5,9 @@ layout (vertices = 1) out;
 
 
 // attributes of the input CPs
-in vec3 WorldPos_CS_in[];
-in vec2 TexCoord_CS_in[];
-in vec3 Normal_CS_in[];
+in vec3 WorldPos_VS_Out[];
+in vec2 TexCoord_VS_Out[];
+in vec3 Normal_VS_Out[];
 
 struct OutputPatch{
     vec3 WorldPos030;
@@ -43,9 +43,9 @@ vec3 ProjectToPlane(vec3 Point, vec3 PlanePoint, vec3 PlaneNormal){
 
 void CalcPositions(){
     // The original vertices stay the same
-    patchData.WorldPos030 = WorldPos_CS_in[0];
-    patchData.WorldPos003 = WorldPos_CS_in[1];
-    patchData.WorldPos300 = WorldPos_CS_in[2];
+    patchData.WorldPos030 = WorldPos_VS_Out[0];
+    patchData.WorldPos003 = WorldPos_VS_Out[1];
+    patchData.WorldPos300 = WorldPos_VS_Out[2];
 
     // Edges are names according to the opposing vertex
     vec3 Edge300 = patchData.WorldPos003 - patchData.WorldPos030;
@@ -61,12 +61,12 @@ void CalcPositions(){
     patchData.WorldPos120 = patchData.WorldPos300 + Edge003 * 2.0 / 3.0;
 
     // Project each midpoint on the plane defined by the nearest vertex and its normal
-    patchData.WorldPos021 = ProjectToPlane(patchData.WorldPos021, patchData.WorldPos030, Normal_CS_in[0]);
-    patchData.WorldPos012 = ProjectToPlane(patchData.WorldPos012, patchData.WorldPos003, Normal_CS_in[1]);
-    patchData.WorldPos102 = ProjectToPlane(patchData.WorldPos102, patchData.WorldPos003, Normal_CS_in[1]);
-    patchData.WorldPos201 = ProjectToPlane(patchData.WorldPos201, patchData.WorldPos300, Normal_CS_in[2]);
-    patchData.WorldPos210 = ProjectToPlane(patchData.WorldPos210, patchData.WorldPos300, Normal_CS_in[2]);
-    patchData.WorldPos120 = ProjectToPlane(patchData.WorldPos120, patchData.WorldPos030, Normal_CS_in[0]);
+    patchData.WorldPos021 = ProjectToPlane(patchData.WorldPos021, patchData.WorldPos030, Normal_VS_Out[0]);
+    patchData.WorldPos012 = ProjectToPlane(patchData.WorldPos012, patchData.WorldPos003, Normal_VS_Out[1]);
+    patchData.WorldPos102 = ProjectToPlane(patchData.WorldPos102, patchData.WorldPos003, Normal_VS_Out[1]);
+    patchData.WorldPos201 = ProjectToPlane(patchData.WorldPos201, patchData.WorldPos300, Normal_VS_Out[2]);
+    patchData.WorldPos210 = ProjectToPlane(patchData.WorldPos210, patchData.WorldPos300, Normal_VS_Out[2]);
+    patchData.WorldPos120 = ProjectToPlane(patchData.WorldPos120, patchData.WorldPos030, Normal_VS_Out[0]);
 
     // Handle the center
     vec3 Center = (patchData.WorldPos003 + patchData.WorldPos030 + patchData.WorldPos300) / 3.0;
@@ -81,9 +81,9 @@ void main(){
     float tessLevel = 20.0;
     // Set the control points of the output patch
     for (int i = 0; i < 3; i++) {
-        patchData.Normal[i] = Normal_CS_in[i];
-        patchData.WorldPos[i] = WorldPos_CS_in[i];
-        patchData.TexCoord[i] = TexCoord_CS_in[i];
+        patchData.Normal[i] = Normal_VS_Out[i];
+        patchData.WorldPos[i] = WorldPos_VS_Out[i];
+        patchData.TexCoord[i] = TexCoord_VS_Out[i];
     }
 
     CalcPositions();

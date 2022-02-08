@@ -21,6 +21,9 @@ namespace MapGenerator {
             auto modelId = modelPair.first;
             //Setup shaders/program
             auto program = useProgram(modelId);
+            if (program == nullptr) {
+                continue;
+            }
             //Setup textures - sets up all textures for the model and binds them to the correct texture units
             useTextures(modelId);
             //Setup uniforms (right now only view and projection are supported)
@@ -91,6 +94,9 @@ namespace MapGenerator {
         }
         //Let's grab the shaders and crate the program
         auto program = scene->getProgram(programId);
+        if(program == nullptr){
+            return nullptr;
+        }
         std::vector<std::shared_ptr<ge::gl::Shader>> shaderObjects;
         for(auto shaderId : program->getShaders()){
             auto shader = getShader(shaderId);

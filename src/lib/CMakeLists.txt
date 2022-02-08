@@ -38,6 +38,11 @@ CPMAddPackage(
         GITHUB_REPOSITORY libcpr/cpr
         GIT_TAG 290fbaff7321b3df66c4ac5b039815f25e4333bb
 )
+CPMAddPackage(
+        NAME poly2tri
+        GITHUB_REPOSITORY jhasse/poly2tri
+        GIT_TAG 8b5fa15800ab8ef44ed7b0ec7061e907d5e49059
+)
 
 
 CPMAddPackage("gh:fmtlib/fmt#8.0.1")
@@ -61,7 +66,7 @@ IF(USE_OpenMP)
     FIND_PACKAGE(OpenMP)
     IF(OPENMP_FOUND)
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} ")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -O3")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     ENDIF()
 ENDIF()
 
@@ -76,7 +81,7 @@ foreach(file ${SHADERS_SRC_FILES})
     set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
     file(WRITE "${DUMMY_FILE}" "")
-    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h)
+    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h)
 endforeach()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
 
@@ -106,7 +111,7 @@ add_custom_target(fakeTarget
         )
 add_dependencies(${PROJECT_NAME} ${FAKE_TARGET})
 
-target_link_libraries(lib PUBLIC cpr::cpr fmt)
+target_link_libraries(lib PUBLIC cpr::cpr fmt poly2tri)
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(lib PUBLIC ${boolinq_SOURCE_DIR})

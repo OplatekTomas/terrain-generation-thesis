@@ -31,15 +31,17 @@ namespace MapGenerator {
         std::unique_ptr<BingApi> bing;
         std::unique_ptr<OpenStreetMapApi> osm;
         std::shared_ptr<LandTypeGenerator> textureGenerator;
-
-        std::shared_ptr<Model> createSurface();
-
-        std::shared_ptr<Texture> createLandTexture(int resolution);
-        //std::shared_ptr<std::vector<float>> getMetadata(double lat1, double long1, double lat2, double long2, int resolution);
-
-        void generateTexturesAsync(int id);
-
         std::shared_ptr<Scene> scene;
+        std::shared_ptr<OSMData> osmData;
+        std::shared_ptr<ElevationData> elevationData;
+
+        void runAsyncGenerators(int surfaceModelId);
+
+        std::shared_ptr<Model> generateSurface();
+
+        void generateSurfaceTextures(int id);
+
+        void generateBuildings();
     };
 }
 

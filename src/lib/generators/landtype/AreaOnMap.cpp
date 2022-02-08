@@ -192,7 +192,7 @@ namespace MapGenerator {
 
     void AreaOnMap::resolveColor() {
         bool randColor = false;
-        auto tags = *node.tags.get();
+        auto tags = *node.tags;
         //Check if area is covered by a forest
 
         if (randColor) {
