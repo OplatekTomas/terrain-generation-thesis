@@ -41,7 +41,7 @@ namespace MapGenerator {
         auto surfaceId = scene->addModel(surface);
 
         //Set up the shaders required for the terrain.
-        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::MainVertexShader(), Shader::VERTEX));
+        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::GroundVertexShader(), Shader::VERTEX));
         auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::GroundFragmentShader(), Shader::FRAGMENT));
         auto tcsId = scene->addShader(
                 std::make_shared<Shader>(Shaders::GroundTessellationControlShader(), Shader::TESS_CONTROL));
@@ -55,12 +55,16 @@ namespace MapGenerator {
         program->tessControlShader = tcsId;
         program->tessEvaluationShader = tesId;
         auto programId = scene->createProgram(program);
-        //scene->bindProgram(surfaceId, programId);
+        scene->bindProgram(surfaceId, programId);
 
         //Start async texture generation.
-        runAsyncGenerators(surfaceId);
-        //std::thread t1(&MapGenerator::runAsyncGenerators, this, surfaceId);
-        //t1.detach();
+        if(true){
+            std::thread t1(&MapGenerator::runAsyncGenerators, this, surfaceId);
+            t1.detach();
+        }else{
+            runAsyncGenerators(surfaceId);
+        }
+
         return scene;
     };
 
@@ -74,8 +78,12 @@ namespace MapGenerator {
             std::swap(options.lon1, options.lon2);
         }
         osmData = osm->getMetadata(options.lat1, options.lon1, options.lat2, options.lon2);
+        if(osmData == nullptr){
+            std:cerr << "Well fuck. There is no data";
+            return;
+        }
         generateBuildings();
-        //generateSurfaceTextures(surfaceModelId);
+        generateSurfaceTextures(surfaceModelId);
     }
 
     std::shared_ptr<Model> MapGenerator::generateSurface() {
@@ -90,7 +98,7 @@ namespace MapGenerator {
         auto model = surfaceGenerator->generate();
         auto modelId = scene->addModel(model);
         auto fragShader = std::make_shared<Shader>(Shaders::BuildingsFragmentShader(), Shader::FRAGMENT);
-        auto vertexShader = std::make_shared<Shader>(Shaders::MainVertexShader(), Shader::VERTEX);
+        auto vertexShader = std::make_shared<Shader>(Shaders::BuildingsVertexShader(), Shader::VERTEX);
         auto program = std::make_shared<Program>();
         program->vertexShader = scene->addShader(vertexShader);
         program->fragmentShader = scene->addShader(fragShader);

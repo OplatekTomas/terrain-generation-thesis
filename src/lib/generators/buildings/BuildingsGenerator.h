@@ -20,8 +20,8 @@ namespace MapGenerator{
         std::shared_ptr<Model> generate();
     private:
         Vertex normaliseVertex(Vertex vertex);
-
-
+        float scale;
+        bool updateZ = false;
         std::shared_ptr<OSMData> data;
         std::shared_ptr<ElevationData> heightData;
         GeneratorOptions options;

@@ -12,14 +12,10 @@ namespace MapGenerator {
                                            const std::shared_ptr<ElevationData> &heightData, GeneratorOptions options) {
         this->heightData = heightData;
         this->data = metadata;
-        this->options = options;
+        this->updateZ = heightData->getScale() > 1;
 
-        for (auto &node: data->getRelations()) {
-            if (!mapContainsKey(*node.tags, "building")) {
-                continue;
-            }
-            buildings.push_back(node);
-        }
+        this->scale = this->updateZ ? 1 / heightData->getScale() : heightData->getScale();
+        this->options = options;
         for (auto &node: data->getWays()) {
             if (!mapContainsKey(*node.tags, "building")) {
                 continue;
@@ -36,8 +32,14 @@ namespace MapGenerator {
         }
         poly.pop_back();
         auto cdt = std::make_shared<p2t::CDT>(poly);
-        cdt->Triangulate();
+        try{
+            cdt->Triangulate();
+
+        }catch(std::exception){
+            return {};
+        }
         auto triangles = cdt->GetTriangles();
+
         std::vector<Vertex> vertices;
         for (auto tri: triangles) {
             auto p1 = tri->GetPoint(0);
@@ -54,24 +56,34 @@ namespace MapGenerator {
     Vertex BuildingsGenerator::normaliseVertex(Vertex vertex) {
         auto latDelta = options.lat2 - options.lat1;
         auto lonDelta = options.lon2 - options.lon1;
-        auto x = (float)((vertex.x - options.lon1) * lonDelta);
-        auto z = (float)((vertex.z - options.lat1) * latDelta);
-        return {x, 0, z};
+        auto x = (float) ((vertex.x - options.lat2) / latDelta);
+        auto z = (float) ((vertex.z - options.lon2) / lonDelta);
+        Vertex v;
+        if (updateZ) {
+            v = {(-z * scale) + (scale / 4), 0.55, x + 1};
+        } else {
+            v = {-z, 0.55, ((x + 1) * scale) + (scale / 4)};
+        }
+        return v;
     }
 
     std::shared_ptr<Model> MapGenerator::BuildingsGenerator::generate() {
         auto model = std::make_shared<Model>();
         int index = 0;
-
+        auto building = *buildings.begin().base();
         for (auto &building: buildings) {
+            if(building.nodes->size() > 30){
+                continue;
+            }
             auto buildingModel = generateBuilding(building);
             for (auto &vertex: buildingModel) {
                 vertex = normaliseVertex(vertex);
                 model->addVertex(vertex);
-                model->addIndex(index, index + 1, index + 2);
-                index += 3;
+                model->addIndex(index);
+                index++;
             }
         }
+
 
         return model;
     }

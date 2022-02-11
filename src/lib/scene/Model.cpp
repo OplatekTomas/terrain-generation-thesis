@@ -27,5 +27,9 @@ namespace MapGenerator {
         indices.push_back(i2);
         indices.push_back(i3);
     }
+
+    void Model::addIndex(int i) {
+        indices.push_back(i);
+    }
 }
 

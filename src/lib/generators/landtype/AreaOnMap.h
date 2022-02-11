@@ -55,7 +55,7 @@ namespace MapGenerator {
 
         bool isInsideRoute(Point p, const ShapeBase &shape) const;
 
-        static int getRouteWidth(const std::string &routeType);
+        int getRouteWidth(const std::string &routeType);
 
         static double distanceToLine(Point p, Point a, Point b);
 

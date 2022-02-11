@@ -174,6 +174,9 @@ namespace MapGenerator {
                 width = 1;
                 break;
         }
+        if(mapContainsKeyAndValue(*this->node.tags, "tunnel", "true")) {
+            width = width * 2;
+        }
         return width;
     }
 

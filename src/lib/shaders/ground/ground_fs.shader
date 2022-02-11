@@ -33,7 +33,7 @@ void main(){
     } else if (equals(r, 7.0)){ //Pixel is used as a residential/industrial area
         color = vec4(0.5, 0.5, 0.5, 1.0);
     } else {
-        color = vec4(r, r, r, 1.0f);
+        color = vec4(1.0f);
     }
     float shading =  1 - ((1 - dot(Normal_FS_in, vec3(0.0, -1.0, 0.0))) * 4.0);
     FragColor = color * vec4(vec3(shading), 1.0);
