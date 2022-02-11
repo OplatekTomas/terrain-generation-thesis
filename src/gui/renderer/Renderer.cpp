@@ -79,7 +79,7 @@ namespace MapGenerator {
                 -22.96603878773571, -43.18380161954447
         };
 
-        auto currentPos = brazil;
+        auto currentPos = posHome;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];

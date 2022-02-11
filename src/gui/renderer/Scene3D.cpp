@@ -33,6 +33,9 @@ namespace MapGenerator {
             if (program->getUniformLocation("projection") != -1) {
                 program->setMatrix4fv("projection", glm::value_ptr(projection));
             }
+            if(program->getUniformLocation("lightPos") != -1) {
+                program->set3v("lightPos", glm::value_ptr(glm::vec3(0, 1.0f, 0.25)));
+            }
             auto drawCount = useModel(modelId);
             auto origProgram = scene->getProgram(scene->getProgramForModel(modelId));
             auto drawMode = GL_TRIANGLES;

@@ -78,7 +78,7 @@ void CalcPositions(){
 
 
 void main(){
-    float tessLevel = 20.0;
+    float tessLevel = 10.0;
     // Set the control points of the output patch
     for (int i = 0; i < 3; i++) {
         patchData.Normal[i] = Normal_VS_Out[i];

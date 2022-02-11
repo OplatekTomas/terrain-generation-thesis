@@ -79,7 +79,7 @@ namespace MapGenerator {
         }
         osmData = osm->getMetadata(options.lat1, options.lon1, options.lat2, options.lon2);
         if(osmData == nullptr){
-            std:cerr << "Well fuck. There is no data";
+            std::cerr << "Well fuck. There is no data";
             return;
         }
         generateBuildings();

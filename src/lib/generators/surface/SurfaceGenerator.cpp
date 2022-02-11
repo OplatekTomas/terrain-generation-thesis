@@ -68,7 +68,7 @@ namespace MapGenerator{
             auto v1 = vertices[index];
             auto v2 = vertices[index2];
             auto v3 = vertices[index3];
-            auto normal = normalize(cross(v2 - v1, v3 - v1));
+            auto normal = (v3 - v1).cross(v2 - v1).normalize();
             verticesNormals[index].push_back(normal);
             verticesNormals[index2].push_back(normal);
             verticesNormals[index3].push_back(normal);
@@ -81,7 +81,7 @@ namespace MapGenerator{
             for (auto n: normals) {
                 normal += n;
             }
-            normal = normalize(normal);
+            normal = normal.normalize();
             auto[t1, t2] = verticesTextureCoords[i];
             model->addVertex(vertices[i], normal, t1, t2);
         }

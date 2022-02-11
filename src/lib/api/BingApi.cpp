@@ -46,7 +46,7 @@ namespace MapGenerator {
             if (result == nullptr || result->resourceSets.empty() || result->resourceSets[0].resources.empty()) {
                 return {};
             }
-            return std::make_shared<ElevationData>(result->resourceSets[0].resources[0].elevations);
+            return std::make_shared<ElevationData>(result->resourceSets[0].resources[0].elevations, resolution);
         }
         //If the resolution is higher than 32x32 we need to send multiple requests and compile the data together
         //Check the resolution and calculate the number of requests needed
@@ -106,8 +106,10 @@ namespace MapGenerator {
         for (auto &item: data) {
             item = item - shift;
         }
-        auto result = std::make_shared<ElevationData>(data);
+        auto result = std::make_shared<ElevationData>(data, resolution);
         result->setScale(longDist/latDist);
+        result->setNormalizedMax(max);
+        result->setNormalizedMin(min);
         return result;
     }
 
@@ -135,9 +137,9 @@ namespace MapGenerator {
         auto url = getBaseAddress() + fmt::format(args, lat1, long1, lat2, long2, rows, cols, this->apiKey);
 
         //TODO: return proper data
-        //auto result = this->readData<ElevationResult>("../../../examples/bing.json");
+        auto result = this->readData<ElevationResult>("../../../examples/bing.json");
 
-        auto result = this->sendRequest<ElevationResult>(url);
+        //auto result = this->sendRequest<ElevationResult>(url);
         return result;
     }
 

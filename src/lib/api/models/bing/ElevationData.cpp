@@ -9,7 +9,8 @@
 #include <iostream>
 
 namespace MapGenerator {
-    ElevationData::ElevationData(const std::vector<double> &data) {
+    ElevationData::ElevationData(const std::vector<double> &data, int resolution) {
+        this->rows = this->cols = resolution;
         this->data = std::make_shared<std::vector<double>>();
         this->data->reserve(data.size());
         for (double i: data) {
@@ -42,13 +43,18 @@ namespace MapGenerator {
             int cIndex = colFrom;
 
             for (int c = 0; c < colCount; c++) {
-                int dataIndex  = (r * rowCount) + (colCount - c - 1);
+                int dataIndex = (r * rowCount) + (colCount - c - 1);
                 setAt(rIndex, cols - cIndex - 1, newData.at(dataIndex));
                 cIndex++;
             }
             rIndex++;
         }
 
-    } 
+    }
+
+    double ElevationData::getAt(int x, int y) {
+
+        return (*data)[x * this->rows + y];
+    }
 
 }

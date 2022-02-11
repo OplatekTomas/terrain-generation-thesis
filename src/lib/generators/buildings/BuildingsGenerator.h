@@ -13,19 +13,27 @@
 #include <config/GeneratorOptions.h>
 #include <api/models/bing/ElevationData.h>
 
-namespace MapGenerator{
+namespace MapGenerator {
     class BuildingsGenerator {
     public:
-        BuildingsGenerator(const std::shared_ptr<OSMData>& metadata, const std::shared_ptr<ElevationData>& heightData,GeneratorOptions options);
+        BuildingsGenerator(const std::shared_ptr<OSMData> &metadata, const std::shared_ptr<ElevationData> &heightData,
+                           GeneratorOptions options);
+
         std::shared_ptr<Model> generate();
+
     private:
+
         Vertex normaliseVertex(Vertex vertex);
+
         float scale;
         bool updateZ = false;
         std::shared_ptr<OSMData> data;
         std::shared_ptr<ElevationData> heightData;
         GeneratorOptions options;
         std::vector<Node> buildings;
+        std::map<std::tuple<double, double>, std::tuple<Vertex, Vertex>> buildingVertices;
+
+        std::vector<Vertex> generateBuilding(const Node &building);
     };
 
 }
