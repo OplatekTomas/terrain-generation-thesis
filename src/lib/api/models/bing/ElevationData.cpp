@@ -57,4 +57,28 @@ namespace MapGenerator {
         return (*data)[x * this->rows + y];
     }
 
+    double ElevationData::getAt(float row, float col) {
+        int lowerX = (int) row;
+        int lowerY = (int) col;
+        int upperX = lowerX + 1;
+        int upperY = lowerY + 1;
+        int lowerXIndex = lowerX * this->rows + lowerY;
+        int upperXIndex = upperX * this->rows + lowerY;
+        int lowerYIndex = lowerX * this->rows + upperY;
+        int upperYIndex = upperX * this->rows + upperY;
+
+        double lowerXValue = (*data)[lowerXIndex];
+        double upperXValue = (*data)[upperXIndex];
+        double lowerYValue = (*data)[lowerYIndex];
+        double upperYValue = (*data)[upperYIndex];
+        double max = std::max(std::max(lowerXValue, upperXValue), std::max(lowerYValue, upperYValue));
+        return max;
+        //Bilinear interpolation between the four surrounding points
+        double x = row - lowerX;
+        double y = col - lowerY;
+        double x1 = 1 - x;
+        double y1 = 1 - y;
+        return x1 * y1 * lowerXValue + x * y1 * upperXValue + x1 * y * lowerYValue + x * y * upperYValue;
+    }
+
 }

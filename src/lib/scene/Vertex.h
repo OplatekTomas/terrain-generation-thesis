@@ -23,6 +23,14 @@ typedef struct Vector3 {
     inline Vector3 operator/(float f) const {
         return {x / f, y / f, z / f};
     }
+
+    inline bool operator==(const Vector3 &v) const {
+        return x == v.x && y == v.y && z == v.z;
+    }
+    inline bool operator!=(const Vector3 &v) const {
+        return x != v.x || y != v.y || z != v.z;
+    }
+
     inline Vector3 &operator+=(const Vector3 &v) {
         x += v.x;
         y += v.y;

@@ -12,7 +12,7 @@ namespace MapGenerator {
     class Model {
     public:
         Model();
-        void addVertex(Vertex v, Vertex n = {0,0,0}, float t1 = 0, float t2 = 0);
+        void addVertex(Vertex vertex, Vertex normal = {0,0,0}, float t1 = 0, float t2 = 0);
 
         void addIndex(int i1, int i2, int i3);
         void addIndex(int i1);

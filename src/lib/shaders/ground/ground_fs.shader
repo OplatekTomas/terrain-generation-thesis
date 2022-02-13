@@ -13,8 +13,22 @@ bool equals(float a, float b) {
     return abs(a - b) < 0.000001;
 }
 
-void main(){
+vec3 CalcDirLight(vec3 normal){
+    //Calculate ambient strengh
     float ambientStrength = 0.25;
+    vec3 ambientColor = vec3(135, 206, 235) / 255.0;
+    vec3 ambient = ambientStrength * ambientColor;
+    //calculate diffuse strength
+    vec3 diffuseColor = vec3(256,251,211) / 255.0;
+    vec3 lightDir = vec3(0.5, 1.0, 0.0);
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = diff * diffuseColor;
+    return (ambient + diffuse);
+}
+
+
+void main(){
+    float ambientStrength = 0.50;
     vec3 lightColor = vec3(247, 245, 230) / 255.0;
 
     vec4 metadata = texture(Texture, TexCoord_FS_in);
@@ -40,15 +54,10 @@ void main(){
         color = vec4(1.0f);
     }
 
-    vec3 norm = normalize(Normal_FS_in);
-    vec3 lightDir = normalize(lightPos - WorldPos_FS_in);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
 
-    vec3 ambient = ambientStrength * color.rgb;
 
     float shading =  1 - ((1 - dot(Normal_FS_in, vec3(0.0, 1.0, 0.0))) * 4.0);
     vec3 shadingColor = color.rgb * shading;
-    vec3 result = (ambient + diffuse) * shadingColor;
+    vec3 result = CalcDirLight(Normal_FS_in) * shadingColor;
     FragColor = vec4(result, 1.0);
 }

@@ -73,8 +73,8 @@ namespace MapGenerator {
             origVertices.emplace_back(vertex);
             vertex = normaliseVertex(vertex);
             //Calculate the index of the height data
-            auto row = static_cast<int>(vertex.z * options.terrainResolution);
-            auto col = static_cast<int>(vertex.x * options.terrainResolution);
+            auto row = vertex.z * options.terrainResolution;
+            auto col = vertex.x * options.terrainResolution;
             //Get the height data
             auto height = (float) heightData->getAt(row, col);
             min = std::min(min, height);
@@ -91,21 +91,20 @@ namespace MapGenerator {
         }
         auto height = ((heightInM - heightData->getNormalizedMin()) /
                        (heightData->getNormalizedMax() + heightData->getNormalizedMin())) * numberOfFloors;
-        for(int i = 0; i < origVertices.size(); i++){
+        for (int i = 0; i < origVertices.size(); i++) {
             auto orig = origVertices[i];
             auto v = vertices[i];
-            Vertex upperV = {v.x, (float)(v.y + height), v.z};
+            Vertex upperV = {v.x, (float) (v.y + height), v.z};
             std::tuple<double, float> key = {orig.x, orig.z};
             this->buildingVertices[key] = {v, upperV};
             vertices.emplace_back(upperV);
-            //this->buildingVertices.emplace(key, {v, {v.x, v.y + height, v.z}});
-            printf("\n");
         }
         return vertices;
     }
 
 #pragma GCC push_options
 #pragma GCC optimize ("O0")
+
     std::shared_ptr<Model> BuildingsGenerator::generate() {
         auto model = std::make_shared<Model>();
         int index = 0;
@@ -116,37 +115,91 @@ namespace MapGenerator {
             //This will output the data into the buildingVertices map and return the geometry of a floor and a roof
             auto ground = generateBuilding(building);
             for (auto &v: ground) {
-                model->addVertex(v, {0, 1, 0});
+                Vertex normal = {0, 1, 0};
+                model->addVertex(v, normal);
                 model->addIndex(index);
                 index++;
             }
-
             for (int i = 0; i < building.geometry->size() - 1; i++) {
-                auto pos1 = Vertex((float)building.geometry->at(i).lat, 0, (float)building.geometry->at(i).lon);
-                auto[v1, v2] = this->buildingVertices[{pos1.x, pos1.z}];
-                auto pos2 = Vertex((float)building.geometry->at(i + 1).lat, 0, (float)building.geometry->at(i + 1).lon);
-                auto[v3, v4] = this->buildingVertices[{pos2.x, pos2.z}];
-                auto n1 = (v2 - v1).cross(v3 - v1).normalize();
-                auto n2 = (v1 - v3).cross(v4 - v3).normalize();
-                model->addVertex(v1, n1);
-                model->addVertex(v2, n1);
-                model->addVertex(v3, n1);
-                model->addVertex(v2, n2);
-                model->addVertex(v3, n2);
-                model->addVertex(v4, n2);
+                auto firstPos = std::make_tuple((float) building.geometry->at(i).lat,
+                                                (float) building.geometry->at(i).lon);
+                auto secondPos = std::make_tuple((float) building.geometry->at(i + 1).lat,
+                                                 (float) building.geometry->at(i + 1).lon);
+                auto[v0, v1] = buildingVertices[firstPos];
+                auto[v2, v3] = buildingVertices[secondPos];
+                auto normal = (v2 - v1).cross(v0 - v1);
+                model->addVertex(v0, normal);
+                model->addVertex(v1, normal);
+                model->addVertex(v2, normal);
+                model->addVertex(v3, normal);
                 model->addIndex(index);
                 model->addIndex(index + 1);
                 model->addIndex(index + 2);
+                model->addIndex(index + 1);
                 model->addIndex(index + 3);
-                model->addIndex(index + 4);
-                model->addIndex(index + 5);
-                index += 6;
-                printf("\n");
+                model->addIndex(index + 2);
+                index += 4;
+                __asm__("nop");
             }
+
         }
         return model;
     }
+
 #pragma GCC pop_options
 
 }
 
+
+
+
+/*  auto vertices = std::vector<Vertex>();
+  auto normals = std::vector<std::vector<Vertex>>((building.geometry->size() - 1) * 2);
+  auto indices = std::vector<int>();
+
+  for (int i = 0; i < building.geometry->size() - 1; i++) {
+      auto pos1 = Vertex((float) building.geometry->at(i).lat, 0, (float) building.geometry->at(i).lon);
+      auto[v1, v2] = this->buildingVertices[{pos1.x, pos1.z}];
+      vertices.emplace_back(v1);
+      vertices.emplace_back(v2);
+      normals[i * 2].push_back({0, 1, 0});
+      normals[i * 2 + 1].push_back({0, 1, 0});
+  }
+  for (int i = 0; i < vertices.size(); i += 2) {
+      auto i2 = (i + 1) % vertices.size();
+      auto i3 = (i + 2) % vertices.size();
+      auto i4 = (i + 3) % vertices.size();
+      indices.push_back(i);
+      indices.push_back(i2);
+      indices.push_back(i3);
+      indices.push_back(i3);
+      indices.push_back(i2);
+      indices.push_back(i4);
+  }
+
+  for (int i = 0; i < indices.size(); i += 3) {
+      auto v1 = vertices[indices[i]];
+      auto v2 = vertices[indices[i + 1]];
+      auto v3 = vertices[indices[i + 2]];
+      auto normal = (v2 - v1).cross(v3 - v1).normalize();
+      normals[indices[i]].push_back(normal);
+      normals[indices[i + 1]].push_back(normal);
+      normals[indices[i + 2]].push_back(normal);
+  }
+  for (int i = 0; i < normals.size(); i++) {
+      Vertex normal = {0, 0, 0};
+      Vertex prevNormal = {0, 0, 0};
+      for (int j = 0; j < normals[i].size(); j++) {
+          if (prevNormal == normals[i][j]) {
+              continue;
+          }
+          normal += normals[i][j];
+          prevNormal = normals[i][j];
+      }
+      normal = normal.normalize();
+      model->addVertex(vertices[i], normal);
+  }
+  for (auto i: indices) {
+      model->addIndex(i + index);
+  }
+  index += vertices.size();*/

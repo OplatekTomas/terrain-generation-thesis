@@ -15,6 +15,6 @@ uniform mat4 projection;
 void main() {
     WorldPos_VS_Out = position;
     TexCoord_VS_Out = texCoord;
-    Normal_VS_Out = normal;
+    Normal_VS_Out = normalize(normal);
     gl_Position = projection * view * vec4(position, 1.0);
 }

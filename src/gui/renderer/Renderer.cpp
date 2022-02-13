@@ -85,6 +85,7 @@ namespace MapGenerator {
         options.lon1 = currentPos[1];
         options.lat2 = currentPos[2];
         options.lon2 = currentPos[3];
+        options.terrainResolution = 96;
         this->mapGenerator = std::make_shared<MapGenerator>(config, options);
         return true;
     }

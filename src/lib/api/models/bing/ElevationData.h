@@ -39,6 +39,7 @@ namespace MapGenerator{
         double getNormalizedMin(){
             return this->normalizedMin;
         }
+        double getAt(float row, float col);
 
 
     private:
@@ -48,6 +49,7 @@ namespace MapGenerator{
         int cols;
         float scale;
         std::shared_ptr<std::vector<double>> data;
+
     };
 }
 
