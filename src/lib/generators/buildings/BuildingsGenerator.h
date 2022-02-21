@@ -34,6 +34,8 @@ namespace MapGenerator {
         std::map<std::tuple<double, double>, std::tuple<Vertex, Vertex>> buildingVertices;
 
         std::vector<Vertex> generateBuilding(const Node &building);
+
+        Vertex checkBounds(Vertex vertex);
     };
 
 }

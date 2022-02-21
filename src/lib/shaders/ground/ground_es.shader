@@ -47,26 +47,7 @@ vec3 getH(int i, int j){
     return (A/2) - ((v/2.0) * B);
 }
 
-
-mat4 lookAt(){
-    vec3 eye = vec3(0.5, 1.0, 0.5);
-    vec3 center = vec3(0.5, 0.0, 0.5);
-    vec3 up = vec3(0.0, 0, 1.0);
-    vec3 f = normalize(center - eye);
-    vec3 s = normalize(cross(f, up));
-    vec3 u = cross(s, f);
-    return mat4(
-    s.x, u.x, -f.x, 0.0,
-    s.y, u.y, -f.y, 0.0,
-    s.z, u.z, -f.z, 0.0,
-    -dot(s, eye), -dot(u, eye), dot(f, eye), 1.0
-    );
-}
-
-
-
-void main()
-{
+void main(){
     // Interpolate the attributes of the output vertex using the barycentric coordinates
     TexCoord_FS_in = interpolate2D(patchData.TexCoord[0], patchData.TexCoord[1], patchData.TexCoord[2]);
 
@@ -107,8 +88,5 @@ void main()
     u * w * Normal101 +
     v * w * Normal011;
     Normal_FS_in = normalize(Normal_FS_in);
-    //Normal_FS_in = interpolate3D(patchData.Normal[0], patchData.Normal[1], patchData.Normal[2]);
     gl_Position = projection * view * vec4(WorldPos_FS_in, 1.0);
-    //gl_Position = vw * (vec4((WorldPos_FS_in * 2.0) - vec3(0.5, 0, 0.5), 1.0));
-    //gl_Position = vec4(WorldPos_FS_in, 1.0);
 }

@@ -40,6 +40,27 @@ namespace MapGenerator {
         return v;
     }
 
+    Vertex BuildingsGenerator::checkBounds(Vertex vertex){
+        return vertex;
+        //TODO fix this function - right now it is not working and i dont have time to fix it
+        if(vertex.x < data->lat2 && vertex.x > data->lat1 && vertex.z < data->lon2 && vertex.z > data->lon1) {
+            return vertex;
+        }
+        Vertex result = vertex;
+        if(vertex.x < data->lat1) {
+            result.x = data->lat1;
+        }
+        if(vertex.x > data->lat2) {
+            result.x = data->lat2;
+        }
+        if(vertex.z < data->lon1) {
+            result.z = data->lon1;
+        }
+        if(vertex.z > data->lon2) {
+            result.z = data->lon2;
+        }
+        return result;
+    }
 
     std::vector<Vertex> BuildingsGenerator::generateBuilding(const Node &building) {
         auto poly = std::vector<p2t::Point *>();
@@ -61,9 +82,11 @@ namespace MapGenerator {
             auto p1 = tri->GetPoint(0);
             auto p2 = tri->GetPoint(1);
             auto p3 = tri->GetPoint(2);
-            vertices.emplace_back(p1->x, 0, p1->y);
-            vertices.emplace_back(p2->x, 0, p2->y);
-            vertices.emplace_back(p3->x, 0, p3->y);
+            vertices.emplace_back(checkBounds(Vertex(p1->x, 0, p1->y)));
+            vertices.emplace_back(checkBounds(Vertex(p2->x, 0, p2->y)));
+            vertices.emplace_back(checkBounds(Vertex(p3->x, 0, p3->y)));
+            //vertices.emplace_back(p2->x, 0, p2->y);
+            //vertices.emplace_back(p3->x, 0, p3->y);
         }
         //Create the height offset from the height data
         auto min = std::numeric_limits<float>::max();
@@ -131,9 +154,7 @@ namespace MapGenerator {
                 model->addIndex(index + 3);
                 model->addIndex(index + 2);
                 index += 4;
-                __asm__("nop");
             }
-
         }
         return model;
     }

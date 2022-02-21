@@ -3,9 +3,6 @@
 layout(triangles, equal_spacing, ccw) in;
 
 out vec3 WorldPos_FS_in;
-out vec2 TexCoord_FS_in;
-out vec3 Normal_FS_in;
-
 
 struct OutputPatch{
     vec3 WorldPos030;
@@ -31,14 +28,6 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
     return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
 }
 
-vec3 getH(int i, int j){
-    vec3 A = patchData.Normal[i] + patchData.Normal[j];
-    vec3 B = patchData.WorldPos[j] - patchData.WorldPos[i];
-    float v = 2.0 * (dot(B, A) / dot(B, B));
-    return (A/2) - ((v/2.0) * B);
-}
-
-
 mat4 lookAt(){
     vec3 eye = vec3(0.5, 1.0, 0.5);
     vec3 center = vec3(0.5, 0.0, 0.5);
@@ -53,12 +42,7 @@ mat4 lookAt(){
     -dot(s, eye), -dot(u, eye), dot(f, eye), 1.0
     );
 }
-
-
-void main()
-{
-    // Interpolate the attributes of the output vertex using the barycentric coordinates
-    TexCoord_FS_in = interpolate2D(patchData.TexCoord[0], patchData.TexCoord[1], patchData.TexCoord[2]);
+void main(){
 
     float u = gl_TessCoord.x;
     float v = gl_TessCoord.y;
@@ -82,24 +66,6 @@ void main()
     patchData.WorldPos012 * 3.0 * u * vPow2 +
     patchData.WorldPos111 * 6.0 * w * u * v;
 
-    vec3 Normal200 =  patchData.Normal[0];
-    vec3 Normal020 =  patchData.Normal[1];
-    vec3 Normal002 =  patchData.Normal[2];
-    vec3 Normal110 = normalize(getH(0, 1));
-    vec3 Normal011 = normalize(getH(1, 2));
-    vec3 Normal101 = normalize(getH(2, 0));
-
-    Normal_FS_in =
-    uPow2 * Normal200 +
-    vPow2 * Normal020 +
-    wPow2 * Normal002 +
-    u * v * Normal110 +
-    u * w * Normal101 +
-    v * w * Normal011;
-    Normal_FS_in = normalize(Normal_FS_in);
-    //Normal_FS_in = interpolate3D(patchData.Normal[0], patchData.Normal[1], patchData.Normal[2]);
-    //WorldPos_FS_in = vec3((WorldPos_FS_in * 2.0) - vec3(0.5, 0, 0.5));
     mat4 vw = lookAt();
-    gl_Position = vw * (vec4((WorldPos_FS_in * 2.0) - vec3(0.5, 0, 0.5), 1.0));
-    //WorldPos_FS_in = gl_Position.xyz;
+    gl_Position = vw * (vec4((WorldPos_FS_in) - vec3(0.25, 0, 0.25), 0.5));
 }

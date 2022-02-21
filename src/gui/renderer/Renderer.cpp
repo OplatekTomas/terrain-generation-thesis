@@ -84,12 +84,13 @@ namespace MapGenerator {
                 49.20443981462129, 16.697611471199462
         };
 
-        auto currentPos = posHome;
+        auto currentPos = posHomeL;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];
         options.lat2 = currentPos[2];
         options.lon2 = currentPos[3];
+        options.terrainResolution = 96;
         this->mapGenerator = std::make_shared<MapGenerator>(config, options);
         return true;
     }

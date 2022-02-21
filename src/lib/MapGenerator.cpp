@@ -71,8 +71,9 @@ namespace MapGenerator {
     };
 
     void MapGenerator::generateHeightMap(int surfaceId, int vertexShaderId, int tcsShaderId) {
+        int resolution = 512;
         //Set up the terrain height map.
-        auto heightMap = std::make_shared<Texture>(512, 512);
+        auto heightMap = std::make_shared<Texture>(resolution, resolution);
         heightTextureId = scene->addTexture(heightMap);
         auto program = std::make_shared<Program>();
         program->vertexShader = vertexShaderId;
@@ -82,7 +83,7 @@ namespace MapGenerator {
         program->tessEvaluationShader = scene->addShader(
                 std::make_shared<Shader>(Shaders::HeightmapEvaluationShader(), Shader::TESS_EVALUATION));
         program->drawTarget = Program::DRAW_TO_TEXTURE;
-        program->drawTextureResolution = 512;
+        program->drawTextureResolution = resolution;
         program->drawTexture = heightTextureId;
         program->maxDrawCount = -1;
         auto programId = scene->createProgram(program);

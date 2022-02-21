@@ -42,7 +42,7 @@ namespace MapGenerator {
         map<int, shared_ptr<ge::gl::Framebuffer>> frameBuffers;
         map<int, shared_ptr<ge::gl::Renderbuffer>> renderBuffers;
 
-        shared_ptr<ge::gl::Texture> getTexture(int id, const shared_ptr<Texture> &texture);
+        shared_ptr<ge::gl::Texture> getTexture(int id, const shared_ptr<Texture> &texture, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
 
         shared_ptr<ge::gl::Shader> getShader(int id);
 

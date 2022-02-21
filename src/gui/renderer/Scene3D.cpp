@@ -24,7 +24,6 @@ namespace MapGenerator {
             //One model can be used with multiple different programs
             for (auto programId: programIds) {
                 //Bounds the default frame buffer to the screen
-                gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 auto program = useProgram(programId);
                 if (program == nullptr) {
                     continue;
@@ -55,6 +54,8 @@ namespace MapGenerator {
                     gl->glViewport(0, 0, width * scale, height * scale);
                     drawToScreen(origProgram, drawCount);
                 }
+                gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
             }
         }
         return 0;
@@ -80,7 +81,7 @@ namespace MapGenerator {
         }
         frameBuffer = frameBuffers[programId];
         frameBuffer->bind();
-        auto texture = getTexture(program->drawTexture, scene->getTexture(program->drawTexture));
+        auto texture = getTexture(program->drawTexture, scene->getTexture(program->drawTexture), GL_R32F, GL_FLOAT);
         if (!mapContainsKey(renderBuffers, programId)) {
             depthBuffer = make_shared<ge::gl::Renderbuffer>();
             depthBuffer->bind();
@@ -162,14 +163,14 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<ge::gl::Texture> Scene3D::getTexture(int id, const std::shared_ptr<Texture> &tex) {
+    std::shared_ptr<ge::gl::Texture> Scene3D::getTexture(int id, const std::shared_ptr<Texture> &tex, GLenum format, GLenum type) {
         if (textures.find(id) != textures.end()) {
             return textures[id];
         }
         auto texture = std::make_shared<ge::gl::Texture>();
-        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, tex->getWidth(), tex->getHeight());
+        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, format, 0, tex->getWidth(), tex->getHeight());
         texture->bind(GL_TEXTURE_2D);
-        texture->setData2D(tex->getData(), GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D, 0, 0, tex->getWidth(),
+        texture->setData2D(tex->getData(), format, type, 0, GL_TEXTURE_2D, 0, 0, tex->getWidth(),
                            tex->getHeight());
         //texture->generateMipmap();
         texture->texParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
