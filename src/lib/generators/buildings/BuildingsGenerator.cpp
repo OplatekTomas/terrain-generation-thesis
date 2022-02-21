@@ -73,16 +73,8 @@ namespace MapGenerator {
             origVertices.emplace_back(vertex);
             vertex = normaliseVertex(vertex);
             //Calculate the index of the height data
-            auto row = vertex.z * options.terrainResolution;
-            auto col = vertex.x * options.terrainResolution;
-            //Get the height data
-            auto height = (float) heightData->getAt(row, col);
-            min = std::min(min, height);
-        }
-        for (auto &vertex: vertices) {
-            vertex.y = min;
-        }
 
+        }
         int numberOfFloors = 1;
         auto heightInM = 420 / 100;
 
@@ -94,7 +86,7 @@ namespace MapGenerator {
         for (int i = 0; i < origVertices.size(); i++) {
             auto orig = origVertices[i];
             auto v = vertices[i];
-            Vertex upperV = {v.x, (float) (v.y + height), v.z};
+            Vertex upperV = {v.x, (float) (height), v.z};
             std::tuple<double, float> key = {orig.x, orig.z};
             this->buildingVertices[key] = {v, upperV};
             vertices.emplace_back(upperV);

@@ -6,8 +6,6 @@ out vec3 WorldPos_FS_in;
 out vec2 TexCoord_FS_in;
 out vec3 Normal_FS_in;
 
-uniform mat4 view;
-uniform mat4 projection;
 
 struct OutputPatch{
     vec3 WorldPos030;
@@ -33,13 +31,6 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
     return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
 }
 
-vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)
-{
-    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
-}
-
-
-
 vec3 getH(int i, int j){
     vec3 A = patchData.Normal[i] + patchData.Normal[j];
     vec3 B = patchData.WorldPos[j] - patchData.WorldPos[i];
@@ -62,7 +53,6 @@ mat4 lookAt(){
     -dot(s, eye), -dot(u, eye), dot(f, eye), 1.0
     );
 }
-
 
 
 void main()
@@ -108,7 +98,8 @@ void main()
     v * w * Normal011;
     Normal_FS_in = normalize(Normal_FS_in);
     //Normal_FS_in = interpolate3D(patchData.Normal[0], patchData.Normal[1], patchData.Normal[2]);
-    gl_Position = projection * view * vec4(WorldPos_FS_in, 1.0);
-    //gl_Position = vw * (vec4((WorldPos_FS_in * 2.0) - vec3(0.5, 0, 0.5), 1.0));
-    //gl_Position = vec4(WorldPos_FS_in, 1.0);
+    //WorldPos_FS_in = vec3((WorldPos_FS_in * 2.0) - vec3(0.5, 0, 0.5));
+    mat4 vw = lookAt();
+    gl_Position = vw * (vec4((WorldPos_FS_in * 2.0) - vec3(0.5, 0, 0.5), 1.0));
+    //WorldPos_FS_in = gl_Position.xyz;
 }

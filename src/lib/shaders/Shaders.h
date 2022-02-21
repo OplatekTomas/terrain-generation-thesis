@@ -31,6 +31,16 @@ const char * ground_es =
 #include <shaders/include/ground/ground_es.shader.out>
         ;
 
+const char * heightmap_fs =
+#include <shaders/include/heightmap/heightmap_fs.shader.out>
+;
+
+
+const char * heightmap_es =
+#include <shaders/include/heightmap/heightmap_es.shader.out>
+;
+
+
 class Shaders {
 public:
     static const char *GroundVertexShader() {
@@ -56,6 +66,14 @@ public:
 
     static const char *GroundTessellationEvaluationShader() {
         return ground_es;
+    };
+
+    static const char *HeightmapFragmentShader() {
+        return heightmap_fs;
+    };
+
+    static const char *HeightmapEvaluationShader() {
+        return heightmap_es;
     };
 
 };

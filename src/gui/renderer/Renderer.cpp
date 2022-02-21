@@ -79,13 +79,17 @@ namespace MapGenerator {
                 -22.96603878773571, -43.18380161954447
         };
 
+        std::vector<double> moni{
+                49.206206330276416, 16.693695548101253,
+                49.20443981462129, 16.697611471199462
+        };
+
         auto currentPos = posHome;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];
         options.lat2 = currentPos[2];
         options.lon2 = currentPos[3];
-        options.terrainResolution = 96;
         this->mapGenerator = std::make_shared<MapGenerator>(config, options);
         return true;
     }
@@ -130,11 +134,14 @@ namespace MapGenerator {
     }
 
     void Renderer::render() {
+        const qreal retinaScale = devicePixelRatio();
         clearView();
         if (scene != nullptr) {
-            scene->draw(height(), width());
+            //camera->print();
+            scene->draw(height(), width(), retinaScale);
         }
         context->swapBuffers(this);
+
     }
 
     void Renderer::clearView() {

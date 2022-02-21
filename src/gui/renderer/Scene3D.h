@@ -25,10 +25,9 @@ namespace MapGenerator {
 
         ~Scene3D();
 
-        int draw(int height, int width);
+        int draw(int height, int width, double scale);
 
     private:
-
 
         shared_ptr<ge::gl::Context> gl;
         shared_ptr<Scene> scene;
@@ -38,18 +37,24 @@ namespace MapGenerator {
         map<int, shared_ptr<ge::gl::VertexArray>> models;
         map<int, shared_ptr<ge::gl::Texture>> textures;
         map<int, shared_ptr<ge::gl::Program>> programs;
+        map<int, int> drawCounts;
         map<int, shared_ptr<ge::gl::Shader>> shaders;
+        map<int, shared_ptr<ge::gl::Framebuffer>> frameBuffers;
+        map<int, shared_ptr<ge::gl::Renderbuffer>> renderBuffers;
 
-        shared_ptr<ge::gl::Texture> getTexture(int id, const shared_ptr<Texture>& texture);
+        shared_ptr<ge::gl::Texture> getTexture(int id, const shared_ptr<Texture> &texture);
 
         shared_ptr<ge::gl::Shader> getShader(int id);
 
-        void useTextures(int modelId);
+        void useTextures(int programId);
 
         int useModel(int id);
 
         shared_ptr<ge::gl::Program> useProgram(int modelId);
 
+        void drawToScreen(const shared_ptr<Program> &program, int drawCount);
+
+        void drawToTexture(const shared_ptr<Program> &program, int programId, int drawCount);
     };
 }
 

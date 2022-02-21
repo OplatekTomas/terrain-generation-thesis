@@ -23,6 +23,7 @@ namespace MapGenerator {
         Camera(Renderer *parent);
 
         glm::mat4 getViewMatrix();
+        void print();
 
     public slots:
 

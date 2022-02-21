@@ -28,6 +28,8 @@ namespace MapGenerator {
 
         LibConfig config;
         GeneratorOptions options;
+        int heightTextureId;
+
         std::unique_ptr<BingApi> bing;
         std::unique_ptr<OpenStreetMapApi> osm;
         std::shared_ptr<LandTypeGenerator> textureGenerator;
@@ -35,13 +37,15 @@ namespace MapGenerator {
         std::shared_ptr<OSMData> osmData;
         std::shared_ptr<ElevationData> elevationData;
 
-        void runAsyncGenerators(int surfaceModelId);
+        void runAsyncGenerators(int programId);
 
         std::shared_ptr<Model> generateSurface();
 
         void generateSurfaceTextures(int id);
 
         void generateBuildings();
+
+        void generateHeightMap(int surfaceId, int vertexShaderId, int tcsShaderId);
     };
 }
 

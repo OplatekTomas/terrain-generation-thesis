@@ -10,7 +10,6 @@ out vec4 FragColor;
 
 uniform vec3 lightPos;
 
-
 vec3 CalcDirLight(vec3 normal){
     //Calculate ambient strengh
     float ambientStrength = 0.25;

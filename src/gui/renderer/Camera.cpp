@@ -163,6 +163,12 @@ namespace MapGenerator {
         prevY = event->y();
     }
 
+    void Camera::print() {
+        std::cout << "Camera position: " << position.x << " " << position.y << " " << position.z << std::endl;
+        std::cout << "Camera front: " << front.x << " " << front.y << " " << front.z << std::endl;
+        std::cout << "Camera up: " << up.x << " " << up.y << " " << up.z << std::endl;
+    }
+
 
 }
 

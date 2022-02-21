@@ -11,10 +11,16 @@ out vec3 Normal_VS_Out;
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform sampler2D heightMap;
 
 void main() {
-    WorldPos_VS_Out = position;
+    vec3 pos = position;
+    vec2 texPos = vec2(1-pos.x, pos.z);
+    pos.y += texture(heightMap, texPos).r;
+
+    WorldPos_VS_Out = pos;
     TexCoord_VS_Out = texCoord;
     Normal_VS_Out = normalize(normal);
-    gl_Position = projection * view * vec4(position, 1.0);
+    gl_Position = projection * view * vec4(pos, 1.0);
+    //gl_Position = vec4(pos, 1.0);
 }

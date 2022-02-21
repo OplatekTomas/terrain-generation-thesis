@@ -38,27 +38,28 @@ namespace MapGenerator {
         return id;
     }
 
-    void Scene::bindProgram(int modelId, int id) {
+    void Scene::bindProgram(int id, int modelId) {
         if (programs.find(id) == programs.end()) {
             throw std::runtime_error("Program with id " + std::to_string(id) + " does not exist");
         }
         if (models.find(modelId) == models.end()) {
             throw std::runtime_error("Model with id " + std::to_string(modelId) + " does not exist");
         }
-        if (modelToProgram.find(modelId) != modelToProgram.end()) {
-            throw std::runtime_error("Model with id " + std::to_string(modelId) + " is already bound to a program");
+        if (std::find(modelToProgram[modelId].begin(), modelToProgram[modelId].end(), id) != modelToProgram[modelId].end()) {
+            throw std::runtime_error("Program with id " + std::to_string(id) + " is already bound to a model");
         }
-        modelToProgram[modelId] = id;
+        modelToProgram[modelId].push_back(id);
     }
 
-    void Scene::bindTexture(int id, int modelId) {
+    void Scene::bindTexture(int id, int programId) {
         if (textures.find(id) == textures.end()) {
             throw std::runtime_error("Texture with id " + std::to_string(id) + " does not exist");
         }
-        if (models.find(modelId) == models.end()) {
-            throw std::runtime_error("Model with id " + std::to_string(modelId) + " does not exist");
+        if (programs.find(programId) == programs.end()) {
+            throw std::runtime_error("Program with id " + std::to_string(programId) + " does not exist");
         }
-        modelToTexture[modelId].push_back(id);
+
+        programToTexture[programId].push_back(id);
     }
 
     template<typename T>
@@ -83,28 +84,25 @@ namespace MapGenerator {
         if (modelToProgram.find(modelId) == modelToProgram.end()) {
             throw std::runtime_error("Model with id " + std::to_string(modelId) + " is not bound to a program");
         }
-        if (modelToProgram[modelId] != id) {
-            throw std::runtime_error("Model with id " + std::to_string(modelId) + " is bound to a different program");
-        }
         modelToProgram.erase(modelId);
     }
 
 
-
-    void Scene::unbindTexture(int id, int modelId) {
+    void Scene::unbindTexture(int id, int programId) {
         if (textures.find(id) == textures.end()) {
             throw std::runtime_error("Texture with id " + std::to_string(id) + " does not exist");
         }
-        if (models.find(modelId) == models.end()) {
-            throw std::runtime_error("Model with id " + std::to_string(modelId) + " does not exist");
+        if (models.find(programId) == models.end()) {
+            throw std::runtime_error("Model with id " + std::to_string(programId) + " does not exist");
         }
-        if (modelToTexture.find(modelId) == modelToTexture.end()) {
-            throw std::runtime_error("Model with id " + std::to_string(modelId) + " is not bound to a texture");
+        if (programToTexture.find(programId) == programToTexture.end()) {
+            throw std::runtime_error("Program with id " + std::to_string(programId) + " is not bound to a texture");
         }
-        auto& tex = modelToTexture[modelId];
+        auto &tex = programToTexture[programId];
         auto it = std::find(tex.begin(), tex.end(), id);
         if (it == tex.end()) {
-            throw std::runtime_error("Model with id " + std::to_string(modelId) + " is not bound to texture with id " + std::to_string(id));
+            throw std::runtime_error("Model with id " + std::to_string(programId) + " is not bound to texture with id " +
+                                     std::to_string(id));
         }
         tex.erase(it);
     }
@@ -113,48 +111,47 @@ namespace MapGenerator {
         return models;
     }
 
-    std::vector<int> Scene::getTexturesForModel(int modelId) {
-        if(modelToTexture.find(modelId) == modelToTexture.end()){
+    std::vector<int> Scene::getTexturesForProgram(int modelId) {
+        if (programToTexture.find(modelId) == programToTexture.end()) {
             return {};
         }
-        return modelToTexture[modelId];
+        return programToTexture[modelId];
     }
 
     std::shared_ptr<Texture> Scene::getTexture(int id) {
-        if(textures.find(id) == textures.end()){
+        if (textures.find(id) == textures.end()) {
             return nullptr;
         }
         return textures[id];
     }
 
     std::shared_ptr<Model> Scene::getModel(int id) {
-        if(models.find(id) == models.end()){
+        if (models.find(id) == models.end()) {
             return nullptr;
         }
         return models[id];
     }
 
-    int Scene::getProgramForModel(int modelId) {
-        if(modelToProgram.find(modelId) == modelToProgram.end()){
-            return -1;
+    std::vector<int> Scene::getProgramsForModel(int modelId) {
+        if (modelToProgram.find(modelId) == modelToProgram.end()) {
+            return {};
         }
         return modelToProgram[modelId];
     }
 
     std::shared_ptr<Program> Scene::getProgram(int programId) {
-        if(programs.find(programId) == programs.end()){
+        if (programs.find(programId) == programs.end()) {
             return nullptr;
         }
         return programs[programId];
     }
 
     std::shared_ptr<Shader> Scene::getShader(int id) {
-        if(shaders.find(id) == shaders.end()){
+        if (shaders.find(id) == shaders.end()) {
             return nullptr;
         }
         return shaders[id];
     }
-
 
 
 }

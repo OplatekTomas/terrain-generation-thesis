@@ -60,4 +60,5 @@ void main(){
     vec3 shadingColor = color.rgb * shading;
     vec3 result = CalcDirLight(Normal_FS_in) * shadingColor;
     FragColor = vec4(result, 1.0);
+    //FragColor = vec4(vec3(WorldPos_FS_in.y), 1.0);
 }

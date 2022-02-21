@@ -57,19 +57,39 @@ namespace MapGenerator {
         auto programId = scene->createProgram(program);
         scene->bindProgram(surfaceId, programId);
 
+        generateHeightMap(surfaceId, vertexId, tcsId);
+
         //Start async texture generation.
-        if(true){
-            std::thread t1(&MapGenerator::runAsyncGenerators, this, surfaceId);
+        if (true) {
+            std::thread t1(&MapGenerator::runAsyncGenerators, this, programId);
             t1.detach();
-        }else{
-            runAsyncGenerators(surfaceId);
+        } else {
+            runAsyncGenerators(programId);
         }
 
         return scene;
     };
 
+    void MapGenerator::generateHeightMap(int surfaceId, int vertexShaderId, int tcsShaderId) {
+        //Set up the terrain height map.
+        auto heightMap = std::make_shared<Texture>(512, 512);
+        heightTextureId = scene->addTexture(heightMap);
+        auto program = std::make_shared<Program>();
+        program->vertexShader = vertexShaderId;
+        program->fragmentShader = scene->addShader(
+                std::make_shared<Shader>(Shaders::HeightmapFragmentShader(), Shader::FRAGMENT));
+        program->tessControlShader = tcsShaderId;
+        program->tessEvaluationShader = scene->addShader(
+                std::make_shared<Shader>(Shaders::HeightmapEvaluationShader(), Shader::TESS_EVALUATION));
+        program->drawTarget = Program::DRAW_TO_TEXTURE;
+        program->drawTextureResolution = 512;
+        program->drawTexture = heightTextureId;
+        program->maxDrawCount = -1;
+        auto programId = scene->createProgram(program);
+        scene->bindProgram(programId, surfaceId);
+    }
 
-    void MapGenerator::runAsyncGenerators(int surfaceModelId) {
+    void MapGenerator::runAsyncGenerators(int surfaceProgramId) {
         //Grab OSM metadata
         if (options.lat1 > options.lat2) {
             std::swap(options.lat1, options.lat2);
@@ -78,20 +98,21 @@ namespace MapGenerator {
             std::swap(options.lon1, options.lon2);
         }
         osmData = osm->getMetadata(options.lat1, options.lon1, options.lat2, options.lon2);
-        if(osmData == nullptr){
+        if (osmData == nullptr) {
             std::cerr << "Well fuck. There is no data";
             return;
         }
         generateBuildings();
-        generateSurfaceTextures(surfaceModelId);
+        generateSurfaceTextures(surfaceProgramId);
     }
 
     std::shared_ptr<Model> MapGenerator::generateSurface() {
         elevationData = bing->getElevationNormalized(options.lat1, options.lon1, options.lat2, options.lon2,
-                                                       options.terrainResolution);
+                                                     options.terrainResolution);
         auto surfaceGenerator = std::make_shared<SurfaceGenerator>(elevationData, options);
         return surfaceGenerator->getSurface();
     }
+
 
     void MapGenerator::generateBuildings() {
         auto surfaceGenerator = std::make_shared<BuildingsGenerator>(osmData, elevationData, options);
@@ -103,11 +124,12 @@ namespace MapGenerator {
         program->vertexShader = scene->addShader(vertexShader);
         program->fragmentShader = scene->addShader(fragShader);
         auto programId = scene->createProgram(program);
+        scene->bindTexture(heightTextureId, programId);
         scene->bindProgram(programId, modelId);
     }
 
 
-    void MapGenerator::generateSurfaceTextures(int surfaceId) {
+    void MapGenerator::generateSurfaceTextures(int programId) {
         int prevId = -1;
         int currentResolution = options.minTextureResolution;
         while (currentResolution <= options.maxTextureResolution) {
@@ -120,9 +142,9 @@ namespace MapGenerator {
             auto texture = textureGenerator->generateTexture(currentResolution);
             auto texId = scene->addTexture(texture);
             if (prevId != -1) {
-                scene->unbindTexture(prevId, surfaceId);
+                scene->unbindTexture(prevId, programId);
             }
-            scene->bindTexture(texId, surfaceId);
+            scene->bindTexture(texId, programId);
             prevId = texId;
             currentResolution = currentResolution * options.textureResolutionStep;
         }

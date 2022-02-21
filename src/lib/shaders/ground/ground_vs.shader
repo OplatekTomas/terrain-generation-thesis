@@ -6,9 +6,6 @@ out vec3 WorldPos_VS_Out;
 out vec2 TexCoord_VS_Out;
 out vec3 Normal_VS_Out;
 
-uniform mat4 view;
-uniform mat4 projection;
-
 void main(){
 	WorldPos_VS_Out = aPos;
 	TexCoord_VS_Out = aTexCoord;

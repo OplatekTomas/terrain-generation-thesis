@@ -14,41 +14,86 @@ namespace MapGenerator {
     }
 
 
-    int Scene3D::draw(int height, int width) {
+    int Scene3D::draw(int height, int width, double scale) {
         auto view = camera->getViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
         for (auto &modelPair: scene->getModels()) {
             auto modelId = modelPair.first;
             //Setup shaders/program
-            auto program = useProgram(modelId);
-            if (program == nullptr) {
-                continue;
+            auto programIds = scene->getProgramsForModel(modelId);
+            //One model can be used with multiple different programs
+            for (auto programId: programIds) {
+                //Bounds the default frame buffer to the screen
+                gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                auto program = useProgram(programId);
+                if (program == nullptr) {
+                    continue;
+                }
+                auto origProgram = scene->getProgram(programId);
+                if(origProgram->maxDrawCount > 0 && drawCounts[programId] >= origProgram->maxDrawCount) {
+                    continue;
+                }
+                drawCounts[programId]++;
+                //Setup textures - sets up all textures for the model and binds them to the correct texture units
+                useTextures(programId);
+                //Setup uniforms (right now only view and projection are supported)
+                if (program->getUniformLocation("view") != -1) {
+                    program->setMatrix4fv("view", glm::value_ptr(view));
+                }
+                if (program->getUniformLocation("projection") != -1) {
+                    program->setMatrix4fv("projection", glm::value_ptr(projection));
+                }
+                if (program->getUniformLocation("lightPos") != -1) {
+                    program->set3v("lightPos", glm::value_ptr(glm::vec3(0, 1.0f, 0.25)));
+                }
+                //Get ready for drawing
+                auto drawCount = useModel(modelId);
+                if (origProgram->drawTarget != Program::DRAW_TO_SCREEN) {
+                    gl->glViewport(0, 0, origProgram->drawTextureResolution, origProgram->drawTextureResolution);
+                    drawToTexture(origProgram, programId, drawCount);
+                } else {
+                    gl->glViewport(0, 0, width * scale, height * scale);
+                    drawToScreen(origProgram, drawCount);
+                }
             }
-            //Setup textures - sets up all textures for the model and binds them to the correct texture units
-            useTextures(modelId);
-            //Setup uniforms (right now only view and projection are supported)
-            if (program->getUniformLocation("view") != -1) {
-                program->setMatrix4fv("view", glm::value_ptr(view));
-            }
-            if (program->getUniformLocation("projection") != -1) {
-                program->setMatrix4fv("projection", glm::value_ptr(projection));
-            }
-            if(program->getUniformLocation("lightPos") != -1) {
-                program->set3v("lightPos", glm::value_ptr(glm::vec3(0, 1.0f, 0.25)));
-            }
-            auto drawCount = useModel(modelId);
-            auto origProgram = scene->getProgram(scene->getProgramForModel(modelId));
-            auto drawMode = GL_TRIANGLES;
-            if(origProgram->tessControlShader != -1 && origProgram->tessEvaluationShader != -1) {
-                gl->glPatchParameteri(GL_PATCH_VERTICES, 3);
-                drawMode = GL_PATCHES;
-            }
-            //Draw the model
-            gl->glDrawElements(drawMode, drawCount, GL_UNSIGNED_INT, nullptr);
-
         }
-
         return 0;
+    }
+
+    void Scene3D::drawToScreen(const shared_ptr<Program> &program, int drawCount) {
+        auto drawMode = GL_TRIANGLES;
+        if (program->tessControlShader != -1 && program->tessEvaluationShader != -1) {
+            gl->glPatchParameteri(GL_PATCH_VERTICES, 3);
+            drawMode = GL_PATCHES;
+        }
+        //Draw the model
+        gl->glDrawElements(drawMode, drawCount, GL_UNSIGNED_INT, nullptr);
+    }
+
+    void Scene3D::drawToTexture(const shared_ptr<Program> &program, int programId, int drawCount) {
+        //Set up the frame buffer
+        shared_ptr<ge::gl::Framebuffer> frameBuffer;
+        shared_ptr<ge::gl::Renderbuffer> depthBuffer;
+        if (!mapContainsKey(frameBuffers, programId)) {
+            frameBuffer = make_shared<ge::gl::Framebuffer>();
+            frameBuffers[programId] = frameBuffer;
+        }
+        frameBuffer = frameBuffers[programId];
+        frameBuffer->bind();
+        auto texture = getTexture(program->drawTexture, scene->getTexture(program->drawTexture));
+        if (!mapContainsKey(renderBuffers, programId)) {
+            depthBuffer = make_shared<ge::gl::Renderbuffer>();
+            depthBuffer->bind();
+            depthBuffer->setStorage(GL_DEPTH_COMPONENT, program->drawTextureResolution, program->drawTextureResolution);
+            renderBuffers[programId] = depthBuffer;
+        }
+        depthBuffer = renderBuffers[programId];
+        depthBuffer->bind();
+        gl->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture->getId(), 0);
+        gl->glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        drawToScreen(program, drawCount);
+        __asm__("nop"); //The debug instruction
+
     }
 
     int Scene3D::useModel(int id) {
@@ -77,19 +122,18 @@ namespace MapGenerator {
         return model->indices.size();
     }
 
-    void Scene3D::useTextures(int modelId) {
-        auto modelTextures = scene->getTexturesForModel(modelId);
-        if (modelTextures.empty()) {
+    void Scene3D::useTextures(int programId) {
+        auto programTextures = scene->getTexturesForProgram(programId);
+        if (programTextures.empty()) {
             return;
         }
-        for (size_t i = 0; i < modelTextures.size(); i++) {
-            auto texture = getTexture(modelTextures[i], scene->getTexture(modelTextures[i]));
+        for (size_t i = 0; i < programTextures.size(); i++) {
+            auto texture = getTexture(programTextures[i], scene->getTexture(programTextures[i]));
             texture->bind(i);
         }
     }
 
-    std::shared_ptr<ge::gl::Program> Scene3D::useProgram(int modelId) {
-        auto programId = scene->getProgramForModel(modelId);
+    std::shared_ptr<ge::gl::Program> Scene3D::useProgram(int programId) {
         //The program exists - use it
         if (programs.find(programId) != programs.end()) {
             programs[programId]->use();
@@ -97,13 +141,13 @@ namespace MapGenerator {
         }
         //Let's grab the shaders and crate the program
         auto program = scene->getProgram(programId);
-        if(program == nullptr){
+        if (program == nullptr) {
             return nullptr;
         }
         std::vector<std::shared_ptr<ge::gl::Shader>> shaderObjects;
-        for(auto shaderId : program->getShaders()){
+        for (auto shaderId: program->getShaders()) {
             auto shader = getShader(shaderId);
-            if(shader == nullptr){
+            if (shader == nullptr) {
                 continue;
             }
             shaderObjects.push_back(shader);
@@ -112,6 +156,7 @@ namespace MapGenerator {
         programObject->attachShaders(shaderObjects);
         programObject->link();
         programs[programId] = programObject;
+        drawCounts[programId] = 0;
         programObject->use();
         return programObject;
     }
@@ -137,7 +182,7 @@ namespace MapGenerator {
     }
 
     std::shared_ptr<ge::gl::Shader> Scene3D::getShader(int id) {
-        if(id == -1) {
+        if (id == -1) {
             return nullptr;
         }
         if (shaders.find(id) != shaders.end()) {
@@ -147,7 +192,7 @@ namespace MapGenerator {
         auto shaderType = shader->getType();
         auto shaderSource = shader->getSource();
         auto geGLShaderType = 0;
-        switch(shaderType) {
+        switch (shaderType) {
             case Shader::VERTEX:
                 geGLShaderType = GL_VERTEX_SHADER;
                 break;
