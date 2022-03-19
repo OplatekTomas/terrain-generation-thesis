@@ -55,16 +55,16 @@ namespace MapGenerator {
         auto data = std::make_shared<ElevationData>(resolution, resolution);
         //Let's go through the requests and request 32 by 32 grid on each one
         for (int rowStart = 0; rowStart < resolution; rowStart += 32) {
-            auto rowEnd = rowStart + 32;
+            auto rowEnd = rowStart + 31;
             for (int colStart = 0; colStart < resolution; colStart += 32) {
-                auto colEnd = colStart + 32;
+                auto colEnd = colStart + 31;
                 auto result = sendElevationRequest(
                         lat1 + (rowStart * latStepSize),
                         long2 + (colStart * longStepSize),
                         lat1 + (rowEnd * latStepSize),
                         long2 + (colEnd * longStepSize),
-                        rowEnd - rowStart,
-                        colEnd - colStart
+                        (rowEnd - rowStart) + 1,
+                        (colEnd - colStart) + 1
                 );
                 auto elevations = result->resourceSets[0].resources[0].elevations;
                 data->setAt(rowStart, rowEnd, colStart, colEnd, elevations);

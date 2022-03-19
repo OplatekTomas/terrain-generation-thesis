@@ -74,6 +74,7 @@ namespace MapGenerator {
         int resolution = 512;
         //Set up the terrain height map.
         auto heightMap = std::make_shared<Texture>(resolution, resolution);
+        //Copy the original height data into the texture.
         heightTextureId = scene->addTexture(heightMap);
         auto program = std::make_shared<Program>();
         program->vertexShader = vertexShaderId;

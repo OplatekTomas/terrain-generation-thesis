@@ -35,16 +35,15 @@ namespace MapGenerator {
     }
 
     void ElevationData::setAt(int rowFrom, int rowTo, int colFrom, int colTo, const std::vector<double> &newData) {
-        int rowCount = rowTo - rowFrom;
-        int colCount = colTo - colFrom;
+        int rowCount = rowTo - rowFrom + 1;
+        int colCount = colTo - colFrom + 1;
         int rIndex = rowFrom;
 
         for (int r = 0; r < rowCount; r++) {
             int cIndex = colFrom;
-
             for (int c = 0; c < colCount; c++) {
-                int dataIndex = (r * rowCount) + (colCount - c - 1);
-                setAt(rIndex, cols - cIndex - 1, newData.at(dataIndex));
+                int dataIndex = (r * rowCount) + (colCount - 1 - c);
+                setAt(rIndex, cIndex, newData.at(dataIndex));
                 cIndex++;
             }
             rIndex++;
@@ -53,7 +52,6 @@ namespace MapGenerator {
     }
 
     double ElevationData::getAt(int x, int y) {
-
         return (*data)[x * this->rows + y];
     }
 

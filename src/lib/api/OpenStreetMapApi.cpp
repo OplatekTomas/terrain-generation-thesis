@@ -10,7 +10,7 @@
 namespace MapGenerator {
 
     std::string OpenStreetMapApi::getBaseAddress() {
-        return "http://overpass-api.de/api/interpreter";
+        return "http://lz4.overpass-api.de/api/interpreter";
     }
 
     std::shared_ptr<OSMData>
@@ -20,9 +20,9 @@ namespace MapGenerator {
         auto queryResult = encodeUrl(fmt::format(query, lat1, lon1, lat2, lon2));
         auto url = getBaseAddress() + "?data=" + queryResult;
 
-        //auto result = this->readData<MetadataResult>("../../../examples/osm.json");
+        auto result = this->readData<MetadataResult>("../../../examples/osm_brno.json");
 
-        auto result = this->sendRequest<MetadataResult>(url);
+        //auto result = this->sendRequest<MetadataResult>(url);
         if (result == nullptr) {
             return nullptr;
         }

@@ -5,6 +5,7 @@
 #include <generators/buildings/BuildingsGenerator.h>
 #include <Helper.h>
 #include <poly2tri/poly2tri.h>
+#include <iostream>
 
 namespace MapGenerator {
 
@@ -40,39 +41,80 @@ namespace MapGenerator {
         return v;
     }
 
-    Vertex BuildingsGenerator::checkBounds(Vertex vertex){
-        return vertex;
-        //TODO fix this function - right now it is not working and i dont have time to fix it
-        if(vertex.x < data->lat2 && vertex.x > data->lat1 && vertex.z < data->lon2 && vertex.z > data->lon1) {
-            return vertex;
+    int BuildingsGenerator::isOutsideBounds(Point point) {
+        if (point.lat > data->lat2) {
+            return 1;
         }
-        Vertex result = vertex;
-        if(vertex.x < data->lat1) {
-            result.x = data->lat1;
+        if (point.lat < data->lat1) {
+            return 2;
         }
-        if(vertex.x > data->lat2) {
-            result.x = data->lat2;
+        if (point.lon > data->lon2) {
+            return 3;
         }
-        if(vertex.z < data->lon1) {
-            result.z = data->lon1;
+        if (point.lon < data->lon1) {
+            return 4;
         }
-        if(vertex.z > data->lon2) {
-            result.z = data->lon2;
-        }
-        return result;
+        return 0;
     }
 
-    std::vector<Vertex> BuildingsGenerator::generateBuilding(const Node &building) {
+    /// @brief Generates the building
+    /// \param building building to generate the mesh for
+    /// \return The first tuple contains ground and roof mesh, the second contains ordered vertices
+    std::tuple<std::vector<Vertex>, std::vector<Vertex>> BuildingsGenerator::generateBuilding(const Node &building) {
         auto poly = std::vector<p2t::Point *>();
-        for (auto point: *building.geometry) {
-            poly.push_back(new p2t::Point(point.lat, point.lon));
+        for (int i = 0; i < building.geometry->size() - 1; i++) {
+            auto p1 = building.geometry->at(i);
+            auto p2 = building.geometry->at(i + 1);
+            auto p1Outside = isOutsideBounds(p1);
+            auto p2Outside = isOutsideBounds(p2);
+            if (p1Outside && p2Outside) {
+                continue;
+            }
+            if (!p1Outside && !p2Outside) {
+                poly.push_back(new p2t::Point(p1.lat, p1.lon));
+                continue;
+            }
+            //This means that first point is inside the bounds and must be added. If the second point is inside,
+            //it will be added later with the next iteration.
+            if (!p1Outside) {
+                poly.push_back(new p2t::Point(p1.lat, p1.lon));
+            }
+
+            // Calculate general equation of line from p1 to p2
+            auto m = (p2.lat - p1.lat) / (p2.lon - p1.lon);
+            auto b = p1.lat - m * p1.lon;
+            auto outResult = p1Outside + p2Outside;
+            //About 1 meter in lat and lon. This is used to make sure the height map is not too small.
+            auto offset = 0.00001;
+            p2t::Point newP;
+            if (outResult == 1) {
+                auto y = data->lat2 - offset;
+                auto x = (y - b) / m;
+                newP = {y, x};
+            } else if (outResult == 2) {
+                auto y = data->lat1 + offset;
+                auto x = ((data->lat1) - b) / m;
+                newP = {y, x};
+            }
+            if (outResult == 3) {
+                auto x = data->lon2 - offset;
+                auto y = m * data->lon2 + b;
+                newP = {y, x};
+            }
+            if (outResult == 4) {
+                auto x = data->lon1 + offset;
+                auto y = m * data->lon1 + b;
+                newP = {y, x};
+            }
+            poly.push_back(new p2t::Point(newP.x, newP.y));
+            __asm__("nop");
         }
-        poly.pop_back();
         auto cdt = std::make_shared<p2t::CDT>(poly);
         try {
             cdt->Triangulate();
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             //The triangulation failed - set some kind of error flag TODO
+            std::cout << e.what() << std::endl;
             return {};
         }
         auto triangles = cdt->GetTriangles();
@@ -82,11 +124,9 @@ namespace MapGenerator {
             auto p1 = tri->GetPoint(0);
             auto p2 = tri->GetPoint(1);
             auto p3 = tri->GetPoint(2);
-            vertices.emplace_back(checkBounds(Vertex(p1->x, 0, p1->y)));
-            vertices.emplace_back(checkBounds(Vertex(p2->x, 0, p2->y)));
-            vertices.emplace_back(checkBounds(Vertex(p3->x, 0, p3->y)));
-            //vertices.emplace_back(p2->x, 0, p2->y);
-            //vertices.emplace_back(p3->x, 0, p3->y);
+            vertices.emplace_back(Vertex(p1->x, 0, p1->y));
+            vertices.emplace_back(Vertex(p2->x, 0, p2->y));
+            vertices.emplace_back(Vertex(p3->x, 0, p3->y));
         }
         //Create the height offset from the height data
         auto min = std::numeric_limits<float>::max();
@@ -95,26 +135,31 @@ namespace MapGenerator {
             //Normalize the coordinates for the height data
             origVertices.emplace_back(vertex);
             vertex = normaliseVertex(vertex);
-            //Calculate the index of the height data
 
         }
         int numberOfFloors = 1;
-        auto heightInM = 420 / 100;
+        auto heightInM = 420.0 / 100.0;
 
         if (mapContainsKey(*building.tags, "building:levels")) {
             numberOfFloors = std::stoi(building.tags->at("building:levels"));
         }
+
         auto height = ((heightInM - heightData->getNormalizedMin()) /
                        (heightData->getNormalizedMax() + heightData->getNormalizedMin())) * numberOfFloors;
         for (int i = 0; i < origVertices.size(); i++) {
             auto orig = origVertices[i];
             auto v = vertices[i];
             Vertex upperV = {v.x, (float) (height), v.z};
-            std::tuple<double, float> key = {orig.x, orig.z};
+            std::tuple<double, double> key = {orig.x, orig.z};
             this->buildingVertices[key] = {v, upperV};
             vertices.emplace_back(upperV);
         }
-        return vertices;
+        std::vector<Vertex> positions;
+        for (auto &vertex: poly) {
+            positions.emplace_back(Vertex(vertex->x, 0, vertex->y));
+        }
+        positions.emplace_back(positions[0]);
+        return {vertices, positions};
     }
 
 #pragma GCC push_options
@@ -128,18 +173,17 @@ namespace MapGenerator {
                 continue;
             }
             //This will output the data into the buildingVertices map and return the geometry of a floor and a roof
-            auto ground = generateBuilding(building);
+            auto[ground, positions] = generateBuilding(building);
             for (auto &v: ground) {
                 Vertex normal = {0, 1, 0};
                 model->addVertex(v, normal);
                 model->addIndex(index);
                 index++;
             }
-            for (int i = 0; i < building.geometry->size() - 1; i++) {
-                auto firstPos = std::make_tuple((float) building.geometry->at(i).lat,
-                                                (float) building.geometry->at(i).lon);
-                auto secondPos = std::make_tuple((float) building.geometry->at(i + 1).lat,
-                                                 (float) building.geometry->at(i + 1).lon);
+            //Let's build the walls and make compiler pay for it
+            for (int i = 0; i < ((int) positions.size()) - 1; i++) {
+                auto firstPos = std::make_tuple((double) positions.at(i).x, (double) positions.at(i).z);
+                auto secondPos = std::make_tuple((double) positions.at(i + 1).x, (double) positions.at(i + 1).z);
                 auto[v0, v1] = buildingVertices[firstPos];
                 auto[v2, v3] = buildingVertices[secondPos];
                 auto normal = (v2 - v1).cross(v0 - v1);
@@ -154,6 +198,17 @@ namespace MapGenerator {
                 model->addIndex(index + 3);
                 model->addIndex(index + 2);
                 index += 4;
+            }
+        }
+        for (int i = 0; i < model->vertices.size(); i += 8) {
+            auto x = model->vertices.at(i);
+            auto y = model->vertices.at(i + 1);
+            auto z = model->vertices.at(i + 2);
+            if (x > 1 || x < 0) {
+                __asm__("nop");
+            }
+            if (z > 1 || z < 0) {
+                __asm__("nop");
             }
         }
         return model;
@@ -216,3 +271,19 @@ namespace MapGenerator {
       model->addIndex(i + index);
   }
   index += vertices.size();*/
+/*if (outResult == 1 || outResult == 2) {
+    auto x = (data->lat2 - b) / m;
+    auto y = data->lat2;
+    if (outResult == 2) {
+        y = data->lat1;
+        x = (data->lat1 - b) / m;
+    }
+    poly.push_back(new p2t::Point(y, x));
+} else if (outResult == 3 || outResult == 4) {
+    auto x = (data->lon2 - b) / m;
+    auto y = data->lon2;
+    if (outResult == 4) {
+        y = data->lon1;
+    }
+    poly.push_back(new p2t::Point(y, x));
+}*/

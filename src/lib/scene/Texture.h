@@ -11,22 +11,26 @@ namespace MapGenerator {
     class Texture {
     public:
         Texture(int width, int height);
+
         Texture(int width, int height, const std::vector<unsigned char> &data);
 
-        unsigned char * getData() const;
+        unsigned char *getData() const;
 
         int getWidth() const;
 
         int getHeight() const;
 
-        void addPixel(unsigned char r,unsigned char g,unsigned char b,unsigned char a);
+        void addPixel(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
-        void setPixel(int x, int y,unsigned char r,unsigned char g,unsigned char b,unsigned char a);
+        void setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+
+        void setPixel(int x, int y, float f);
 
         void removePixel();
 
 
     private:
+
         int width;
         int height;
         int index;

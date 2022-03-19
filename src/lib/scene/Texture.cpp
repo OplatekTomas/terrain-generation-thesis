@@ -60,5 +60,10 @@ namespace MapGenerator {
         this->data = std::make_shared<std::vector<unsigned char>>(data);
     }
 
+    void Texture::setPixel(int x, int y, float f) {
+        auto const * p = reinterpret_cast<unsigned char const *>(&f);
+        setPixel(x, y, p[0], p[1], p[2], p[3]);
+    }
+
 
 }

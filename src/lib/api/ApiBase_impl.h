@@ -8,6 +8,8 @@
 #include <cpr/cpr.h>
 #include <iomanip>
 #include <utility>
+#include <iostream>
+
 namespace MapGenerator {
     template<class T>
     std::shared_ptr<T> ApiBase::sendRequest(std::string uri) {
@@ -18,6 +20,7 @@ namespace MapGenerator {
         auto result = session->Get();
         delete session;
         if (result.status_code != 200) {
+            std::cerr << "Error: " << result.status_code << std::endl;
             return nullptr;
         }
         auto jsonObj = nlohmann::json::parse(result.text);

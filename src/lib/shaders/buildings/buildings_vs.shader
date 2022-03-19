@@ -16,8 +16,10 @@ uniform sampler2D heightMap;
 void main() {
     vec3 pos = position;
     vec2 texPos = vec2(1-pos.x, pos.z);
-    pos.y += texture(heightMap, texPos).r;
-
+    float height = texture(heightMap, texPos).r;
+    if(height != 0.0){
+        //pos.y += height;
+    }
     WorldPos_VS_Out = pos;
     TexCoord_VS_Out = texCoord;
     Normal_VS_Out = normalize(normal);

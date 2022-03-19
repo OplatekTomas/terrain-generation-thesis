@@ -84,13 +84,18 @@ namespace MapGenerator {
                 49.20443981462129, 16.697611471199462
         };
 
-        auto currentPos = posHomeL;
+        std::vector<double> nassfeld{
+            46.631426377462304, 13.222294893455746,
+            46.55290962338361, 13.297562841791274
+        };
+
+        auto currentPos = posBrno;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];
         options.lat2 = currentPos[2];
         options.lon2 = currentPos[3];
-        options.terrainResolution = 96;
+        options.terrainResolution = 32;
         this->mapGenerator = std::make_shared<MapGenerator>(config, options);
         return true;
     }

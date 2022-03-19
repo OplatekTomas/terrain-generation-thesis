@@ -9,5 +9,6 @@ void main(){
     //color = vec3(WorldPos_FS_in.y);
     color = vec3(WorldPos_FS_in.y);
 
-    //color = vec3(1);
+
+        //color = vec3(1);
 }
