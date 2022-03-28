@@ -153,6 +153,22 @@ namespace MapGenerator {
         return shaders[id];
     }
 
+    void Scene::removeModel(int id) {
+        if(models.find(id) == models.end()) {
+            throw std::runtime_error("Model with id " + std::to_string(id) + " does not exist");
+        }
+        auto &programs = modelToProgram[id];
+        for (auto programId : programs) {
+            auto &textures = programToTexture[programId];
+            auto it = std::find(textures.begin(), textures.end(), id);
+            if (it != textures.end()) {
+                textures.erase(it);
+            }
+        }
+        modelToProgram.erase(id);
+        models.erase(id);
+    }
+
 
 }
 

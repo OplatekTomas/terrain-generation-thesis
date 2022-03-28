@@ -141,8 +141,12 @@ namespace MapGenerator {
 
 
     void MapGenerator::generateTrees(const shared_ptr<Texture> &texture, int resolution) {
+        static int vegetationId = -1;
+        if(vegetationId != -1) {
+            return; //TODO introduce a function that will increase the precission without recalculating
+        }
         auto vegetation = vegetationGenerator->getVegetation(texture, resolution);
-        auto vegetationId = scene->addModel(vegetation);
+        vegetationId = scene->addModel(vegetation);
         auto program = std::make_shared<Program>();
         program->vertexShader = scene->addShader(
                 std::make_shared<Shader>(Shaders::TreesVertexShader(), Shader::VERTEX));
@@ -151,7 +155,6 @@ namespace MapGenerator {
         program->drawTarget = Program::DRAW_TO_SCREEN;
         auto progId = scene->createProgram(program);
         scene->bindTexture(heightTextureId, progId);
-
         scene->bindProgram(progId, vegetationId);
     }
 

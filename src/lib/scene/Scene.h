@@ -20,6 +20,7 @@ namespace MapGenerator{
         Scene();
 
         int addModel(std::shared_ptr<Model> model);
+        void removeModel(int id);
         int addTexture(std::shared_ptr<Texture> texture);
         int addShader(std::shared_ptr<Shader> shader);
         void bindTexture(int id, int programId);
