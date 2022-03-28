@@ -9,6 +9,7 @@
 #include<memory>
 #include <api/models/openstreetmap/OSMData.h>
 #include <scene/Model.h>
+//#include <delaunator.hpp>
 #include <scene/Vertex.h>
 #include <config/GeneratorOptions.h>
 #include <api/models/bing/ElevationData.h>
@@ -35,7 +36,9 @@ namespace MapGenerator {
 
         std::tuple<std::vector<Vertex>, std::vector<Vertex>> generateBuilding(const Node &building);
 
-        int isOutsideBounds(Point point);
+        int isOutsideBounds(GeoPoint point);
+
+        std::vector<std::tuple<double, double>> clipBuilding(const Node &building);
     };
 
 }

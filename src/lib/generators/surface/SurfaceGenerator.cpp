@@ -25,7 +25,7 @@ namespace MapGenerator{
 
         auto vertices = std::vector<Vertex>();
         auto verticesNormals = std::vector<std::vector<Vertex>>();
-        auto verticesTextureCoords = std::vector<std::tuple<float, float>>();
+        auto verticesTextureCoords = std::vector<PointF>();
         for (auto x = 0; x <= res; x++) {
             for (auto y = 0; y <= res; y++) {
                 auto index = (x * (res + 1) + y);
@@ -35,9 +35,9 @@ namespace MapGenerator{
                 // the (scale / 4) is there to put it at the center of the 0-1 range
                 Vertex v;
                 if (changeY) {
-                    v = {(yPos * scale) + (scale / 4), height, xPos};
+                    v = {(yPos * scale) + ((1-scale)/2), height, xPos};
                 } else {
-                    v = {yPos, height, (xPos * scale) + (scale / 4)};
+                    v = {yPos, height, (xPos * scale) + ((1-scale)/2)};
                 }
                 vertices.push_back(v);
                 verticesNormals.emplace_back();
@@ -82,8 +82,7 @@ namespace MapGenerator{
                 normal += n;
             }
             normal = normal.normalize();
-            auto[t1, t2] = verticesTextureCoords[i];
-            model->addVertex(vertices[i], normal, t1, t2);
+            model->addVertex(vertices[i], normal, verticesTextureCoords[i]);
         }
         return model;
     }

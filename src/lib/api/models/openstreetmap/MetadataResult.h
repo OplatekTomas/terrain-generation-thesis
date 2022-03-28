@@ -22,7 +22,7 @@ namespace MapGenerator {
         double maxLon;
     };
 
-    struct Point {
+    struct GeoPoint {
 
         double lat;
         double lon;
@@ -34,7 +34,7 @@ namespace MapGenerator {
 
     struct ShapeBase{
         Type type;
-        std::shared_ptr<std::vector<Point>> geometry;
+        std::shared_ptr<std::vector<GeoPoint>> geometry;
     };
 
     struct Member : ShapeBase {
@@ -72,9 +72,9 @@ namespace nlohmann {
 
     void to_json(json &j, const MapGenerator::Bounds &x);
 
-    void from_json(const json &j, MapGenerator::Point &x);
+    void from_json(const json &j, MapGenerator::GeoPoint &x);
 
-    void to_json(json &j, const MapGenerator::Point &x);
+    void to_json(json &j, const MapGenerator::GeoPoint &x);
 
     void from_json(const json &j, MapGenerator::Member &x);
 
@@ -111,12 +111,12 @@ namespace nlohmann {
         j["maxlon"] = x.maxLon;
     }
 
-    inline void from_json(const json &j, MapGenerator::Point &x) {
+    inline void from_json(const json &j, MapGenerator::GeoPoint &x) {
         x.lat = j.at("lat").get<double>();
         x.lon = j.at("lon").get<double>();
     }
 
-    inline void to_json(json &j, const MapGenerator::Point &x) {
+    inline void to_json(json &j, const MapGenerator::GeoPoint &x) {
         j = json::object();
         j["lat"] = x.lat;
         j["lon"] = x.lon;
@@ -126,7 +126,7 @@ namespace nlohmann {
         x.type = j.at("type").get<MapGenerator::Type>();
         x.ref = j.at("ref").get<int64_t>();
         x.role = j.at("role").get<std::string>();
-        x.geometry = MapGenerator::get_optional<std::vector<MapGenerator::Point>>(j, "geometry");
+        x.geometry = MapGenerator::get_optional<std::vector<MapGenerator::GeoPoint>>(j, "geometry");
         x.lat = MapGenerator::get_optional<double>(j, "lat");
         x.lon = MapGenerator::get_optional<double>(j, "lon");
     }
@@ -155,7 +155,7 @@ namespace nlohmann {
         x.tags = MapGenerator::get_optional<std::map<std::string, std::string>>(j, "tags");
         x.bounds = MapGenerator::get_optional<MapGenerator::Bounds>(j, "bounds");
         x.nodes = MapGenerator::get_optional<std::vector<int64_t>>(j, "nodes");
-        x.geometry = MapGenerator::get_optional<std::vector<MapGenerator::Point>>(j, "geometry");
+        x.geometry = MapGenerator::get_optional<std::vector<MapGenerator::GeoPoint>>(j, "geometry");
         x.members = MapGenerator::get_optional<std::vector<MapGenerator::Member>>(j, "members");
     }
 

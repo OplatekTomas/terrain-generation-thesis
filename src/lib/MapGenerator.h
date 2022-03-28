@@ -15,6 +15,7 @@
 #include <future>
 #include <thread>
 #include <chrono>
+#include <generators/vegetation/VegetationGenerator.h>
 
 
 namespace MapGenerator {
@@ -33,9 +34,11 @@ namespace MapGenerator {
         std::unique_ptr<BingApi> bing;
         std::unique_ptr<OpenStreetMapApi> osm;
         std::shared_ptr<LandTypeGenerator> textureGenerator;
+        std::shared_ptr<VegetationGenerator> vegetationGenerator;
         std::shared_ptr<Scene> scene;
         std::shared_ptr<OSMData> osmData;
         std::shared_ptr<ElevationData> elevationData;
+
 
         void runAsyncGenerators(int programId);
 
@@ -46,6 +49,8 @@ namespace MapGenerator {
         void generateBuildings();
 
         void generateHeightMap(int surfaceId, int vertexShaderId, int tcsShaderId);
+
+        void generateTrees(const shared_ptr<Texture> &texture, int resolution);
     };
 }
 

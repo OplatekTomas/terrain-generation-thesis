@@ -55,7 +55,7 @@ namespace MapGenerator {
         way.id = elem.id;
         way.tags = elem.tags;
         way.members = std::make_shared<std::vector<Member>>();
-        way.geometry = std::make_shared<std::vector<Point>>();
+        way.geometry = std::make_shared<std::vector<GeoPoint>>();
 
         auto added = std::map<long, bool>();
         auto outerWays = boolinq::from(*elem.members)
@@ -68,7 +68,7 @@ namespace MapGenerator {
         for (const auto &outerWay: outerWays) {
             added.insert({outerWay.ref, false});
         }
-        Point lastPoint{};
+        GeoPoint lastPoint{};
         auto frontPredicate = [&](const Member &member) {
             return member.geometry->front().lat == lastPoint.lat &&
                    member.geometry->front().lon == lastPoint.lon &&
@@ -273,7 +273,7 @@ namespace MapGenerator {
         if (!isInsideBounds(lat, lon)) {
             return false;
         }
-        Point p = {lat, lon};
+        GeoPoint p = {lat, lon};
         if (isRelation) {
             return isInsideRelation(p);
         } else {
@@ -281,7 +281,7 @@ namespace MapGenerator {
         }
     }
 
-    bool AreaOnMap::isInsideRelation(Point p) {
+    bool AreaOnMap::isInsideRelation(GeoPoint p) {
         return std::any_of(node.members->begin(), node.members->end(), [&](const Member &member) {
             if (member.type == Type::way) {
                 return isInsideWay(p, member);
@@ -291,7 +291,7 @@ namespace MapGenerator {
     }
 
 
-    double AreaOnMap::distanceToLine(Point p, Point a, Point b) {
+    double AreaOnMap::distanceToLine(GeoPoint p, GeoPoint a, GeoPoint b) {
         double x = p.lon - a.lon;
         double y = p.lat - a.lat;
         double u = b.lon - a.lon;
@@ -310,7 +310,7 @@ namespace MapGenerator {
         return sqrt(xx * xx + yy * yy);
     }
 
-    bool AreaOnMap::isInsideRoute(Point p, const ShapeBase &shape) const {
+    bool AreaOnMap::isInsideRoute(GeoPoint p, const ShapeBase &shape) const {
         //Check if the distance between the point and the line is less than routeWidth using distanceToLine
         double distance = 0;
         bool result = false;
@@ -323,7 +323,7 @@ namespace MapGenerator {
         return result;
     }
 
-    bool AreaOnMap::isInsideWay(Point p, const ShapeBase &way) {
+    bool AreaOnMap::isInsideWay(GeoPoint p, const ShapeBase &way) {
         if (isRoute) {
             return isInsideRoute(p, way);
         }

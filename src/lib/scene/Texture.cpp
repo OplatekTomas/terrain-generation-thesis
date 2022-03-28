@@ -65,5 +65,13 @@ namespace MapGenerator {
         setPixel(x, y, p[0], p[1], p[2], p[3]);
     }
 
+    Vertex Texture::getPixel(int x, int y) const {
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+            return {};
+        }
+        int idx = (y * width + x) * 4;
+        return Vertex(data->at(idx + 0), data->at(idx + 1), data->at(idx + 2));
+    }
+
 
 }

@@ -44,6 +44,12 @@ CPMAddPackage(
         GIT_TAG 8b5fa15800ab8ef44ed7b0ec7061e907d5e49059
 )
 
+if(CDT_ADDED)
+    add_library(CDT INTERFACE IMPORTED)
+    target_include_directories(CDT INTERFACE "${CDT_SOURCE_DIR}/CDT/include")
+    message(STATUS "CDT_SOURCE_DIR: ${CDT_SOURCE_DIR}")
+endif()
+
 
 CPMAddPackage("gh:fmtlib/fmt#8.0.1")
 
@@ -53,20 +59,41 @@ CPMAddPackage(
         VERSION 1.2
 )
 
+CPMAddPackage(
+        NAME cdt
+        GITHUB_REPOSITORY artem-ogre/CDT
+        GIT_TAG 1.1.2
+)
+
+CPMAddPackage(
+        NAME assimp
+        GITHUB_REPOSITORY assimp/assimp
+        GIT_TAG v4.1.0
+)
+
 FetchContent_Declare(
         boolinq
         URL https://raw.githubusercontent.com/k06a/boolinq/master/include/boolinq/boolinq.h
         DOWNLOAD_NO_EXTRACT TRUE
 )
 
+FetchContent_Declare(
+        poisson_disk_sampling
+        URL https://raw.githubusercontent.com/thinks/poisson-disk-sampling/master/thinks/poisson_disk_sampling/poisson_disk_sampling.h
+        DOWNLOAD_NO_EXTRACT TRUE
+)
+
+
+
 FetchContent_MakeAvailable(boolinq)
+FetchContent_MakeAvailable(poisson_disk_sampling)
 
 OPTION (USE_OpenMP "Use OpenMP" ON)
 IF(USE_OpenMP)
     FIND_PACKAGE(OpenMP)
     IF(OPENMP_FOUND)
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} ")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} ")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -O0 ")
     ENDIF()
 ENDIF()
 
@@ -81,9 +108,10 @@ foreach(file ${SHADERS_SRC_FILES})
     set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
     file(WRITE "${DUMMY_FILE}" "")
-    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h generators/vegetation/PositionSampler.cpp generators/vegetation/PositionSampler.h)
+    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h)
 endforeach()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
+
 
 add_library (lib
         shaders/Shaders.h ${SHADERS_DST_FILES}
@@ -96,25 +124,37 @@ add_library (lib
         generators/landtype/LandTypeGenerator.cpp generators/landtype/LandTypeGenerator.h generators/landtype/AreaOnMap.cpp generators/landtype/AreaOnMap.h
         scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h config/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
         scene/Vertex.h scene/Vertex.cpp
-        )
+        generators/vegetation/ObjectLoader.cpp generators/vegetation/ObjectLoader.h generators/vegetation/VegetationGenerator.cpp generators/vegetation/VegetationGenerator.h scene/Point.cpp scene/Point.h)
 
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
 endif()
 
+if (cdt_ADDED)
+    target_include_directories(lib PUBLIC ${cdt_SOURCE_DIR}/CDT/include)
+endif()
+
+
 #Create fake target that calls the shaders/CMakeLists.txt file just before compile time to include the current version
 #of a shader and not the one that would be read during loading of the project
-set(FAKE_TARGET fakeTarget)
-add_custom_target(fakeTarget
+set(SHADER_COPY shaderCopyTarget)
+add_custom_target(shaderCopyTarget
         COMMAND ${CMAKE_COMMAND} -P "shaders/CMakeLists.txt"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
-add_dependencies(${PROJECT_NAME} ${FAKE_TARGET})
 
-target_link_libraries(lib PUBLIC cpr::cpr fmt poly2tri)
+set(MODEL_COPY modelCopyTarget)
+add_custom_target(modelCopyTarget
+        COMMAND ${CMAKE_COMMAND} -E copy_directory models ${CMAKE_CURRENT_BINARY_DIR}/models
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        )
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY} ${MODEL_COPY})
+
+target_link_libraries(lib PUBLIC cpr::cpr fmt assimp)
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(lib PUBLIC ${boolinq_SOURCE_DIR})
+target_include_directories(lib PUBLIC ${poisson_disk_sampling_SOURCE_DIR})
 
 
 

@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <vector>
+#include <scene/Vertex.h>
 
 namespace MapGenerator {
     class Texture {
@@ -25,6 +26,8 @@ namespace MapGenerator {
         void setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
         void setPixel(int x, int y, float f);
+
+        Vertex getPixel(int x, int y) const;
 
         void removePixel();
 

@@ -8,7 +8,6 @@
 #include <memory>
 #include <thread>
 #include <csignal>
-#include "shaders/Shaders.h"
 #include <config/ConfigReader.h>
 #include <QCoreApplication>
 #include <QKeyEvent>
@@ -20,6 +19,7 @@
 
 namespace MapGenerator {
     Renderer::Renderer(QWindow *parent) {
+
         initialized = false;
         context = nullptr;
         setSurfaceType(
@@ -89,7 +89,7 @@ namespace MapGenerator {
             46.55290962338361, 13.297562841791274
         };
 
-        auto currentPos = posBrno;
+        auto currentPos = posHome;
 
         options.lat1 = currentPos[0];
         options.lon1 = currentPos[1];

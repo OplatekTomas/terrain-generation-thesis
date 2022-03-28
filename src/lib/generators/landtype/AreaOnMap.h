@@ -41,23 +41,23 @@ namespace MapGenerator {
         unsigned char rgba[4] = {0, 0, 0, 0};
         double area = -1;
         int priority = 0;
-        Point min;
-        Point max;
+        GeoPoint min;
+        GeoPoint max;
 
         AreaOnMap(const Node &elem);
         AreaOnMap();
         void resolveColor();
         void computeRoute();
 
-        bool isInsideWay(Point p, const ShapeBase &way);
+        bool isInsideWay(GeoPoint p, const ShapeBase &way);
 
-        bool isInsideRelation(Point p);
+        bool isInsideRelation(GeoPoint p);
 
-        bool isInsideRoute(Point p, const ShapeBase &shape) const;
+        bool isInsideRoute(GeoPoint p, const ShapeBase &shape) const;
 
         int getRouteWidth(const std::string &routeType);
 
-        static double distanceToLine(Point p, Point a, Point b);
+        static double distanceToLine(GeoPoint p, GeoPoint a, GeoPoint b);
 
         static Bounds calculateBounds(const ShapeBase &way);
 

@@ -35,7 +35,6 @@ namespace MapGenerator {
 
         //Create an empty scene.
         scene = std::make_shared<Scene>();
-
         //Add the surface mesh.
         auto surface = generateSurface();
         auto surfaceId = scene->addModel(surface);
@@ -56,8 +55,11 @@ namespace MapGenerator {
         program->tessEvaluationShader = tesId;
         auto programId = scene->createProgram(program);
         scene->bindProgram(surfaceId, programId);
-
+        vegetationGenerator = std::make_shared<VegetationGenerator>(options, elevationData);
         generateHeightMap(surfaceId, vertexId, tcsId);
+
+        //Load models.
+
 
         //Start async texture generation.
         if (true) {
@@ -71,7 +73,7 @@ namespace MapGenerator {
     };
 
     void MapGenerator::generateHeightMap(int surfaceId, int vertexShaderId, int tcsShaderId) {
-        int resolution = 512;
+        int resolution = 2048;
         //Set up the terrain height map.
         auto heightMap = std::make_shared<Texture>(resolution, resolution);
         //Copy the original height data into the texture.
@@ -91,6 +93,7 @@ namespace MapGenerator {
         scene->bindProgram(programId, surfaceId);
     }
 
+
     void MapGenerator::runAsyncGenerators(int surfaceProgramId) {
         //Grab OSM metadata
         if (options.lat1 > options.lat2) {
@@ -105,7 +108,28 @@ namespace MapGenerator {
             return;
         }
         generateBuildings();
-        generateSurfaceTextures(surfaceProgramId);
+        int prevId = -1;
+        int currentResolution = options.minTextureResolution;
+        while (currentResolution <= options.maxTextureResolution) {
+            if (osmData == nullptr) {
+                return;
+            }
+            if (textureGenerator == nullptr) {
+                textureGenerator = std::make_shared<LandTypeGenerator>(osmData);
+            }
+            auto texture = textureGenerator->generateTexture(currentResolution);
+            auto texId = scene->addTexture(texture);
+            if (prevId != -1) {
+                scene->unbindTexture(prevId, surfaceProgramId);
+            }
+            scene->bindTexture(texId, surfaceProgramId);
+            prevId = texId;
+
+            //Now we can generate the trees -> when we have at least basic texture
+            generateTrees(texture, currentResolution);
+
+            currentResolution = currentResolution * options.textureResolutionStep;
+        }
     }
 
     std::shared_ptr<Model> MapGenerator::generateSurface() {
@@ -113,6 +137,22 @@ namespace MapGenerator {
                                                      options.terrainResolution);
         auto surfaceGenerator = std::make_shared<SurfaceGenerator>(elevationData, options);
         return surfaceGenerator->getSurface();
+    }
+
+
+    void MapGenerator::generateTrees(const shared_ptr<Texture> &texture, int resolution) {
+        auto vegetation = vegetationGenerator->getVegetation(texture, resolution);
+        auto vegetationId = scene->addModel(vegetation);
+        auto program = std::make_shared<Program>();
+        program->vertexShader = scene->addShader(
+                std::make_shared<Shader>(Shaders::TreesVertexShader(), Shader::VERTEX));
+        program->fragmentShader = scene->addShader(
+                std::make_shared<Shader>(Shaders::TreesFragmentShader(), Shader::FRAGMENT));
+        program->drawTarget = Program::DRAW_TO_SCREEN;
+        auto progId = scene->createProgram(program);
+        scene->bindTexture(heightTextureId, progId);
+
+        scene->bindProgram(progId, vegetationId);
     }
 
 
@@ -132,24 +172,7 @@ namespace MapGenerator {
 
 
     void MapGenerator::generateSurfaceTextures(int programId) {
-        int prevId = -1;
-        int currentResolution = options.minTextureResolution;
-        while (currentResolution <= options.maxTextureResolution) {
-            if (osmData == nullptr) {
-                return;
-            }
-            if (textureGenerator == nullptr) {
-                textureGenerator = std::make_shared<LandTypeGenerator>(osmData);
-            }
-            auto texture = textureGenerator->generateTexture(currentResolution);
-            auto texId = scene->addTexture(texture);
-            if (prevId != -1) {
-                scene->unbindTexture(prevId, programId);
-            }
-            scene->bindTexture(texId, programId);
-            prevId = texId;
-            currentResolution = currentResolution * options.textureResolutionStep;
-        }
+
     }
 
 }

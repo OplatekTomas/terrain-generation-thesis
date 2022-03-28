@@ -13,32 +13,48 @@ const char *ground_vs =
         ;
 
 const char *ground_fs =
+
 #include <shaders/include/ground/ground_fs.shader.out>
         ;
 
 const char *buildings_fs =
+
 #include <shaders/include/buildings/buildings_fs.shader.out>
         ;
 
 const char *buildings_vs =
+
 #include <shaders/include/buildings/buildings_vs.shader.out>
         ;
 
 const char *ground_tcs =
+
 #include <shaders/include/ground/ground_tcs.shader.out>
         ;
-const char * ground_es =
+const char *ground_es =
+
 #include <shaders/include/ground/ground_es.shader.out>
         ;
 
-const char * heightmap_fs =
+const char *heightmap_fs =
+
 #include <shaders/include/heightmap/heightmap_fs.shader.out>
-;
+        ;
 
 
-const char * heightmap_es =
+const char *heightmap_es =
+
 #include <shaders/include/heightmap/heightmap_es.shader.out>
-;
+        ;
+
+const char *trees_fs =
+
+#include <shaders/include/trees/tree_fs.shader.out>
+        ;
+
+const char *trees_vs =
+#include <shaders/include/trees/tree_vs.shader.out>
+        ;
 
 
 class Shaders {
@@ -74,6 +90,14 @@ public:
 
     static const char *HeightmapEvaluationShader() {
         return heightmap_es;
+    };
+
+    static const char *TreesFragmentShader() {
+        return trees_fs;
+    };
+
+    static const char *TreesVertexShader() {
+        return trees_vs;
     };
 
 };
