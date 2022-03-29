@@ -21,7 +21,7 @@ namespace MapGenerator {
     class Scene3D {
     public:
         Scene3D(const shared_ptr<Scene> &scene, const shared_ptr<ge::gl::Context> &ctx,
-                const shared_ptr<Camera> &camera);
+                const shared_ptr<Camera> &camera, int gBufferId);
 
         ~Scene3D();
 
@@ -41,6 +41,7 @@ namespace MapGenerator {
         map<int, shared_ptr<ge::gl::Shader>> shaders;
         map<int, shared_ptr<ge::gl::Framebuffer>> frameBuffers;
         map<int, shared_ptr<ge::gl::Renderbuffer>> renderBuffers;
+        int gBufferId;
 
         shared_ptr<ge::gl::Texture> getTexture(int id, const shared_ptr<Texture> &texture, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
 

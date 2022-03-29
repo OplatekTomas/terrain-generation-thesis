@@ -54,6 +54,11 @@ namespace MapGenerator {
         bool initialized;
         QOpenGLContext *context;
         std::shared_ptr<ge::gl::Context> gl;
+        std::shared_ptr<ge::gl::Buffer> gBuffer;
+        std::shared_ptr<ge::gl::Texture> gPosition;
+        std::shared_ptr<ge::gl::Texture> gNormal;
+        std::shared_ptr<ge::gl::Texture> gAlbedo;
+        void prepareGBufferTextures();
         std::shared_ptr<Camera> camera;
         QSurfaceFormat surfaceFormat;
         std::unique_ptr<QTimer> renderTimer;

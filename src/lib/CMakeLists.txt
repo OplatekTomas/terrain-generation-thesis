@@ -68,7 +68,7 @@ CPMAddPackage(
 CPMAddPackage(
         NAME assimp
         GITHUB_REPOSITORY assimp/assimp
-        GIT_TAG v4.1.0
+        GIT_TAG v4.0.0
 )
 
 FetchContent_Declare(

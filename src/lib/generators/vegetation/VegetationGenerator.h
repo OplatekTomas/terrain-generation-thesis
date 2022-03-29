@@ -13,6 +13,8 @@
 #include <string>
 #include <scene/Texture.h>
 #include <memory>
+#include <random>
+
 
 namespace MapGenerator {
     class VegetationGenerator {
@@ -34,6 +36,12 @@ namespace MapGenerator {
 
         bool updateZ;
         float scale;
+        std::shared_ptr<Model> result;
+
+        void addToResult(const std::shared_ptr <Model> &model, const std::vector <Vertex> &scaledData, const PointF &offset);
+
+        std::uniform_real_distribution<double> randomDistribution;
+        std::mt19937 randomGenerator;
     };
 }
 

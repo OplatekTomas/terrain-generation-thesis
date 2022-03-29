@@ -13,10 +13,15 @@ namespace MapGenerator {
         defaultTree = ObjectLoader::load("../lib/models/kokotree.obj");
         this->options = options;
         this->heightData = heightData;
-
         this->updateZ = heightData->getScale() > 1;
-
         this->scale = this->updateZ ? 1 / heightData->getScale() : heightData->getScale();
+        //Initialize a c++11 random number generator
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        this->randomGenerator = std::mt19937(rd());
+        this->randomDistribution = std::uniform_real_distribution<double>(0, 1);
+        //Generate a random number
+
     }
 
     VegetationGenerator::~VegetationGenerator() {
@@ -46,12 +51,47 @@ namespace MapGenerator {
         PointI pointI = PointI((int) (point.x * resolution), (int) (point.y * resolution));
         auto color = texture->getPixel(pointI.x, pointI.y);
         //TODO change according to requested biome
-        //return true;
         return color.x == 1.0;
     }
 
+    void VegetationGenerator::addToResult(const std::shared_ptr<Model> &model, const std::vector<Vertex> &scaledData,
+                                          const PointF &offset) {
+        std::vector<Vertex> resultVertices;
+        for (int j = 0; j < scaledData.size(); j++) {
+            auto vertex = Vertex(scaledData[j].x + offset.x, scaledData[j].y, scaledData[j].z + offset.y);
+            if (!updateZ) {
+                vertex.z = (vertex.z * scale) + ((1 - scale) / 2);
+            } else {
+                vertex.x = (vertex.x * scale) + ((1 - scale) / 2);
+            }
+            //resultVertices.push_back(vertex);
+            auto origV = &model->vertices;
+            auto normal = Vertex((*origV)[j * 8 + 3], (*origV)[j * 8 + 4], (*origV)[j * 8 + 5]);
+            auto uv = PointF((*origV)[j * 8 + 6], (*origV)[j * 8 + 7]);
+            result->addVertex(vertex, normal, uv);
+        }
+        return;
+        Vertex center;
+        for(auto i : scaledData){
+            center += i;
+        }
+        center /= scaledData.size();
+        auto angle = randomDistribution(randomGenerator) * 2 * M_PI;
+        //rotate around center according to angle
+        for (int i = 0; i < resultVertices.size(); i++) {
+            auto v = resultVertices[i];
+            //translate the vertex back to origin
+            v -= center;
+            v.x = v.x * cos(angle) - v.z * sin(angle);
+            v.z = -v.x * sin(angle) + v.z * cos(angle);
+            //v.z = z + center.z;
+            v += center;
+
+        }
+    }
+
     std::shared_ptr<Model> VegetationGenerator::getVegetation(const std::shared_ptr<Texture> &texture, int resolution) {
-        auto result = std::make_shared<Model>();
+        result = std::make_shared<Model>();
         PointF min;
         PointF max;
         if (!updateZ) {
@@ -64,8 +104,8 @@ namespace MapGenerator {
         min = {0.005, 0.005};
         max = {0.995, 0.995};
 
-        auto treeHeightInM = 20.0;
-        auto treeDistanceInM = 4.0;
+        auto treeHeightInM = 20.0 * (1 / this->scale);
+        auto treeDistanceInM = 4.0 * (1 / this->scale);
         auto treeHeight = ((treeHeightInM - heightData->getNormalizedMin()) /
                            (heightData->getNormalizedMax() + heightData->getNormalizedMin()));
         auto treeDistance = ((treeDistanceInM - heightData->getNormalizedMin()) /
@@ -81,21 +121,8 @@ namespace MapGenerator {
             auto xOffset = floatPositions[i][0];
             auto zOffset = floatPositions[i][1];
             if (!shouldRender(texture, resolution, PointF(xOffset, zOffset))) continue;
+            addToResult(model, scaledModel, PointF(xOffset, zOffset));
 
-            for (int j = 0; j < scaledModel.size(); j++) {
-                auto origV = &defaultTree->vertices;
-                auto vertex = Vertex(scaledModel[j].x + xOffset, scaledModel[j].y, scaledModel[j].z + zOffset);
-                if (!updateZ) {
-                    vertex.z = (vertex.z * scale) + ((1 - scale) / 2);
-                    //vertex.x = vertex.x * scale;
-                } else {
-                    vertex.x = (vertex.x * scale) + ((1 - scale) / 2);
-                    //vertex.z = (vertex.z * scale
-                }
-                auto normal = Vertex((*origV)[j * 8 + 3], (*origV)[j * 8 + 4], (*origV)[j * 8 + 5]);
-                auto uv = PointF((*origV)[j * 8 + 6], (*origV)[j * 8 + 7]);
-                result->addVertex(vertex, normal, uv);
-            }
             for (int j = 0; j < model->indices.size(); j++) {
                 result->addIndex(model->indices[j] + (scaledModel.size() * i));
             }

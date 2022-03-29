@@ -26,6 +26,6 @@ vec3 CalcDirLight(vec3 normal){
 
 void main() {
     vec3 baseColor = vec3(70, 70, 100) / 255.0;
-    vec3 color = CalcDirLight(Normal_VS_Out);
-    FragColor = vec4(baseColor * color, 1.0);
+    //vec3 color = CalcDirLight(Normal_VS_Out);
+    FragColor = vec4(baseColor, 1.0);
 }

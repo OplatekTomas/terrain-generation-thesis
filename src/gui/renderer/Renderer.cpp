@@ -16,6 +16,7 @@
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <QGuiApplication>
+#include "geGL/Generated/FunctionTableCalls.h"
 
 namespace MapGenerator {
     Renderer::Renderer(QWindow *parent) {
@@ -85,8 +86,8 @@ namespace MapGenerator {
         };
 
         std::vector<double> nassfeld{
-            46.631426377462304, 13.222294893455746,
-            46.55290962338361, 13.297562841791274
+                46.631426377462304, 13.222294893455746,
+                46.55290962338361, 13.297562841791274
         };
 
         auto currentPos = posHome;
@@ -129,21 +130,51 @@ namespace MapGenerator {
         //grab the monitor refresh rate and set the timer to that
         auto screen = QGuiApplication::primaryScreen();
         refreshRate = 1000 / screen->refreshRate();
-        renderTimer->setInterval((int)refreshRate);
+        renderTimer->setInterval((int) refreshRate);
         connect(renderTimer.get(), SIGNAL(timeout()), this, SLOT(renderNow()));
         renderTimer->start();
         initialized = true;
         //Grab the map and create the scene
 
         auto map = mapGenerator->generateMap();
-        scene = std::make_shared<Scene3D>(map, gl, camera);
+
+        //Prepare gBuffer render targets
+        gBuffer = std::make_shared<ge::gl::Buffer>(GL_FRAMEBUFFER);
+        prepareGBufferTextures();
+
+        scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
+    }
+
+    void Renderer::prepareGBufferTextures() {
+        int width = this->width();
+        int height = this->height();
+
+        gPosition = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
+        gPosition->setData2D(nullptr, GL_RGBA, GL_FLOAT);
+        gPosition->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gPosition->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition->getId(), 0);
+
+        gNormal = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
+        gNormal->setData2D(nullptr, GL_RGBA, GL_FLOAT);
+        gNormal->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gNormal->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal->getId(), 0);
+
+        gAlbedo = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, width, height);
+        gAlbedo->setData2D(nullptr, GL_RGBA, GL_UNSIGNED_BYTE);
+        gAlbedo->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gAlbedo->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo->getId(), 0);
+
+        unsigned int att[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+        glDrawBuffers(3, att);
     }
 
     void Renderer::render() {
         const qreal retinaScale = devicePixelRatio();
         clearView();
         if (scene != nullptr) {
-            //camera->print();
             scene->draw(height(), width(), retinaScale);
         }
         context->swapBuffers(this);

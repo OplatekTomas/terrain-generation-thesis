@@ -7,10 +7,11 @@
 
 namespace MapGenerator {
     Scene3D::Scene3D(const shared_ptr<Scene> &scene, const shared_ptr<ge::gl::Context> &ctx,
-                     const shared_ptr<Camera> &camera) {
+                     const shared_ptr<Camera> &camera, int gBuffer) {
         this->scene = scene;
         this->gl = ctx;
         this->camera = camera;
+        this->gBufferId = gBuffer;
     }
 
 
