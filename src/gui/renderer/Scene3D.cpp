@@ -55,7 +55,7 @@ namespace MapGenerator {
                     gl->glViewport(0, 0, width * scale, height * scale);
                     drawToScreen(origProgram, drawCount);
                 }
-                gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                gl->glBindFramebuffer(GL_FRAMEBUFFER, gBufferId);
 
             }
         }

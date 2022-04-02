@@ -64,6 +64,16 @@ namespace MapGenerator {
         std::unique_ptr<QTimer> renderTimer;
         bool setupLib();
         void clearView();
+
+        shared_ptr<ge::gl::VertexArray> quadVAO;
+        shared_ptr<ge::gl::Buffer> quadBuffer;
+        shared_ptr<ge::gl::Buffer> quadIndices;
+
+        void renderQuad();
+
+        shared_ptr<ge::gl::Shader> lightningVS;
+        shared_ptr<ge::gl::Shader> lightningFS;
+        shared_ptr<ge::gl::Program> lightningProgram;
     };
 
 }

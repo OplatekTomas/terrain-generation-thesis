@@ -108,7 +108,7 @@ foreach(file ${SHADERS_SRC_FILES})
     set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
     file(WRITE "${DUMMY_FILE}" "")
-    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h)
+    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}")
 endforeach()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
 
@@ -124,8 +124,8 @@ add_library (lib
         generators/landtype/LandTypeGenerator.cpp generators/landtype/LandTypeGenerator.h generators/landtype/AreaOnMap.cpp generators/landtype/AreaOnMap.h
         scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h config/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
         scene/Vertex.h scene/Vertex.cpp
-        generators/vegetation/ObjectLoader.cpp generators/vegetation/ObjectLoader.h generators/vegetation/VegetationGenerator.cpp generators/vegetation/VegetationGenerator.h scene/Point.cpp scene/Point.h)
-
+        generators/vegetation/ObjectLoader.cpp generators/vegetation/ObjectLoader.h generators/vegetation/VegetationGenerator.cpp generators/vegetation/VegetationGenerator.h scene/Point.cpp scene/Point.h
+scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h)
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
 endif()

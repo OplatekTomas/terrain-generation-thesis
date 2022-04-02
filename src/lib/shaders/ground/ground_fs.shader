@@ -44,9 +44,7 @@ void main(){
     //vec3 shadingColor = color.rgb * shading;
     //vec3 result = CalcDirLight(Normal_FS_in) * shadingColor;
     //FragColor = vec4(color.rgb, 1.0);
-    gPosition = FragPos;
+    gPosition = WorldPos_FS_in;
     gNormal = normalize(Normal_FS_in);
     gAlbedo.rgb = color.rgb;
-
-
 }

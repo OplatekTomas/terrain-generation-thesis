@@ -45,7 +45,24 @@ set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
         renderer/Renderer.cpp renderer/Renderer.h
-        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h)
+        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h)
+
+
+#Create dummy files so that they at least exist when CMake project is loaded
+file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/*.shader)
+set(SHADERS_DST_FILES "")
+foreach(file ${SHADERS_SRC_FILES})
+    #Get file name after shaders dir
+    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/" "" PATH_IN_SHADERS_DIR "${file}")
+    #Create a dummy file
+    set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders_gui/include/${PATH_IN_SHADERS_DIR}.out")
+    message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
+    file(WRITE "${DUMMY_FILE}" "")
+    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}")
+endforeach()
+message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
+
+
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}  MANUAL_FINALIZATION ${PROJECT_SOURCES})
@@ -53,7 +70,17 @@ else()
     add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 endif()
 
+
+
 find_package(GPUEngine COMPONENTS geGL geSG geUtil)
+
+set(SHADER_COPY_GUI shaderCopyTargetGUI)
+add_custom_target(shaderCopyTargetGUI
+        COMMAND ${CMAKE_COMMAND} -P "shaders_gui/CMakeLists.txt"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        )
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI})
+
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets geGL geSG geUtil lib)
 
