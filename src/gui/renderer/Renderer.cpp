@@ -149,16 +149,10 @@ namespace MapGenerator {
                 -1.0f, 1.0f, 0.0f,
                 1.0f, 1.0f, 0.0f
         };
-        int indices[] = {
-                0, 1, 2,
-                1, 2, 3
-        };
         this->quadBuffer = std::make_shared<ge::gl::Buffer>(12 * sizeof(float), vertices);
-        this->quadIndices = std::make_shared<ge::gl::Buffer>(6 * sizeof(int), indices);
         this->quadVAO = std::make_shared<ge::gl::VertexArray>();
         this->quadVAO->bind();
         quadVAO->addAttrib(quadBuffer, 0, 3, GL_FLOAT, 3 * sizeof(float), 0);
-        quadVAO->addElementBuffer(quadIndices);
 
         //Prepare the shaders for the lightning pass
         this->lightningVS = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, GUIShaders::getLightningVS());
@@ -171,55 +165,61 @@ namespace MapGenerator {
     void Renderer::prepareGBufferTextures() {
         int width = this->width();
         int height = this->height();
-
         gPosition = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
-        gPosition->setData2D(nullptr, GL_RGBA, GL_FLOAT);
         gPosition->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gPosition->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition->getId(), 0);
 
         gNormal = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
-        gNormal->setData2D(nullptr, GL_RGBA, GL_FLOAT);
         gNormal->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gNormal->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal->getId(), 0);
 
         gAlbedo = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, width, height);
-        gAlbedo->setData2D(nullptr, GL_RGBA, GL_UNSIGNED_BYTE);
         gAlbedo->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gAlbedo->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo->getId(), 0);
 
         unsigned int att[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
         gl->glDrawBuffers(3, att);
+
+        this->rboDepth = std::make_shared<ge::gl::Renderbuffer>(GL_DEPTH_COMPONENT32F, width, height);
+        rboDepth->setStorage(GL_DEPTH_COMPONENT, width, height);
+        gl->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->getId());
+        // finally check if framebuffer is complete
+        if (gl->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            std::cout << "Framebuffer not complete!" << std::endl;
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void Renderer::render() {
         const qreal retinaScale = devicePixelRatio();
         clearView();
-        gl->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getId());
         if (scene != nullptr) {
-            scene->draw(height(), width(), retinaScale);
+            gl->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getId());
+            //scene->draw(height(), width(), retinaScale);
         }
-        //gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderQuad();
         context->swapBuffers(this);
     }
 
     void Renderer::renderQuad() {
         gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         gNormal->bind(0);
         gPosition->bind(1);
         gAlbedo->bind(2);
-        quadVAO->bind();
         lightningProgram->use();
-        gl->glDrawArrays(GL_TRIANGLES, 0, 4);
+        quadVAO->bind();
+        gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
     void Renderer::clearView() {
 
         //PROBABLY FUCKED TODO FIX
         const qreal retinaScale = devicePixelRatio();
+        gBuffer->bind(GL_FRAMEBUFFER);
         gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
         gl->glClearColor(0, 0, 0, 1.0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

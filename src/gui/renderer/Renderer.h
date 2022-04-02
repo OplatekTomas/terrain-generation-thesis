@@ -74,6 +74,7 @@ namespace MapGenerator {
         shared_ptr<ge::gl::Shader> lightningVS;
         shared_ptr<ge::gl::Shader> lightningFS;
         shared_ptr<ge::gl::Program> lightningProgram;
+        shared_ptr<ge::gl::Renderbuffer> rboDepth;
     };
 
 }

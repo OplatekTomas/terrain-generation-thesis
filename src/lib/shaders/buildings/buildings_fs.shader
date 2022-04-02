@@ -3,7 +3,10 @@ in vec4 gl_FragCoord;
 
 in vec3 WorldPos_VS_Out;
 in vec3 Normal_VS_Out;
-out vec2 TexCoord_VS_Out;
+layout (location = 0) out vec3 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedo;
+
 
 out vec4 FragColor;
 //in vec2 TexCoord;
@@ -27,5 +30,7 @@ vec3 CalcDirLight(vec3 normal){
 void main() {
     vec3 baseColor = vec3(70, 70, 100) / 255.0;
     //vec3 color = CalcDirLight(Normal_VS_Out);
-    FragColor = vec4(baseColor, 1.0);
+    gPosition = WorldPos_VS_Out;
+    gNormal = normalize(Normal_VS_Out);
+    gAlbedo.rgb = baseColor.rgb;
 }

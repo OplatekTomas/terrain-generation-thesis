@@ -41,12 +41,12 @@ CPMAddPackage(
         GIT_TAG 53c587c52d99b57e77817bb4df1d625fcea1d5be
 )
 
+
 set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
         renderer/Renderer.cpp renderer/Renderer.h
         renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h)
-
 
 #Create dummy files so that they at least exist when CMake project is loaded
 file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/*.shader)
@@ -62,12 +62,12 @@ foreach(file ${SHADERS_SRC_FILES})
 endforeach()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
 
-
+message(STATUS "Created dummy shader files ${SHADERS_DST_FILES}")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}  MANUAL_FINALIZATION ${PROJECT_SOURCES})
 else()
-    add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+    add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${SHADER_DST_FILES})
 endif()
 
 
@@ -79,11 +79,19 @@ add_custom_target(shaderCopyTargetGUI
         COMMAND ${CMAKE_COMMAND} -P "shaders_gui/CMakeLists.txt"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
-add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI})
 
+set(SHADER_COPY_GUI_HELP shaderCopyTargetGUIHelp)
+add_custom_target(shaderCopyTargetGUIHelp
+        COMMAND ${CMAKE_COMMAND} -E copy_directory shaders_gui/include ${CMAKE_CURRENT_BINARY_DIR}/shaders_gui/include
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets geGL geSG geUtil lib)
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI_HELP} ${SHADER_COPY_GUI})
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(vut-bp-gui)
 endif()
+
+target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/include/lighting)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets geGL geSG geUtil lib)
+

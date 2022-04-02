@@ -7,7 +7,6 @@ const char *lightning_vs =
 #include <shaders_gui/include/lightning/lightning_vs.shader.out>
         ;
 
-
 const char *lightning_fs =
 #include <shaders_gui/include/lightning/lightning_fs.shader.out>
         ;
