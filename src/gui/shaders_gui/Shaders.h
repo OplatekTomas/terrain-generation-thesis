@@ -11,6 +11,10 @@ const char *lightning_fs =
 #include <shaders_gui/include/lightning/lightning_fs.shader.out>
         ;
 
+const char *ssao_fs =
+#include <shaders_gui/include/ssao/ssao_fs.shader.out>
+        ;
+
 
 class GUIShaders {
 public:
@@ -20,6 +24,12 @@ public:
 
     static const char *getLightningFS() {
         return lightning_fs;
+    }
+    static const char *getSSAOFS() {
+        return ssao_fs;
+    }
+    static const char* getSSAOVS(){
+        return getLightningVS();
     }
 };
 

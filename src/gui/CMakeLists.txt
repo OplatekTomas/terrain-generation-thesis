@@ -46,7 +46,7 @@ set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
         renderer/Renderer.cpp renderer/Renderer.h
-        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h)
+        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h StaticFunctions.h)
 
 #Create dummy files so that they at least exist when CMake project is loaded
 file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/*.shader)
@@ -86,7 +86,8 @@ add_custom_target(shaderCopyTargetGUIHelp
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
 
-add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI_HELP} ${SHADER_COPY_GUI})
+add_dependencies(${SHADER_COPY_GUI_HELP} ${SHADER_COPY_GUI})
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI_HELP})
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(vut-bp-gui)

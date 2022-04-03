@@ -56,10 +56,17 @@ namespace MapGenerator {
                     drawToScreen(origProgram, drawCount);
                 }
                 gl->glBindFramebuffer(GL_FRAMEBUFFER, gBufferId);
-
             }
         }
         return 0;
+    }
+
+    void Scene3D::checkForErrors() {
+        GLenum err;
+        while ((err = gl->glGetError()) != GL_NO_ERROR) {
+            std::cout << "OpenGL error: " << err << std::endl;
+            throw std::runtime_error("OpenGL error");
+        }
     }
 
     void Scene3D::drawToScreen(const shared_ptr<Program> &program, int drawCount) {

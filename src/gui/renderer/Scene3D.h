@@ -56,6 +56,8 @@ namespace MapGenerator {
         void drawToScreen(const shared_ptr<Program> &program, int drawCount);
 
         void drawToTexture(const shared_ptr<Program> &program, int programId, int drawCount);
+
+        void checkForErrors();
     };
 }
 

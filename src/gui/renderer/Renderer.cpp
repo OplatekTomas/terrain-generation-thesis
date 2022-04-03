@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <StaticFunctions.h>
 #include <renderer/Renderer.h>
 #include <geGL/geGL.h>
 #include <memory>
@@ -139,9 +140,72 @@ namespace MapGenerator {
         auto map = mapGenerator->generateMap();
 
         //Prepare gBuffer render targets
-        gBuffer = std::make_shared<ge::gl::Buffer>(GL_FRAMEBUFFER);
-        prepareGBufferTextures();
+        initializeLightning();
+        initializeGBuffer();
+        initializeSsao();
+        //Prepare the scene - used in geometry pass
+        scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
+    }
 
+    void Renderer::initializeSsao() {
+        std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
+        std::default_random_engine generator;
+        for (unsigned int i = 0; i < 64; ++i) {
+            glm::vec3 sample(
+                    randomFloats(generator) * 2.0 - 1.0,
+                    randomFloats(generator),
+                    randomFloats(generator) * 2.0 - 1.0
+            );
+            sample = glm::normalize(sample);
+            sample *= randomFloats(generator);
+            float scale = (float) i / 64.0;
+            scale = lerp(0.1f, 1.0f, scale * scale); // scale samples s.t. they're more aligned to center of kernel
+            sample *= scale;
+            ssaoKernel.push_back(sample);
+        }
+        //Prepare the noise and its texture
+        std::vector<glm::vec3> ssaoNoise;
+        for (unsigned int i = 0; i < 16; i++) {
+            glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, 0.0f, randomFloats(generator) * 2.0 - 1.0);
+            ssaoNoise.push_back(noise);
+        }
+        this->noiseTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, 4, 4);
+        this->noiseTexture->setData2D(ssaoNoise.data(), GL_RGB, GL_FLOAT, 0, GL_TEXTURE_2D, 0, 0, 4, 4);
+        this->noiseTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        this->noiseTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        this->noiseTexture->texParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
+        this->noiseTexture->texParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        this->ssaoFBO = std::make_shared<ge::gl::Framebuffer>();
+        this->ssaoFBO->bind();
+        this->ssaoColorBuffer = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RED, 0, width(), height());
+        this->ssaoColorBuffer->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        this->ssaoColorBuffer->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->ssaoColorBuffer->getId(),
+                                   0);
+
+
+        this->ssaoFS = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, GUIShaders::getSSAOFS());
+        this->ssaoVS = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, GUIShaders::getSSAOVS());
+        this->ssaoProgram = std::make_shared<ge::gl::Program>(ssaoVS, ssaoFS);
+
+
+        checkForErrors();
+        //rebind default frame buffer to avoid errors
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+    }
+
+    void Renderer::initializeLightning() {
+        //Prepare the shaders for the lightning pass
+        this->lightningVS = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, GUIShaders::getLightningVS());
+        this->lightningFS = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, GUIShaders::getLightningFS());
+        this->lightningProgram = std::make_shared<ge::gl::Program>(lightningVS, lightningFS);
+    }
+
+
+    void Renderer::initializeGBuffer() {
         //Prepare the quad that will get rendered
         float vertices[] = {
                 -1.0f, -1.0f, 0.0f,
@@ -154,28 +218,34 @@ namespace MapGenerator {
         this->quadVAO->bind();
         quadVAO->addAttrib(quadBuffer, 0, 3, GL_FLOAT, 3 * sizeof(float), 0);
 
-        //Prepare the shaders for the lightning pass
-        this->lightningVS = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, GUIShaders::getLightningVS());
-        this->lightningFS = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, GUIShaders::getLightningFS());
-        this->lightningProgram = std::make_shared<ge::gl::Program>(lightningVS, lightningFS);
-
-        scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
+        gBuffer = std::make_shared<ge::gl::Framebuffer>();
+        initializeGBufferTextures();
     }
 
-    void Renderer::prepareGBufferTextures() {
+    void Renderer::initializeGBufferTextures() {
+        gBuffer->bind(GL_FRAMEBUFFER);
+        //checkForErrors();
+
         int width = this->width();
         int height = this->height();
         gPosition = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
+        gl->glBindTexture(GL_TEXTURE_2D, gPosition->getId());
         gPosition->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gPosition->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        checkForErrors();
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition->getId(), 0);
-
+        checkForErrors();
         gNormal = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
+        gl->glBindTexture(GL_TEXTURE_2D, gNormal->getId());
+
         gNormal->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gNormal->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal->getId(), 0);
 
+        checkForErrors();
+
         gAlbedo = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, width, height);
+        gl->glBindTexture(GL_TEXTURE_2D, gAlbedo->getId());
         gAlbedo->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gAlbedo->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo->getId(), 0);
@@ -183,43 +253,94 @@ namespace MapGenerator {
         unsigned int att[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
         gl->glDrawBuffers(3, att);
 
-        this->rboDepth = std::make_shared<ge::gl::Renderbuffer>(GL_DEPTH_COMPONENT32F, width, height);
-        rboDepth->setStorage(GL_DEPTH_COMPONENT, width, height);
+        this->rboDepth = std::make_shared<ge::gl::Renderbuffer>();
+        this->rboDepth->bind();
+        gl->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+
         gl->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->getId());
+
         // finally check if framebuffer is complete
         if (gl->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             std::cout << "Framebuffer not complete!" << std::endl;
+        checkForErrors();
         gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    }
+
+    void Renderer::checkForErrors() {
+        GLenum err;
+        while ((err = gl->glGetError()) != GL_NO_ERROR) {
+            std::cout << "OpenGL error: " << err << std::endl;
+            throw std::runtime_error("OpenGL error");
+
+        }
     }
 
     void Renderer::render() {
-        const qreal retinaScale = devicePixelRatio();
         clearView();
-        if (scene != nullptr) {
-            gl->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getId());
-            //scene->draw(height(), width(), retinaScale);
-        }
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        renderQuad();
+        geometryPass();
+        ssaoPass();
+        lightningPass();
+
         context->swapBuffers(this);
     }
 
-    void Renderer::renderQuad() {
+    void Renderer::geometryPass() {
+        if (scene == nullptr) {
+            return;
+        }
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getId());
+        const qreal retinaScale = devicePixelRatio();
+        scene->draw(height(), width(), retinaScale);
         gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        gNormal->bind(0);
-        gPosition->bind(1);
-        gAlbedo->bind(2);
+    }
+
+
+    void Renderer::ssaoPass() {
+        auto width = this->width();
+        auto height = this->height();
+        ssaoFBO->bind(GL_FRAMEBUFFER);
+        gl->glClear(GL_COLOR_BUFFER_BIT);
+        ssaoProgram->use();
+        gPosition->bind(0);
+        gNormal->bind(1);
+        noiseTexture->bind(2);
+        auto projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
+        ssaoProgram->setMatrix4fv("projection", glm::value_ptr(projection));
+        ssaoProgram->set2f("noiseScale", width / 4, height / 4);
+        ssaoProgram->set3fv("samples", glm::value_ptr(ssaoKernel[0]), 64);
+        drawQuad();
+
+        //Add blur pass
+
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    void Renderer::lightningPass() {
         lightningProgram->use();
+        gPosition->bind(0);
+        gNormal->bind(1);
+        gAlbedo->bind(2);
+        ssaoColorBuffer->bind(3);
+        drawQuad();
+        gl->glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->getId());
+        gl->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        gl->glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    }
+
+    void Renderer::drawQuad() {
         quadVAO->bind();
         gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
     void Renderer::clearView() {
-
         //PROBABLY FUCKED TODO FIX
         const qreal retinaScale = devicePixelRatio();
-        gBuffer->bind(GL_FRAMEBUFFER);
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getId());
         gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
         gl->glClearColor(0, 0, 0, 1.0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -239,6 +360,11 @@ namespace MapGenerator {
             case QEvent::UpdateRequest:
                 renderNow();
                 return true;
+            case QEvent::Resize:
+                if (initialized) {
+                    //initializeGBufferTextures();
+                }
+                return true;
             case QEvent::Close:
                 //TODO stop render thread
                 //deleteLater();
@@ -255,5 +381,6 @@ namespace MapGenerator {
             renderNow();
         }
     }
+
 
 }
