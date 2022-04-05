@@ -17,6 +17,14 @@ namespace MapGenerator {
 
         unsigned char *getData() const;
 
+        std::vector<unsigned char>::iterator begin(){
+            return data->begin();
+        }
+
+        std::vector<unsigned char>::iterator end(){
+            return data->end();
+        }
+
         int getWidth() const;
 
         int getHeight() const;
@@ -39,6 +47,7 @@ namespace MapGenerator {
         int index;
         int maxIndex;
         std::shared_ptr<std::vector<unsigned char>> data;
+
     };
 }
 

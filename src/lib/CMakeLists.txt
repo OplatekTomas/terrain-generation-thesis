@@ -112,6 +112,9 @@ foreach(file ${SHADERS_SRC_FILES})
 endforeach()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
 
+find_package(PNG REQUIRED)
+include_directories(${PNG_INCLUDE_DIR})
+
 
 add_library (lib
         shaders/Shaders.h ${SHADERS_DST_FILES}
@@ -125,7 +128,7 @@ add_library (lib
         scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h config/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
         scene/Vertex.h scene/Vertex.cpp
         generators/vegetation/ObjectLoader.cpp generators/vegetation/ObjectLoader.h generators/vegetation/VegetationGenerator.cpp generators/vegetation/VegetationGenerator.h scene/Point.cpp scene/Point.h
-scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h)
+scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h scene/TextureArray.cpp scene/TextureArray.h Helper.cpp)
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
 endif()
@@ -143,14 +146,14 @@ add_custom_target(shaderCopyTarget
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
 
-set(MODEL_COPY modelCopyTarget)
-add_custom_target(modelCopyTarget
-        COMMAND ${CMAKE_COMMAND} -E copy_directory models ${CMAKE_CURRENT_BINARY_DIR}/models
+set(ASSET_COPY assetCopyTarget)
+add_custom_target(assetCopyTarget
+        COMMAND ${CMAKE_COMMAND} -E copy_directory assets ${CMAKE_CURRENT_BINARY_DIR}/assets
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
-add_dependencies(${PROJECT_NAME} ${SHADER_COPY} ${MODEL_COPY})
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY}  ${ASSET_COPY})
 
-target_link_libraries(lib PUBLIC cpr::cpr fmt assimp)
+target_link_libraries(lib PUBLIC cpr::cpr fmt assimp ${PNG_LIBRARY})
 
 target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(lib PUBLIC ${boolinq_SOURCE_DIR})

@@ -1,11 +1,13 @@
-#version 410 core
+#version 420 core
 
 in vec3 WorldPos_FS_in;
 in vec2 TexCoord_FS_in;
 in vec3 Normal_FS_in;
 
 uniform vec3 lightPos;
-uniform sampler2D Texture;
+layout (binding = 0) uniform sampler2D MetadataTexture;
+layout (binding = 1) uniform sampler2DArray AsphaltTextures;
+layout (binding = 2) uniform sampler2DArray FieldTextures;
 
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
@@ -18,7 +20,11 @@ bool equals(float a, float b) {
 
 
 void main(){
-    vec4 metadata = texture(Texture, TexCoord_FS_in);
+    vec4 metadata = texture(MetadataTexture, TexCoord_FS_in);
+    float scale = 40;
+    int tmp;
+    vec2 texCoord = TexCoord_FS_in * scale;
+    texCoord = mod(texCoord, 1.0);
     float r = metadata.r;
     vec4 color;
     if (r == 255){ // Pixel is used as a "unkown" area
@@ -28,9 +34,9 @@ void main(){
     } else if (equals(r, 2.0)){ //Pixel is used as a water
         color = vec4(0.0, 0.0, 0.5, 1.0);
     } else if (equals(r, 3.0)){ //Pixel is used as a field
-        color = vec4(0.96, 0.835, 0.013, 1.0);
+        color = texture(FieldTextures, vec3(texCoord, 0.0));
     } else if (equals(r, 4.0)){ //Pixel is used as a road
-        color = vec4(0.7, 0.32, 0.08, 1.0);
+        color = texture(AsphaltTextures, vec3(texCoord, 0.0));
     } else if (equals(r, 5.0)){ //Pixel is used as a building
         color = vec4(0.78, 0.78, 0.78, 1.0);
     } else if (equals(r, 6.0)){ //Pixel is used as a park
@@ -44,7 +50,7 @@ void main(){
     //vec3 shadingColor = color.rgb * shading;
     //vec3 result = CalcDirLight(Normal_FS_in) * shadingColor;
     //FragColor = vec4(color.rgb, 1.0);
-    gPosition = WorldPos_FS_in;
-    gNormal = normalize(Normal_FS_in);
+    gPosition = WorldPos_FS_in.xyz;
+    gNormal = normalize(Normal_FS_in).xyz;
     gAlbedo.rgb = color.rgb;
 }

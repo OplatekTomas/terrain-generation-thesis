@@ -5,11 +5,15 @@
 #include <MapGenerator.h>
 #include <generators/buildings/BuildingsGenerator.h>
 #include <fmt/printf.h>
+#include <filesystem>
 #include <shaders/Shaders.h>
 #include <boolinq.h>
+#include <Helper.h>
 #include <generators/surface/SurfaceGenerator.h>
 
 using namespace boolinq;
+namespace fs = std::filesystem;
+
 
 namespace MapGenerator {
 
@@ -46,14 +50,15 @@ namespace MapGenerator {
                 std::make_shared<Shader>(Shaders::GroundTessellationControlShader(), Shader::TESS_CONTROL));
         auto tesId = scene->addShader(
                 std::make_shared<Shader>(Shaders::GroundTessellationEvaluationShader(), Shader::TESS_EVALUATION));
-
         //Set up the program for the shaders.
         auto program = std::make_shared<Program>();
         program->vertexShader = vertexId;
         program->fragmentShader = fragmentId;
         program->tessControlShader = tcsId;
         program->tessEvaluationShader = tesId;
-        auto programId = scene->createProgram(program);
+        auto programId = scene->addProgram(program);
+        loadTexturesForSurface(programId);
+
         scene->bindProgram(surfaceId, programId);
         vegetationGenerator = std::make_shared<VegetationGenerator>(options, elevationData);
         generateHeightMap(surfaceId, vertexId, tcsId);
@@ -72,6 +77,7 @@ namespace MapGenerator {
         return scene;
     };
 
+
     void MapGenerator::generateHeightMap(int surfaceId, int vertexShaderId, int tcsShaderId) {
         int resolution = 2048;
         //Set up the terrain height map.
@@ -89,7 +95,7 @@ namespace MapGenerator {
         program->drawTextureResolution = resolution;
         program->drawTexture = heightTextureId;
         program->maxDrawCount = -1;
-        auto programId = scene->createProgram(program);
+        auto programId = scene->addProgram(program);
         scene->bindProgram(programId, surfaceId);
     }
 
@@ -142,7 +148,7 @@ namespace MapGenerator {
 
     void MapGenerator::generateTrees(const shared_ptr<Texture> &texture, int resolution) {
         static int vegetationId = -1;
-        if(vegetationId != -1) {
+        if (vegetationId != -1) {
             return; //TODO introduce a function that will increase the precission without recalculating
         }
         auto vegetation = vegetationGenerator->getVegetation(texture, resolution);
@@ -153,7 +159,7 @@ namespace MapGenerator {
         program->fragmentShader = scene->addShader(
                 std::make_shared<Shader>(Shaders::TreesFragmentShader(), Shader::FRAGMENT));
         program->drawTarget = Program::DRAW_TO_SCREEN;
-        auto progId = scene->createProgram(program);
+        auto progId = scene->addProgram(program);
         scene->bindTexture(heightTextureId, progId);
         scene->bindProgram(progId, vegetationId);
     }
@@ -168,15 +174,42 @@ namespace MapGenerator {
         auto program = std::make_shared<Program>();
         program->vertexShader = scene->addShader(vertexShader);
         program->fragmentShader = scene->addShader(fragShader);
-        auto programId = scene->createProgram(program);
+        auto programId = scene->addProgram(program);
         scene->bindTexture(heightTextureId, programId);
         scene->bindProgram(programId, modelId);
     }
 
-
-    void MapGenerator::generateSurfaceTextures(int programId) {
-
+    void MapGenerator::loadTexturesForSurface(int surfaceId) {
+        auto texturePath = "../lib/assets/textures/";
+        auto textureTypes = {"asphalt", "field"};
+        for (std::string textureType: textureTypes) {
+            auto textureArray = std::make_shared<TextureArray>(1024, 1024);
+            auto dir = texturePath + textureType;
+            //get files inside the folder
+            auto files = std::vector<std::string>();
+            for (auto &p: fs::directory_iterator(dir)) {
+                files.push_back(p.path().string());
+            }
+            //sort files by name
+            std::sort(files.begin(), files.end(), [](const std::string &a, const std::string &b) {
+                return fs::path(a).filename() < fs::path(b).filename();
+            });
+            //load files
+            for (auto &file: files) {
+                //read the entire file using libpng
+                auto data = readPng(file);
+                auto texture = std::make_shared<Texture>(1024, 1024);
+                auto stepSize = data.size() == 1024*1024*4 ? 4 : 3;
+                for (int i = 0; i < data.size(); i += stepSize) {
+                    texture->addPixel(data[i], data[i + 1], data[i + 2], 255);
+                }
+                textureArray->addTexture(texture);
+            }
+            auto id = scene->addTextureArray(textureArray);
+            scene->bindTextureArray(id, surfaceId);
+        }
     }
+
 
 }
 

@@ -10,7 +10,7 @@
 #include <QWidget>
 #include <QSurfaceFormat>
 #include <QScreen>
-
+#include <renderer/SSAO.h>
 #include <QWindow>
 #include <QOpenGLContext>
 #include <renderer/Camera.h>
@@ -64,13 +64,9 @@ namespace MapGenerator {
 
         void geometryPass();
 
-        void ssaoPass();
-
         void initializeGBuffer();
 
         void initializeLightning();
-
-        void initializeSsao();
 
         void drawQuad();
 
@@ -95,13 +91,13 @@ namespace MapGenerator {
         std::shared_ptr<Camera> camera;
         QSurfaceFormat surfaceFormat;
         std::unique_ptr<QTimer> renderTimer;
-        shared_ptr<ge::gl::Texture> noiseTexture;
-        shared_ptr<ge::gl::Framebuffer> ssaoFBO;
-        shared_ptr<ge::gl::Texture> ssaoColorBuffer;
-        std::vector<glm::vec3> ssaoKernel;
-        shared_ptr<ge::gl::Shader> ssaoFS;
-        shared_ptr<ge::gl::Shader> ssaoVS;
-        shared_ptr<ge::gl::Program> ssaoProgram;
+
+        std::shared_ptr<SSAO> ssao;
+
+        string readShader(string path);
+
+
+        void resizeRender();
     };
 
 }

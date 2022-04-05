@@ -10,7 +10,7 @@
 
 namespace MapGenerator {
     VegetationGenerator::VegetationGenerator(GeneratorOptions options, std::shared_ptr<ElevationData> heightData) {
-        defaultTree = ObjectLoader::load("../lib/models/kokotree.obj");
+        defaultTree = ObjectLoader::load("../lib/assets/models/kokotree.obj");
         this->options = options;
         this->heightData = heightData;
         this->updateZ = heightData->getScale() > 1;
@@ -31,7 +31,7 @@ namespace MapGenerator {
 
     std::vector<Vertex> VegetationGenerator::getModelVertices(std::shared_ptr<Model> model, double scale) {
         std::vector<Vertex> vertices;
-        for (int i = 0; i < model->vertices.size(); i += 8) {
+        for (int i = 0; i < model->vertices.size(); i += 11) {
             auto v1 = model->vertices[i];
             auto v2 = model->vertices[i + 1];
             auto v3 = model->vertices[i + 2];
@@ -66,8 +66,8 @@ namespace MapGenerator {
             }
             //resultVertices.push_back(vertex);
             auto origV = &model->vertices;
-            auto normal = Vertex((*origV)[j * 8 + 3], (*origV)[j * 8 + 4], (*origV)[j * 8 + 5]);
-            auto uv = PointF((*origV)[j * 8 + 6], (*origV)[j * 8 + 7]);
+            auto normal = Vertex((*origV)[j * 11 + 3], (*origV)[j * 11 + 4], (*origV)[j * 11 + 5]);
+            auto uv = PointF((*origV)[j * 11 + 6], (*origV)[j * 11 + 7]);
             result->addVertex(vertex, normal, uv);
         }
         return;
@@ -105,7 +105,7 @@ namespace MapGenerator {
         max = {0.995, 0.995};
 
         auto treeHeightInM = 20.0 * (1 / this->scale);
-        auto treeDistanceInM = 4.0 * (1 / this->scale);
+        auto treeDistanceInM = 9.0 * (1 / this->scale);
         auto treeHeight = ((treeHeightInM - heightData->getNormalizedMin()) /
                            (heightData->getNormalizedMax() + heightData->getNormalizedMin()));
         auto treeDistance = ((treeDistanceInM - heightData->getNormalizedMin()) /
@@ -116,16 +116,16 @@ namespace MapGenerator {
 
         auto scaledModel = getModelVertices(defaultTree, treeHeight);
         auto model = defaultTree;
+        int treeIndex = 0;
         for (int i = 0; i < floatPositions.size(); i++) {
-            //TODO dont add if not in forrest
             auto xOffset = floatPositions[i][0];
             auto zOffset = floatPositions[i][1];
             if (!shouldRender(texture, resolution, PointF(xOffset, zOffset))) continue;
             addToResult(model, scaledModel, PointF(xOffset, zOffset));
-
             for (int j = 0; j < model->indices.size(); j++) {
-                result->addIndex(model->indices[j] + (scaledModel.size() * i));
+                result->addIndex(model->indices[j] + (scaledModel.size() * treeIndex));
             }
+            treeIndex++;
         }
         return result;
     }

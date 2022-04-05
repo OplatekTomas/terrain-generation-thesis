@@ -89,4 +89,5 @@ void main(){
     v * w * Normal011;
     Normal_FS_in = normalize(Normal_FS_in);
     gl_Position = projection * view * vec4(WorldPos_FS_in, 1.0);
+    WorldPos_FS_in = (view * vec4(WorldPos_FS_in, 1.0)).xyz;
 }

@@ -51,6 +51,9 @@ namespace MapGenerator {
         void generateHeightMap(int surfaceId, int vertexShaderId, int tcsShaderId);
 
         void generateTrees(const shared_ptr<Texture> &texture, int resolution);
+
+
+        void loadTexturesForSurface(int surfaceId);
     };
 }
 

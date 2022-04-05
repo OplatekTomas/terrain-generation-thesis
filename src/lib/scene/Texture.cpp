@@ -12,11 +12,14 @@ namespace MapGenerator {
         this->height = height;
         this->data = std::make_shared<std::vector<unsigned char>>();
         this->data->resize(width * height * 4);
+        this->index = 0;
     }
 
     unsigned char * Texture::getData() const {
         return data->data();
     }
+
+
 
     int Texture::getWidth() const {
         return width;

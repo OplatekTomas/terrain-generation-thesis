@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
+#include <map>
 
 constexpr uint32_t hash(const char* data, size_t const size) noexcept{
     uint32_t hash = 5381;
@@ -43,4 +46,6 @@ inline uint32_t hash(const std::string &str) {
     return hash;
 }
 
+
+std::vector<unsigned char> readPng(const std::string &path);
 

@@ -36,6 +36,7 @@ namespace MapGenerator {
         std::vector<shared_ptr<ge::gl::Buffer>> buffers;
         map<int, shared_ptr<ge::gl::VertexArray>> models;
         map<int, shared_ptr<ge::gl::Texture>> textures;
+        map<int, shared_ptr<ge::gl::Texture>> textureArrays;
         map<int, shared_ptr<ge::gl::Program>> programs;
         map<int, int> drawCounts;
         map<int, shared_ptr<ge::gl::Shader>> shaders;
@@ -58,6 +59,12 @@ namespace MapGenerator {
         void drawToTexture(const shared_ptr<Program> &program, int programId, int drawCount);
 
         void checkForErrors();
+
+        shared_ptr<ge::gl::Texture> getTextureArray();
+
+        shared_ptr<ge::gl::Texture> getTextureArray(int id);
+
+        shared_ptr<ge::gl::Texture> getTextureArray(int id, shared_ptr<TextureArray> arr);
     };
 }
 

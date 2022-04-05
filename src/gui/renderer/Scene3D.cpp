@@ -30,7 +30,7 @@ namespace MapGenerator {
                     continue;
                 }
                 auto origProgram = scene->getProgram(programId);
-                if(origProgram->maxDrawCount > 0 && drawCounts[programId] >= origProgram->maxDrawCount) {
+                if (origProgram->maxDrawCount > 0 && drawCounts[programId] >= origProgram->maxDrawCount) {
                     continue;
                 }
                 drawCounts[programId]++;
@@ -112,6 +112,7 @@ namespace MapGenerator {
             vao->bind();
             return model->indices.size();
         }
+        model->calculateTangents();
         auto vertexData = model->vertices;
         auto vertices = std::make_shared<ge::gl::Buffer>(vertexData.size() * sizeof(float), vertexData.data());
         auto indexData = model->indices;
@@ -122,9 +123,11 @@ namespace MapGenerator {
         auto vao = std::make_shared<ge::gl::VertexArray>();
         vao->bind();
 
-        vao->addAttrib(vertices, 0, 3, GL_FLOAT, 8 * sizeof(float), 0);
-        vao->addAttrib(vertices, 1, 3, GL_FLOAT, 8 * sizeof(float), 3 * sizeof(float));
-        vao->addAttrib(vertices, 2, 2, GL_FLOAT, 8 * sizeof(float), 6 * sizeof(float));
+        vao->addAttrib(vertices, 0, 3, GL_FLOAT, 11 * sizeof(float), 0);
+        vao->addAttrib(vertices, 1, 3, GL_FLOAT, 11 * sizeof(float), 3 * sizeof(float));
+        vao->addAttrib(vertices, 2, 2, GL_FLOAT, 11 * sizeof(float), 6 * sizeof(float));
+        vao->addAttrib(vertices, 3, 3, GL_FLOAT, 11 * sizeof(float), 8 * sizeof(float));
+
         vao->addElementBuffer(indices);
         models[id] = vao;
         vao->bind();
@@ -133,13 +136,48 @@ namespace MapGenerator {
 
     void Scene3D::useTextures(int programId) {
         auto programTextures = scene->getTexturesForProgram(programId);
-        if (programTextures.empty()) {
+        auto programTextureArrays = scene->getTextureArraysForProgram(programId);
+        if (programTextures.empty() && programTextureArrays.empty()) {
             return;
         }
-        for (size_t i = 0; i < programTextures.size(); i++) {
+        size_t i = 0;
+        for (; i < programTextures.size(); i++) {
             auto texture = getTexture(programTextures[i], scene->getTexture(programTextures[i]));
             texture->bind(i);
         }
+        for (size_t j = 0; j < programTextureArrays.size(); j++) {
+            auto textureArray = getTextureArray(programTextureArrays[j],
+                                                scene->getTextureArray(programTextureArrays[j]));
+            textureArray->bind(i + j);
+        }
+    }
+
+    std::shared_ptr<ge::gl::Texture> Scene3D::getTextureArray(int id, std::shared_ptr<TextureArray> arr) {
+        if (textureArrays.find(id) != textureArrays.end()) {
+            return textureArrays[id];
+        }
+        std::vector<char> data;
+        for (auto i = 0; i < arr->getSize(); i++) {
+            data.insert(data.end(), arr->getTexture(i)->begin(), arr->getTexture(i)->end());
+        }
+        auto texture = std::make_shared<ge::gl::Texture>(
+                GL_TEXTURE_2D_ARRAY,
+                GL_RGBA8,
+                0,
+                arr->getWidth(),
+                arr->getHeight(),
+                arr->getSize()
+        );
+        //PRAY IT WORKS (holy fuck it does)
+        texture->setData3D(data.data(), GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D_ARRAY,
+                           0, 0, 0,
+                           arr->getWidth(), arr->getHeight(), arr->getSize());
+        texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        texture->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        texture->texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        textureArrays[id] = texture;
+        return texture;
     }
 
     std::shared_ptr<ge::gl::Program> Scene3D::useProgram(int programId) {
@@ -171,7 +209,8 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<ge::gl::Texture> Scene3D::getTexture(int id, const std::shared_ptr<Texture> &tex, GLenum format, GLenum type) {
+    std::shared_ptr<ge::gl::Texture>
+    Scene3D::getTexture(int id, const std::shared_ptr<Texture> &tex, GLenum format, GLenum type) {
         if (textures.find(id) != textures.end()) {
             return textures[id];
         }

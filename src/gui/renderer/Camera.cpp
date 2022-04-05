@@ -91,7 +91,7 @@ namespace MapGenerator {
             iterations++;
             if (iterations > idleTimeoutIterations) {
                 iterations = 0;
-                rotate = true;
+                rotate = false;  //TODO FIX
             }
         }
     }

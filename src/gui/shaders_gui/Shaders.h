@@ -3,17 +3,6 @@
 //
 #pragma once
 
-const char *lightning_vs =
-#include <shaders_gui/include/lightning/lightning_vs.shader.out>
-        ;
-
-const char *lightning_fs =
-#include <shaders_gui/include/lightning/lightning_fs.shader.out>
-        ;
-
-const char *ssao_fs =
-#include <shaders_gui/include/ssao/ssao_fs.shader.out>
-        ;
 
 
 class GUIShaders {
@@ -31,5 +20,19 @@ public:
     static const char* getSSAOVS(){
         return getLightningVS();
     }
+
+    static const char* getSSAOBlurVS(){
+        return getLightningVS();
+    }
+
+    static const char* getSSAOBlurFS(){
+        return blur_fs;
+    }
+
+    static const char *lightning_vs;
+    static const char *lightning_fs;
+    static const char *ssao_fs;
+    static const char *blur_fs;
+
 };
 

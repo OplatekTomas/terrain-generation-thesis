@@ -16,7 +16,7 @@ uniform vec3 lightPos;
 
 void main() {
     vec3 baseColor = vec3(70, 70, 100) / 255.0;
-    gPosition = WorldPos_VS_Out;
-    gNormal = normalize(Normal_VS_Out);
+    gPosition = WorldPos_VS_Out.xyz;
+    gNormal = normalize(Normal_VS_Out).xyz;
     gAlbedo.rgb = baseColor.rgb;
 }

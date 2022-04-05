@@ -56,7 +56,14 @@ namespace MapGenerator {
         //Get current time
         auto start = std::chrono::system_clock::now();
         int chunkSize = resolution / 8;
-#pragma omp parallel for default(none) shared(texture, chunkSize)
+
+        auto threadCount = omp_get_max_threads();
+        if(threadCount > 3){
+            threadCount -= 2; //2 for main thread and other processes on the system
+        }else{
+            threadCount = 1;
+        }
+#pragma omp parallel for default(none) shared(texture, chunkSize) num_threads(threadCount)
         for (int x = 0; x < resolution; x++) {
             auto lon = xStart + x * xStep;
             auto lineData = from(areas).where([lon](const std::shared_ptr<AreaOnMap> &area) {

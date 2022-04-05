@@ -31,7 +31,7 @@ void main() {
     vec3 baseColor = vec3(34,139,34) / 255.0;
     //vec3 color = CalcDirLight(Normal_VS_Out);
     //FragColor = vec4(baseColor , 1.0);
-    gPosition = WorldPos_VS_Out;
-    gNormal = normalize(Normal_VS_Out);
+    gPosition = WorldPos_VS_Out.xyz;
+    gNormal = normalize(Normal_VS_Out).xyz;
     gAlbedo.rgb = baseColor.rgb;
 }

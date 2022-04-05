@@ -142,59 +142,9 @@ namespace MapGenerator {
         //Prepare gBuffer render targets
         initializeLightning();
         initializeGBuffer();
-        initializeSsao();
+        this->ssao = std::make_shared<SSAO>(this->gl, this->width(), this->height(), [this]() { drawQuad(); });
         //Prepare the scene - used in geometry pass
         scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
-    }
-
-    void Renderer::initializeSsao() {
-        std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
-        std::default_random_engine generator;
-        for (unsigned int i = 0; i < 64; ++i) {
-            glm::vec3 sample(
-                    randomFloats(generator) * 2.0 - 1.0,
-                    randomFloats(generator),
-                    randomFloats(generator) * 2.0 - 1.0
-            );
-            sample = glm::normalize(sample);
-            sample *= randomFloats(generator);
-            float scale = (float) i / 64.0;
-            scale = lerp(0.1f, 1.0f, scale * scale); // scale samples s.t. they're more aligned to center of kernel
-            sample *= scale;
-            ssaoKernel.push_back(sample);
-        }
-        //Prepare the noise and its texture
-        std::vector<glm::vec3> ssaoNoise;
-        for (unsigned int i = 0; i < 16; i++) {
-            glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, 0.0f, randomFloats(generator) * 2.0 - 1.0);
-            ssaoNoise.push_back(noise);
-        }
-        this->noiseTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, 4, 4);
-        this->noiseTexture->setData2D(ssaoNoise.data(), GL_RGB, GL_FLOAT, 0, GL_TEXTURE_2D, 0, 0, 4, 4);
-        this->noiseTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        this->noiseTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        this->noiseTexture->texParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
-        this->noiseTexture->texParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        this->ssaoFBO = std::make_shared<ge::gl::Framebuffer>();
-        this->ssaoFBO->bind();
-        this->ssaoColorBuffer = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RED, 0, width(), height());
-        this->ssaoColorBuffer->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        this->ssaoColorBuffer->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->ssaoColorBuffer->getId(),
-                                   0);
-
-
-        this->ssaoFS = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, GUIShaders::getSSAOFS());
-        this->ssaoVS = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, GUIShaders::getSSAOVS());
-        this->ssaoProgram = std::make_shared<ge::gl::Program>(ssaoVS, ssaoFS);
-
-
-        checkForErrors();
-        //rebind default frame buffer to avoid errors
-        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
     }
 
     void Renderer::initializeLightning() {
@@ -232,17 +182,13 @@ namespace MapGenerator {
         gl->glBindTexture(GL_TEXTURE_2D, gPosition->getId());
         gPosition->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gPosition->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        checkForErrors();
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition->getId(), 0);
-        checkForErrors();
+
         gNormal = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
         gl->glBindTexture(GL_TEXTURE_2D, gNormal->getId());
-
         gNormal->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gNormal->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal->getId(), 0);
-
-        checkForErrors();
 
         gAlbedo = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, width, height);
         gl->glBindTexture(GL_TEXTURE_2D, gAlbedo->getId());
@@ -256,13 +202,11 @@ namespace MapGenerator {
         this->rboDepth = std::make_shared<ge::gl::Renderbuffer>();
         this->rboDepth->bind();
         gl->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-
         gl->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->getId());
 
         // finally check if framebuffer is complete
         if (gl->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             std::cout << "Framebuffer not complete!" << std::endl;
-        checkForErrors();
         gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     }
@@ -281,7 +225,8 @@ namespace MapGenerator {
         gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         geometryPass();
-        ssaoPass();
+        ssao->render(gPosition, gNormal);
+        ssao->renderBlur();
         lightningPass();
 
         context->swapBuffers(this);
@@ -297,33 +242,22 @@ namespace MapGenerator {
         gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-
-    void Renderer::ssaoPass() {
-        auto width = this->width();
-        auto height = this->height();
-        ssaoFBO->bind(GL_FRAMEBUFFER);
-        gl->glClear(GL_COLOR_BUFFER_BIT);
-        ssaoProgram->use();
-        gPosition->bind(0);
-        gNormal->bind(1);
-        noiseTexture->bind(2);
-        auto projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
-        ssaoProgram->setMatrix4fv("projection", glm::value_ptr(projection));
-        ssaoProgram->set2f("noiseScale", width / 4, height / 4);
-        ssaoProgram->set3fv("samples", glm::value_ptr(ssaoKernel[0]), 64);
-        drawQuad();
-
-        //Add blur pass
-
-        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    std::string Renderer::readShader(std::string path) {
+        //Read entire file into string
+        std::ifstream file(path);
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        file.close();
+        return buffer.str();
     }
+
 
     void Renderer::lightningPass() {
         lightningProgram->use();
         gPosition->bind(0);
         gNormal->bind(1);
         gAlbedo->bind(2);
-        ssaoColorBuffer->bind(3);
+        ssao->bind(3);
         drawQuad();
         gl->glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->getId());
         gl->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -354,6 +288,11 @@ namespace MapGenerator {
         render();
     }
 
+    void Renderer::resizeRender(){
+        initializeGBufferTextures();
+        ssao->setDimensions(this->width(), this->height());
+    }
+
 
     bool Renderer::event(QEvent *event) {
         switch (event->type()) {
@@ -362,7 +301,7 @@ namespace MapGenerator {
                 return true;
             case QEvent::Resize:
                 if (initialized) {
-                    //initializeGBufferTextures();
+                    resizeRender();
                 }
                 return true;
             case QEvent::Close:
@@ -381,6 +320,7 @@ namespace MapGenerator {
             renderNow();
         }
     }
+
 
 
 }

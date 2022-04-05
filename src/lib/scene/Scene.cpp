@@ -32,7 +32,7 @@ namespace MapGenerator {
     }
 
 
-    int Scene::createProgram(std::shared_ptr<Program> program) {
+    int Scene::addProgram(std::shared_ptr<Program> program) {
         int id = generateId(programs);
         programs[id] = program;
         return id;
@@ -45,7 +45,8 @@ namespace MapGenerator {
         if (models.find(modelId) == models.end()) {
             throw std::runtime_error("Model with id " + std::to_string(modelId) + " does not exist");
         }
-        if (std::find(modelToProgram[modelId].begin(), modelToProgram[modelId].end(), id) != modelToProgram[modelId].end()) {
+        if (std::find(modelToProgram[modelId].begin(), modelToProgram[modelId].end(), id) !=
+            modelToProgram[modelId].end()) {
             throw std::runtime_error("Program with id " + std::to_string(id) + " is already bound to a model");
         }
         modelToProgram[modelId].push_back(id);
@@ -101,14 +102,22 @@ namespace MapGenerator {
         auto &tex = programToTexture[programId];
         auto it = std::find(tex.begin(), tex.end(), id);
         if (it == tex.end()) {
-            throw std::runtime_error("Model with id " + std::to_string(programId) + " is not bound to texture with id " +
-                                     std::to_string(id));
+            throw std::runtime_error(
+                    "Model with id " + std::to_string(programId) + " is not bound to texture with id " +
+                    std::to_string(id));
         }
         tex.erase(it);
     }
 
     std::map<int, std::shared_ptr<Model>> Scene::getModels() {
         return models;
+    }
+
+    std::vector<int> Scene::getTextureArraysForProgram(int modelId) {
+        if(programToTextureArray.find(modelId) == programToTextureArray.end()) {
+            return {};
+        }
+        return programToTextureArray[modelId];
     }
 
     std::vector<int> Scene::getTexturesForProgram(int modelId) {
@@ -154,11 +163,11 @@ namespace MapGenerator {
     }
 
     void Scene::removeModel(int id) {
-        if(models.find(id) == models.end()) {
+        if (models.find(id) == models.end()) {
             throw std::runtime_error("Model with id " + std::to_string(id) + " does not exist");
         }
         auto &programs = modelToProgram[id];
-        for (auto programId : programs) {
+        for (auto programId: programs) {
             auto &textures = programToTexture[programId];
             auto it = std::find(textures.begin(), textures.end(), id);
             if (it != textures.end()) {
@@ -167,6 +176,29 @@ namespace MapGenerator {
         }
         modelToProgram.erase(id);
         models.erase(id);
+    }
+
+    void Scene::bindTextureArray(int id, int programId) {
+        if (textureArrays.find(id) == textureArrays.end()) {
+            throw std::runtime_error("Texture with id " + std::to_string(id) + " does not exist");
+        }
+        if (models.find(programId) == models.end()) {
+            throw std::runtime_error("Model with id " + std::to_string(programId) + " does not exist");
+        }
+        programToTextureArray[programId].push_back(id);
+    }
+
+    int Scene::addTextureArray(const std::shared_ptr<TextureArray> &textureArray) {
+        int id = generateId(textureArrays);
+        textureArrays[id] = textureArray;
+        return id;
+    }
+
+    std::shared_ptr<TextureArray> Scene::getTextureArray(int id) {
+        if (textureArrays.find(id) == textureArrays.end()) {
+            return nullptr;
+        }
+        return textureArrays[id];
     }
 
 
