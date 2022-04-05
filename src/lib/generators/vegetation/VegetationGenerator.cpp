@@ -7,10 +7,14 @@
 #include <poisson_disk_sampling.h>
 #include "scene/Point.h"
 #include <iostream>
+#include <filesystem>
 
+
+namespace fs = std::filesystem;
 namespace MapGenerator {
     VegetationGenerator::VegetationGenerator(GeneratorOptions options, std::shared_ptr<ElevationData> heightData) {
-        defaultTree = ObjectLoader::load("../lib/assets/models/kokotree.obj");
+        currentModels = {};
+
         this->options = options;
         this->heightData = heightData;
         this->updateZ = heightData->getScale() > 1;
@@ -20,12 +24,37 @@ namespace MapGenerator {
         std::mt19937 gen(rd());
         this->randomGenerator = std::mt19937(rd());
         this->randomDistribution = std::uniform_real_distribution<double>(0, 1);
-        //Generate a random number
-
+        loadModels();
     }
 
     VegetationGenerator::~VegetationGenerator() {
 
+    }
+
+    void VegetationGenerator::loadModels() {
+        auto base = "../lib/assets/models/";
+        std::vector<std::string> types = {"coniferous_trees", "deciduous_trees", "grass", "crops"};
+        loadModels(base + types[0], coniferousTrees);
+        loadModels(base + types[1], deciduousTrees);
+        loadModels(base + types[0], mixedTrees);
+        loadModels(base + types[1], mixedTrees);
+        loadModels(base + types[2], grass);
+        loadModels(base + types[3], crops);
+
+    }
+
+    void VegetationGenerator::loadModels(const std::string &directory, std::vector<std::shared_ptr<Model>> &location) {
+        //Get all files inside the directory
+        std::vector<std::string> files;
+        for (auto &p: fs::directory_iterator(directory)) {
+            files.push_back(p.path().string());
+        }
+        //Load all files
+        auto models = ObjectLoader::loadAll(files);
+        //Add all models to the location vector
+        for (auto &model: models) {
+            location.push_back(model);
+        }
     }
 
 
@@ -47,11 +76,26 @@ namespace MapGenerator {
         return vertices;
     }
 
-    bool VegetationGenerator::shouldRender(const std::shared_ptr<Texture> &texture, int resolution, PointF point) {
+    bool VegetationGenerator::shouldRender(const std::shared_ptr<Texture> &texture, int resolution, PointF point,VegetationType type) {
         PointI pointI = PointI((int) (point.x * resolution), (int) (point.y * resolution));
         auto color = texture->getPixel(pointI.x, pointI.y);
-        //TODO change according to requested biome
-        return color.x == 1.0;
+        auto requestedBiomeId = 0.0f;
+        switch(type){
+            case VegetationType::ConiferousForest:
+                requestedBiomeId = 1.0f;
+                break;
+            case VegetationType::DeciduousForest:
+            case VegetationType::MixedForest:
+                requestedBiomeId = -1.0f;
+                break;
+            case VegetationType::Field:
+                requestedBiomeId = 3.0f;
+                break;
+            case VegetationType::Grassland:
+                requestedBiomeId = 6.0f;
+                break;
+        }
+        return color.x == requestedBiomeId;
     }
 
     void VegetationGenerator::addToResult(const std::shared_ptr<Model> &model, const std::vector<Vertex> &scaledData,
@@ -64,68 +108,97 @@ namespace MapGenerator {
             } else {
                 vertex.x = (vertex.x * scale) + ((1 - scale) / 2);
             }
-            //resultVertices.push_back(vertex);
             auto origV = &model->vertices;
             auto normal = Vertex((*origV)[j * 11 + 3], (*origV)[j * 11 + 4], (*origV)[j * 11 + 5]);
             auto uv = PointF((*origV)[j * 11 + 6], (*origV)[j * 11 + 7]);
             result->addVertex(vertex, normal, uv);
         }
-        return;
-        Vertex center;
-        for(auto i : scaledData){
-            center += i;
-        }
-        center /= scaledData.size();
-        auto angle = randomDistribution(randomGenerator) * 2 * M_PI;
-        //rotate around center according to angle
-        for (int i = 0; i < resultVertices.size(); i++) {
-            auto v = resultVertices[i];
-            //translate the vertex back to origin
-            v -= center;
-            v.x = v.x * cos(angle) - v.z * sin(angle);
-            v.z = -v.x * sin(angle) + v.z * cos(angle);
-            //v.z = z + center.z;
-            v += center;
-
-        }
     }
 
-    std::shared_ptr<Model> VegetationGenerator::getVegetation(const std::shared_ptr<Texture> &texture, int resolution) {
-        result = std::make_shared<Model>();
-        PointF min;
-        PointF max;
-        if (!updateZ) {
-            min = PointF(0, (1 - scale) / 2);
-            max = PointF(1, 1 - min.y);
-        } else {
-            min = PointF((1 - scale) / 2, 0);
-            max = PointF(1 - min.x, 1);
+    void VegetationGenerator::prepareModels(VegetationType type) {
+        auto modelHeight = 0.0;
+        currentModelsScaled.clear();
+        switch (type) {
+            case VegetationType::MixedForest:
+                modelHeight = 20.0;
+                currentModels = mixedTrees;
+                break;
+            case VegetationType::DeciduousForest:
+                modelHeight = 20.0;
+                currentModels = deciduousTrees;
+                break;
+            case VegetationType::ConiferousForest:
+                modelHeight = 20.0;
+                currentModels = coniferousTrees;
+                break;
+            case VegetationType::Field:
+                modelHeight = 1.0;
+                currentModels = crops;
+                break;
+            case VegetationType::Grassland:
+                modelHeight = 0.2;
+                currentModels = grass;
+                break;
         }
-        min = {0.005, 0.005};
-        max = {0.995, 0.995};
-
-        auto treeHeightInM = 20.0 * (1 / this->scale);
-        auto treeDistanceInM = 9.0 * (1 / this->scale);
-        auto treeHeight = ((treeHeightInM - heightData->getNormalizedMin()) /
+        modelHeight *= (1 / scale);
+        auto modelScale = ((modelHeight - heightData->getNormalizedMin()) /
                            (heightData->getNormalizedMax() + heightData->getNormalizedMin()));
-        auto treeDistance = ((treeDistanceInM - heightData->getNormalizedMin()) /
-                             (heightData->getNormalizedMax() + heightData->getNormalizedMin()));
+        for (auto &model: currentModels) {
+            currentModelsScaled.push_back(getModelVertices(model, modelScale));
+        }
+
+    }
+
+    double VegetationGenerator::getDistance(VegetationType type) {
+        double distance;
+        switch (type) {
+            case VegetationType::MixedForest:
+            case VegetationType::DeciduousForest:
+            case VegetationType::ConiferousForest:
+                distance = 9;
+                break;
+            case VegetationType::Field:
+                distance = 4;
+                break;
+            case VegetationType::Grassland:
+                distance = 0.5;
+                break;
+        }
+        distance *= (1 / scale);
+        return ((distance - heightData->getNormalizedMin()) /
+                (heightData->getNormalizedMax() + heightData->getNormalizedMin()));
+    }
+
+    std::shared_ptr<Model>
+    VegetationGenerator::getVegetation(const std::shared_ptr<Texture> &texture, int resolution, VegetationType type) {
+        result = std::make_shared<Model>();
+        PointF min = {0.005, 0.005};
+        PointF max = {0.995, 0.995};
         auto kXMin = std::array<float, 2>{min.x, min.y};
         auto kXMax = std::array<float, 2>{max.x, max.y};
-        auto floatPositions = thinks::PoissonDiskSampling((float) treeDistance, kXMin, kXMax);
+        prepareModels(type);
+        if (currentModels.empty()) {
+            return result;
+        }
+        auto floatPositions = thinks::PoissonDiskSampling((float) getDistance(type), kXMin, kXMax);
 
-        auto scaledModel = getModelVertices(defaultTree, treeHeight);
-        auto model = defaultTree;
-        int treeIndex = 0;
+        unsigned long indexSoFar = 0;
         for (int i = 0; i < floatPositions.size(); i++) {
             auto xOffset = floatPositions[i][0];
             auto zOffset = floatPositions[i][1];
-            if (!shouldRender(texture, resolution, PointF(xOffset, zOffset))) continue;
-            addToResult(model, scaledModel, PointF(xOffset, zOffset));
-            for (int j = 0; j < model->indices.size(); j++) {
-                result->addIndex(model->indices[j] + (scaledModel.size() * treeIndex));
+            if (!shouldRender(texture, resolution, PointF(xOffset, zOffset), type)) {
+                continue;
             }
-            treeIndex++;
+            //We can now grab a random model from the list and use it
+            auto idx = (int) (randomDistribution(randomGenerator) * currentModels.size());
+            auto model = currentModels[idx];
+            auto scaledData = currentModelsScaled[idx];
+            addToResult(model, scaledData, PointF(xOffset, zOffset));
+            //Since we only need to move the index with every other tree this is the solution
+            for (int j = 0; j < model->indices.size(); j++) {
+                result->addIndex(indexSoFar + model->indices[j]);
+            }
+            indexSoFar += scaledData.size();
         }
         return result;
     }

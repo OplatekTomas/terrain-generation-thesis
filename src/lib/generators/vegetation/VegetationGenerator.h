@@ -19,29 +19,55 @@
 namespace MapGenerator {
     class VegetationGenerator {
     public:
+        enum class VegetationType {
+            MixedForest,
+            DeciduousForest,
+            ConiferousForest,
+            Field,
+            Grassland,
+        };
+
         VegetationGenerator(GeneratorOptions options, std::shared_ptr<ElevationData> heightData);
 
         ~VegetationGenerator();
 
-        std::shared_ptr<Model> getVegetation(const std::shared_ptr<Texture> &texture, int resolution);
+        std::shared_ptr<Model>
+        getVegetation(const std::shared_ptr<Texture> &texture, int resolution, VegetationType type);
 
     private:
         GeneratorOptions options;
         std::shared_ptr<ElevationData> heightData;
-        std::shared_ptr<Model> defaultTree;
+        std::vector<std::shared_ptr<Model>> coniferousTrees;
+        std::vector<std::shared_ptr<Model>> deciduousTrees;
+        std::vector<std::shared_ptr<Model>> mixedTrees;
+        std::vector<std::shared_ptr<Model>> grass;
+        std::vector<std::shared_ptr<Model>> crops;
+
+        std::vector<std::vector<Vertex>> currentModelsScaled;
+        std::vector <std::shared_ptr<Model>> currentModels;
 
         std::vector<Vertex> getModelVertices(std::shared_ptr<Model> model, double scale);
 
-        bool shouldRender(const std::shared_ptr<Texture> &texture, int resolution, PointF point);
+        bool shouldRender(const std::shared_ptr <Texture> &texture, int resolution, PointF point, VegetationType type);
 
         bool updateZ;
         float scale;
         std::shared_ptr<Model> result;
 
-        void addToResult(const std::shared_ptr <Model> &model, const std::vector <Vertex> &scaledData, const PointF &offset);
+        void
+        addToResult(const std::shared_ptr<Model> &model, const std::vector<Vertex> &scaledData, const PointF &offset);
 
         std::uniform_real_distribution<double> randomDistribution;
         std::mt19937 randomGenerator;
+
+        void loadModels();
+
+        void loadModels(const std::string &directory, std::vector<std::shared_ptr<Model>> &location);
+
+        void prepareModels(VegetationType type);
+
+        double getDistance(VegetationType type);
+
     };
 }
 

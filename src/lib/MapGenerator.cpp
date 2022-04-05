@@ -116,6 +116,7 @@ namespace MapGenerator {
         generateBuildings();
         int prevId = -1;
         int currentResolution = options.minTextureResolution;
+        bool vegetationDone = false;
         while (currentResolution <= options.maxTextureResolution) {
             if (osmData == nullptr) {
                 return;
@@ -132,8 +133,11 @@ namespace MapGenerator {
             prevId = texId;
 
             //Now we can generate the trees -> when we have at least basic texture
-            generateTrees(texture, currentResolution);
-
+            if (!vegetationDone) {
+                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::ConiferousForest);
+                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::Field);
+                vegetationDone = true;
+            }
             currentResolution = currentResolution * options.textureResolutionStep;
         }
     }
@@ -146,13 +150,10 @@ namespace MapGenerator {
     }
 
 
-    void MapGenerator::generateTrees(const shared_ptr<Texture> &texture, int resolution) {
-        static int vegetationId = -1;
-        if (vegetationId != -1) {
-            return; //TODO introduce a function that will increase the precission without recalculating
-        }
-        auto vegetation = vegetationGenerator->getVegetation(texture, resolution);
-        vegetationId = scene->addModel(vegetation);
+    void MapGenerator::generateVegetation(const shared_ptr<Texture> &texture, int resolution,
+                                          VegetationGenerator::VegetationType type) {
+        auto vegetation = vegetationGenerator->getVegetation(texture, resolution, type);
+        auto vegetationId = scene->addModel(vegetation);
         auto program = std::make_shared<Program>();
         program->vertexShader = scene->addShader(
                 std::make_shared<Shader>(Shaders::TreesVertexShader(), Shader::VERTEX));
@@ -199,7 +200,7 @@ namespace MapGenerator {
                 //read the entire file using libpng
                 auto data = readPng(file);
                 auto texture = std::make_shared<Texture>(1024, 1024);
-                auto stepSize = data.size() == 1024*1024*4 ? 4 : 3;
+                auto stepSize = data.size() == 1024 * 1024 * 4 ? 4 : 3;
                 for (int i = 0; i < data.size(); i += stepSize) {
                     texture->addPixel(data[i], data[i + 1], data[i + 2], 255);
                 }

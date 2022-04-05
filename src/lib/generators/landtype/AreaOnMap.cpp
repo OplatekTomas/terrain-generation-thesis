@@ -204,9 +204,8 @@ namespace MapGenerator {
             rgba[2] = rand() % 255;
         }
 
-        std::vector<std::string> landUseTypes = {"grassland", "meadow", "orchard", "vineyard", "farmland"};
 
-        std::vector<std::string> landUseLightTypes = {"village_green", "plant_nursery", "grass"};
+        std::vector<std::string> landUseLightTypes = {"village_green", "plant_nursery", "grass", "grassland", "meadow", "orchard", "vineyard"};
         std::vector<std::string> leisureTypes = {"park", "garden", "plant_nursery", "pitch", "playground"};
 
         //Check for forrest
@@ -220,9 +219,7 @@ namespace MapGenerator {
             rgba[0] = 2;
             priority = 2;
         }//Check for fields
-        else if (boolinq::from(landUseTypes).any([&tags](const std::string &type) {
-            return mapContainsKeyAndValue(tags, "landuse", type);
-        })) {
+        else if (mapContainsKeyAndValue(tags, "landuse", "farmland")) {
             rgba[0] = 3;
         } // Check for roads
         else if (mapContainsKey(tags, "highway")) {
@@ -249,7 +246,7 @@ namespace MapGenerator {
         else if (mapContainsKeyAndValue(tags, "boundary", "administrative")) {
             rgba[0] = 7;
             priority = -1;
-        }
+        } //Check for farmland
         else {
             //If the area is unknown, just make the priority low, so it will be drawn last
             rgba[0] = 255;
