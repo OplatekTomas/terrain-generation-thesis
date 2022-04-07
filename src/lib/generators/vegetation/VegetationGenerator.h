@@ -31,7 +31,7 @@ namespace MapGenerator {
 
         ~VegetationGenerator();
 
-        std::shared_ptr<Model>
+        std::vector <std::shared_ptr<Model>>
         getVegetation(const std::shared_ptr<Texture> &texture, int resolution, VegetationType type);
 
     private:
@@ -52,10 +52,7 @@ namespace MapGenerator {
 
         bool updateZ;
         float scale;
-        std::shared_ptr<Model> result;
 
-        void
-        addToResult(const std::shared_ptr<Model> &model, const std::vector<Vertex> &scaledData, const PointF &offset);
 
         std::uniform_real_distribution<double> randomDistribution;
         std::mt19937 randomGenerator;

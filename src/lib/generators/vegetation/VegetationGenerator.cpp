@@ -76,11 +76,12 @@ namespace MapGenerator {
         return vertices;
     }
 
-    bool VegetationGenerator::shouldRender(const std::shared_ptr<Texture> &texture, int resolution, PointF point,VegetationType type) {
+    bool VegetationGenerator::shouldRender(const std::shared_ptr<Texture> &texture, int resolution, PointF point,
+                                           VegetationType type) {
         PointI pointI = PointI((int) (point.x * resolution), (int) (point.y * resolution));
         auto color = texture->getPixel(pointI.x, pointI.y);
         auto requestedBiomeId = 0.0f;
-        switch(type){
+        switch (type) {
             case VegetationType::ConiferousForest:
                 requestedBiomeId = 1.0f;
                 break;
@@ -98,23 +99,6 @@ namespace MapGenerator {
         return color.x == requestedBiomeId;
     }
 
-    void VegetationGenerator::addToResult(const std::shared_ptr<Model> &model, const std::vector<Vertex> &scaledData,
-                                          const PointF &offset) {
-        std::vector<Vertex> resultVertices;
-        for (int j = 0; j < scaledData.size(); j++) {
-            auto vertex = Vertex(scaledData[j].x + offset.x, scaledData[j].y, scaledData[j].z + offset.y);
-            if (!updateZ) {
-                vertex.z = (vertex.z * scale) + ((1 - scale) / 2);
-            } else {
-                vertex.x = (vertex.x * scale) + ((1 - scale) / 2);
-            }
-            auto origV = &model->vertices;
-            auto normal = Vertex((*origV)[j * 11 + 3], (*origV)[j * 11 + 4], (*origV)[j * 11 + 5]);
-            auto uv = PointF((*origV)[j * 11 + 6], (*origV)[j * 11 + 7]);
-            result->addVertex(vertex, normal, uv);
-        }
-    }
-
     void VegetationGenerator::prepareModels(VegetationType type) {
         auto modelHeight = 0.0;
         currentModelsScaled.clear();
@@ -128,11 +112,11 @@ namespace MapGenerator {
                 currentModels = deciduousTrees;
                 break;
             case VegetationType::ConiferousForest:
-                modelHeight = 20.0;
+                modelHeight = 15.0;
                 currentModels = coniferousTrees;
                 break;
             case VegetationType::Field:
-                modelHeight = 1.0;
+                modelHeight = 2.0;
                 currentModels = crops;
                 break;
             case VegetationType::Grassland:
@@ -155,10 +139,10 @@ namespace MapGenerator {
             case VegetationType::MixedForest:
             case VegetationType::DeciduousForest:
             case VegetationType::ConiferousForest:
-                distance = 9;
+                distance = 6;
                 break;
             case VegetationType::Field:
-                distance = 4;
+                distance = 4.0;
                 break;
             case VegetationType::Grassland:
                 distance = 0.5;
@@ -169,38 +153,63 @@ namespace MapGenerator {
                 (heightData->getNormalizedMax() + heightData->getNormalizedMin()));
     }
 
-    std::shared_ptr<Model>
+    std::vector<std::shared_ptr<Model>>
     VegetationGenerator::getVegetation(const std::shared_ptr<Texture> &texture, int resolution, VegetationType type) {
-        result = std::make_shared<Model>();
+        std::vector<std::shared_ptr<Model>> result;
         PointF min = {0.005, 0.005};
         PointF max = {0.995, 0.995};
         auto kXMin = std::array<float, 2>{min.x, min.y};
         auto kXMax = std::array<float, 2>{max.x, max.y};
         prepareModels(type);
         if (currentModels.empty()) {
-            return result;
+            return {};
+        }
+        auto scaleX = std::make_shared<Uniform>();
+        scaleX->name = "scaleX";
+        scaleX->type = Uniform::Type::FLOAT;
+        scaleX->valueInt = (int) this->updateZ;
+        auto scaleZ = std::make_shared<Uniform>();
+        scaleZ->name = "scaleZ";
+        scaleZ->type = Uniform::Type::FLOAT;
+        scaleZ->valueFloat = this->scale;
+        if (!updateZ) {
+            scaleZ->valueFloat = scale;
+            scaleX->valueFloat = 1.0;
+        } else {
+            scaleX->valueFloat = scale;
+            scaleZ->valueFloat = 1.0;
+        }
+        for (int i = 0; i < currentModels.size(); i++) {
+            auto model = std::make_shared<Model>();
+            auto current = currentModelsScaled[i];
+            auto orig = currentModels[i];
+            auto origV = orig->vertices;
+            for (int j = 0; j < currentModelsScaled[i].size(); j++) {
+                auto idx = j * 11;
+                auto vertex = current[j];
+                model->addVertex(vertex, {origV[idx + 3], origV[idx + 4], origV[idx + 5]},
+                                 {origV[idx + 6], origV[idx + 7]});
+            }
+            for (int j = 0; j < orig->indices.size(); j++) {
+                model->addIndex(orig->indices[j]);
+            }
+            model->uniforms.push_back(scaleZ);
+            model->uniforms.push_back(scaleX);
+            model->isInstanced = true;
+            result.push_back(model);
         }
         auto floatPositions = thinks::PoissonDiskSampling((float) getDistance(type), kXMin, kXMax);
-
-        unsigned long indexSoFar = 0;
-        for (int i = 0; i < floatPositions.size(); i++) {
-            auto xOffset = floatPositions[i][0];
-            auto zOffset = floatPositions[i][1];
-            if (!shouldRender(texture, resolution, PointF(xOffset, zOffset), type)) {
+        for (auto &position: floatPositions) {
+            auto point = PointF(position[0], position[1]);
+            if (!shouldRender(texture, resolution, point, type)) {
                 continue;
             }
-            //We can now grab a random model from the list and use it
             auto idx = (int) (randomDistribution(randomGenerator) * currentModels.size());
-            auto model = currentModels[idx];
-            auto scaledData = currentModelsScaled[idx];
-            addToResult(model, scaledData, PointF(xOffset, zOffset));
-            //Since we only need to move the index with every other tree this is the solution
-            for (int j = 0; j < model->indices.size(); j++) {
-                result->addIndex(indexSoFar + model->indices[j]);
-            }
-            indexSoFar += scaledData.size();
+            result[idx]->instanceData.push_back(point.x);
+            result[idx]->instanceData.push_back(point.y);
         }
         return result;
+
     }
 
 

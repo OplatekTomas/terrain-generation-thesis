@@ -19,7 +19,7 @@ vec3 CalcDirLight(vec3 normal){
     vec3 ambientColor = vec3(135, 206, 235) / 255.0;
     vec3 ambient = ambientStrength * ambientColor;
     //calculate diffuse strength
-    vec3 diffuseColor = vec3(256,251,211) / 255.0;
+    vec3 diffuseColor = vec3(256, 251, 211) / 255.0;
     vec3 lightDir = vec3(0.5, 1.0, 0.0);
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * diffuseColor;
@@ -28,10 +28,10 @@ vec3 CalcDirLight(vec3 normal){
 
 
 void main() {
-    vec3 baseColor = vec3(34,139,34) / 255.0;
+    vec3 baseColor = vec3(34, 139, 34) / 255.0;
     //vec3 color = CalcDirLight(Normal_VS_Out);
     //FragColor = vec4(baseColor , 1.0);
     gPosition = WorldPos_VS_Out.xyz;
     gNormal = normalize(Normal_VS_Out).xyz;
-    gAlbedo.rgb = baseColor.rgb;
+    gAlbedo = vec4(baseColor.rgb, 1.0);
 }

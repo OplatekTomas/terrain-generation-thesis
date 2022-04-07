@@ -42,6 +42,7 @@ namespace MapGenerator {
         map<int, shared_ptr<ge::gl::Shader>> shaders;
         map<int, shared_ptr<ge::gl::Framebuffer>> frameBuffers;
         map<int, shared_ptr<ge::gl::Renderbuffer>> renderBuffers;
+        map<int, shared_ptr<ge::gl::Buffer>> instances;
         int gBufferId;
 
         shared_ptr<ge::gl::Texture> getTexture(int id, const shared_ptr<Texture> &texture, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
@@ -65,6 +66,8 @@ namespace MapGenerator {
         shared_ptr<ge::gl::Texture> getTextureArray(int id);
 
         shared_ptr<ge::gl::Texture> getTextureArray(int id, shared_ptr<TextureArray> arr);
+
+        void setupUniforms(int progId, int modelId);
     };
 }
 

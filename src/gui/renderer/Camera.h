@@ -19,8 +19,11 @@ namespace MapGenerator {
 
     class Camera : public QObject {
     Q_OBJECT
+
+
     public:
         Camera(Renderer *parent);
+        glm::vec3 getPosition();
 
         glm::mat4 getViewMatrix();
         void print();
@@ -28,8 +31,8 @@ namespace MapGenerator {
     public slots:
 
         void keyEvent(QKeyEvent *event);
-
         void mouseMoved(QMouseEvent *event);
+        void scrolled(QWheelEvent *event);
 
         void updateSteps();
 
@@ -57,6 +60,8 @@ namespace MapGenerator {
         bool space_down;
         int xMove;
         int yMove;
+
+        float moveSpeed = 0.03;
 
     };
 

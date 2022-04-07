@@ -119,6 +119,8 @@ namespace MapGenerator {
             connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
+            connect(this, SIGNAL(wheelEvent(QWheelEvent * )), camera.get(), SLOT(scrolled(QWheelEvent * )));
+
         }
         //set up the context and get ready for rendering
         context->makeCurrent(this);
@@ -143,6 +145,7 @@ namespace MapGenerator {
         initializeLightning();
         initializeGBuffer();
         this->ssao = std::make_shared<SSAO>(this->gl, this->width(), this->height(), [this]() { drawQuad(); });
+        this->skybox = std::make_shared<Skybox>(this->gl, this->camera, (float) width(), (float) height());
         //Prepare the scene - used in geometry pass
         scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
     }
@@ -228,7 +231,7 @@ namespace MapGenerator {
         ssao->render(gPosition, gNormal);
         ssao->renderBlur();
         lightningPass();
-
+        skybox->draw();
         context->swapBuffers(this);
     }
 
@@ -288,9 +291,10 @@ namespace MapGenerator {
         render();
     }
 
-    void Renderer::resizeRender(){
+    void Renderer::resizeRender() {
         initializeGBufferTextures();
         ssao->setDimensions(this->width(), this->height());
+        skybox->setDimensions(this->width(), this->height());
     }
 
 
@@ -302,6 +306,7 @@ namespace MapGenerator {
             case QEvent::Resize:
                 if (initialized) {
                     resizeRender();
+
                 }
                 return true;
             case QEvent::Close:
@@ -320,7 +325,6 @@ namespace MapGenerator {
             renderNow();
         }
     }
-
 
 
 }

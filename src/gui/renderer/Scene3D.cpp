@@ -48,7 +48,12 @@ namespace MapGenerator {
                 }
                 //Get ready for drawing
                 auto drawCount = useModel(modelId);
-                if (origProgram->drawTarget != Program::DRAW_TO_SCREEN) {
+                setupUniforms(programId, modelId);
+                if (scene->getModel(modelId)->isInstanced) {
+                    gl->glViewport(0, 0, width * scale, height * scale);
+                    gl->glDrawElementsInstanced(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, nullptr,
+                                                scene->getModel(modelId)->instanceData.size() / 2);
+                } else if (origProgram->drawTarget != Program::DRAW_TO_SCREEN) {
                     gl->glViewport(0, 0, origProgram->drawTextureResolution, origProgram->drawTextureResolution);
                     drawToTexture(origProgram, programId, drawCount);
                 } else {
@@ -70,6 +75,7 @@ namespace MapGenerator {
     }
 
     void Scene3D::drawToScreen(const shared_ptr<Program> &program, int drawCount) {
+
         auto drawMode = GL_TRIANGLES;
         if (program->tessControlShader != -1 && program->tessEvaluationShader != -1) {
             gl->glPatchParameteri(GL_PATCH_VERTICES, 3);
@@ -108,6 +114,8 @@ namespace MapGenerator {
     int Scene3D::useModel(int id) {
         auto model = scene->getModel(id);
         if (models.find(id) != models.end()) {
+            if (model->isInstanced) {
+            }
             auto vao = models[id];
             vao->bind();
             return model->indices.size();
@@ -129,6 +137,16 @@ namespace MapGenerator {
         vao->addAttrib(vertices, 3, 3, GL_FLOAT, 11 * sizeof(float), 8 * sizeof(float));
 
         vao->addElementBuffer(indices);
+
+        if (model->isInstanced) {
+            auto instanceVAO = std::make_shared<ge::gl::Buffer>(model->instanceData.size() * sizeof(float),
+                                                                model->instanceData.data());
+            instanceVAO->bind(GL_ARRAY_BUFFER);
+            vao->addAttrib(instanceVAO, 4, 2, GL_FLOAT, 2 * sizeof(float), 0);
+            gl->glVertexAttribDivisor(4, 1);
+            instances[id] = instanceVAO;
+        }
+
         models[id] = vao;
         vao->bind();
         return model->indices.size();
@@ -172,10 +190,11 @@ namespace MapGenerator {
         texture->setData3D(data.data(), GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D_ARRAY,
                            0, 0, 0,
                            arr->getWidth(), arr->getHeight(), arr->getSize());
-        texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
         texture->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         texture->texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        texture->generateMipmap();
         textureArrays[id] = texture;
         return texture;
     }
@@ -263,6 +282,33 @@ namespace MapGenerator {
         auto shaderObj = std::make_shared<ge::gl::Shader>(geGLShaderType, shaderSource);
         shaders[id] = shaderObj;
         return shaderObj;
+    }
+
+    void Scene3D::setupUniforms(int progId, int modelId) {
+        auto program = programs[progId];
+        auto model = scene->getModel(modelId);
+        for (const auto &uniform: model->uniforms) {
+            if (program->getUniformLocation(uniform->name) == -1) {
+                continue;
+            }
+            switch (uniform->type) {
+                case Uniform::INT:
+                    program->set1i(uniform->name, uniform->valueInt);
+                    break;
+                case Uniform::FLOAT:
+                    program->set1f(uniform->name, uniform->valueFloat);
+                    break;
+                case Uniform::VEC2:
+                    program->set2f(uniform->name, uniform->valueVec2[0], uniform->valueVec2[1]);
+                    break;
+                case Uniform::VEC3:
+                    program->set3f(uniform->name, uniform->valueVec3[0], uniform->valueVec3[1], uniform->valueVec3[2]);
+                    break;
+                case Uniform::VEC4:
+                    program->set4f(uniform->name, uniform->valueVec4[0], uniform->valueVec4[1], uniform->valueVec4[2],
+                                   uniform->valueVec4[3]);
+            }
+        }
     }
 
     Scene3D::~Scene3D() = default;

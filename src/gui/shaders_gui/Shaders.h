@@ -29,10 +29,20 @@ public:
         return blur_fs;
     }
 
+    static const char* getSkyboxFS(){
+        return skybox_fs;
+    }
+
+    static const char* getSkyboxVS(){
+        return skybox_vs;
+    }
+
     static const char *lightning_vs;
     static const char *lightning_fs;
     static const char *ssao_fs;
     static const char *blur_fs;
+    static const char *skybox_vs;
+    static const char *skybox_fs;
 
 };
 

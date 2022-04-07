@@ -133,7 +133,7 @@ namespace MapGenerator {
             prevId = texId;
 
             //Now we can generate the trees -> when we have at least basic texture
-            if (!vegetationDone) {
+            if (!vegetationDone && currentResolution >= 1024) {
                 generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::ConiferousForest);
                 generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::Field);
                 vegetationDone = true;
@@ -153,16 +153,18 @@ namespace MapGenerator {
     void MapGenerator::generateVegetation(const shared_ptr<Texture> &texture, int resolution,
                                           VegetationGenerator::VegetationType type) {
         auto vegetation = vegetationGenerator->getVegetation(texture, resolution, type);
-        auto vegetationId = scene->addModel(vegetation);
-        auto program = std::make_shared<Program>();
-        program->vertexShader = scene->addShader(
-                std::make_shared<Shader>(Shaders::TreesVertexShader(), Shader::VERTEX));
-        program->fragmentShader = scene->addShader(
-                std::make_shared<Shader>(Shaders::TreesFragmentShader(), Shader::FRAGMENT));
-        program->drawTarget = Program::DRAW_TO_SCREEN;
-        auto progId = scene->addProgram(program);
-        scene->bindTexture(heightTextureId, progId);
-        scene->bindProgram(progId, vegetationId);
+        for (auto &i: vegetation) {
+            auto vegetationId = scene->addModel(i);
+            auto program = std::make_shared<Program>();
+            program->vertexShader = scene->addShader(
+                    std::make_shared<Shader>(Shaders::TreesVertexShader(), Shader::VERTEX));
+            program->fragmentShader = scene->addShader(
+                    std::make_shared<Shader>(Shaders::TreesFragmentShader(), Shader::FRAGMENT));
+            program->drawTarget = Program::DRAW_TO_SCREEN;
+            auto progId = scene->addProgram(program);
+            scene->bindTexture(heightTextureId, progId);
+            scene->bindProgram(progId, vegetationId);
+        }
     }
 
 
@@ -182,7 +184,7 @@ namespace MapGenerator {
 
     void MapGenerator::loadTexturesForSurface(int surfaceId) {
         auto texturePath = "../lib/assets/textures/";
-        auto textureTypes = {"asphalt", "field"};
+        auto textureTypes = {"asphalt", "field", "meadow", "forrest"};
         for (std::string textureType: textureTypes) {
             auto textureArray = std::make_shared<TextureArray>(1024, 1024);
             auto dir = texturePath + textureType;

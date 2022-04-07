@@ -12,6 +12,7 @@
 #include <QScreen>
 #include <renderer/SSAO.h>
 #include <QWindow>
+#include <renderer/Skybox.h>
 #include <QOpenGLContext>
 #include <renderer/Camera.h>
 #include <MapGenerator.h>
@@ -44,6 +45,8 @@ namespace MapGenerator {
         void keyReleaseEvent(QKeyEvent *event) override;
 
         void mouseMoveEvent(QMouseEvent *) override;
+        void wheelEvent(QWheelEvent *) override;
+
 
         void resizeEvent(QResizeEvent *) override;
 
@@ -93,6 +96,7 @@ namespace MapGenerator {
         std::unique_ptr<QTimer> renderTimer;
 
         std::shared_ptr<SSAO> ssao;
+        std::shared_ptr<class Skybox> skybox;
 
         string readShader(string path);
 

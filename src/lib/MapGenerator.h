@@ -52,6 +52,8 @@ namespace MapGenerator {
         void loadTexturesForSurface(int surfaceId);
         void generateVegetation(const shared_ptr <Texture> &texture, int resolution,
                                 VegetationGenerator::VegetationType type);
+
+
     };
 }
 

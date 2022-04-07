@@ -55,6 +55,10 @@ namespace MapGenerator {
         return glm::lookAt(eyeLocal, centerLocal, upLocal);
     }
 
+    glm::vec3 Camera::getPosition() {
+        return position;
+    }
+
     void Camera::keyEvent(QKeyEvent *event) {
         auto pressed = event->type() == QEvent::KeyPress;
         switch (event->key()) {
@@ -120,26 +124,25 @@ namespace MapGenerator {
 
     bool Camera::updateKeyboardEvents() {
         auto y = position.y;
-        const float stepSize = 0.03f;
         if (w_down) {
-            position += front * stepSize;
+            position += front * moveSpeed;
         }
         if (s_down) {
-            position -= front * stepSize;
+            position -= front * moveSpeed;
         }
         if (d_down) {
-            position += right * stepSize;
+            position += right * moveSpeed;
         }
         if (a_down) {
-            position -= right * stepSize;
+            position -= right * moveSpeed;
         }
         position.y = y;
 
         if (space_down) {
-            position += worldUp * stepSize;
+            position += worldUp * moveSpeed;
         }
         if (ctrl_down) {
-            position -= worldUp * stepSize;
+            position -= worldUp * moveSpeed;
         }
         return w_down || s_down || d_down || a_down || space_down || ctrl_down;
     }
@@ -161,6 +164,14 @@ namespace MapGenerator {
         yMove += prevY - event->y();
         prevX = event->x();
         prevY = event->y();
+    }
+
+    void Camera::scrolled(QWheelEvent *event) {
+        if(event->delta() > 0){
+            moveSpeed *= 1.1;
+        }else{
+            moveSpeed *= 0.9;
+        }
     }
 
     void Camera::print() {

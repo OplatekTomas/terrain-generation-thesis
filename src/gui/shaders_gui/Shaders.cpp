@@ -19,3 +19,11 @@ const char *GUIShaders::ssao_fs =
 const char *GUIShaders::blur_fs =
 #include <shaders_gui/include/ssao/blur_fs.shader.out>
 ;
+
+const char *GUIShaders::skybox_fs =
+#include <shaders_gui/include/skybox/skybox_fs.shader.out>
+;
+
+const char *GUIShaders::skybox_vs =
+#include <shaders_gui/include/skybox/skybox_vs.shader.out>
+;

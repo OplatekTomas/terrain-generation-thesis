@@ -8,6 +8,7 @@
 #include <vector>
 #include <scene/Vertex.h>
 #include <scene/Point.h>
+#include <scene/Uniform.h>
 
 namespace MapGenerator {
     class Model {
@@ -27,6 +28,10 @@ namespace MapGenerator {
 
         std::vector<float> vertices;
         std::vector<int> indices;
+
+        bool isInstanced = false;
+        std::vector<float> instanceData;
+        std::vector<std::shared_ptr<class Uniform>> uniforms;
 
     private:
         Vertex calculateTangents(Vertex v1, Vertex v2, Vertex v3, PointF uv1, PointF uv2, PointF uv3);

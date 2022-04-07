@@ -27,10 +27,15 @@ vec3 CalcDirLight(vec3 normal){
 }
 
 void main() {
+    vec4 AlbedoWithTransparency = texture(gAlbedo, TexCoords);
+    if(AlbedoWithTransparency.a == 0.0){
+        FragColor = vec4(0.0);
+        return;
+    }
+    vec3 Albedo = AlbedoWithTransparency.rgb;
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
     vec3 Normal = texture(gNormal, TexCoords).rgb;
     vec3 light = CalcDirLight(Normal);
-    vec3 Albedo = texture(gAlbedo, TexCoords).rgb;
     FragColor = vec4(Albedo * light, 1.0);
     //FragColor = vec4(ao, ao, ao ,1.0);
 }

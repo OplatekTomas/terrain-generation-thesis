@@ -18,5 +18,5 @@ void main() {
     vec3 baseColor = vec3(70, 70, 100) / 255.0;
     gPosition = WorldPos_VS_Out.xyz;
     gNormal = normalize(Normal_VS_Out).xyz;
-    gAlbedo.rgb = baseColor.rgb;
+    gAlbedo = vec4(baseColor.rgb, 1.0);
 }
