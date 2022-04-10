@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ui version="5.0">
+<ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
@@ -15,13 +15,47 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="baseGridLayout">
+    <item row="1" column="0">
+     <widget class="QPushButton" name="btn">
+      <property name="text">
+       <string>Start drawing the scene</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
-     <widget class="QPushButton" name="btn"/>
+     <widget class="GLWrapper" name="openGLWidget" native="true"/>
     </item>
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GLWrapper</class>
+   <extends>QWidget</extends>
+   <header>glwrapper.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onRenderStarted()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onRenderStarted()</slot>
+ </slots>
 </ui>

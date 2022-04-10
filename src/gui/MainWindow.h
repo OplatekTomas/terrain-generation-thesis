@@ -6,6 +6,10 @@
 
 #include <QMainWindow>
 #include <renderer/Renderer.h>
+#include <QOpenGLContext>
+#include <QOpenGLWidget>
+#include <glwrapper.h>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,11 +24,18 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
+
+
+    protected slots:
+    void onRenderStarted();
 
 private:
     Ui::MainWindow *ui;
-    Renderer* renderer;
+    //Renderer* renderer;
     QLayout* baseGridLayout;
+
 
 };
 

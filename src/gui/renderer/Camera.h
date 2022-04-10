@@ -22,7 +22,7 @@ namespace MapGenerator {
 
 
     public:
-        Camera(Renderer *parent);
+        Camera();
         glm::vec3 getPosition();
 
         glm::mat4 getViewMatrix();
@@ -43,7 +43,7 @@ namespace MapGenerator {
         bool rotate = false;
         double refreshRate;
         int idleTimeoutIterations;
-        Renderer *parent;
+        //Renderer *parent;
         std::unique_ptr<QTimer> timer;
         glm::vec3 position;
         glm::vec3 front;

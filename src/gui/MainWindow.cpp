@@ -1,3 +1,4 @@
+
 //
 // Created by tomas on 02.10.21.
 //
@@ -8,18 +9,40 @@
 #include <ui_MainWindow.h>
 
 
-MainWindow::MainWindow(QWidget *parent) :QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    baseGridLayout = this->findChild<QGridLayout*>("baseGridLayout");
-    //this->renderer = new MapRenderer::Renderer();
-    //baseGridLayout->addWidget(renderer);
+    baseGridLayout = this->findChild<QGridLayout *>("baseGridLayout");
     QSizePolicy sizePolicy;
     sizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);
     sizePolicy.setVerticalPolicy(QSizePolicy::Expanding);
 
+    auto glWidget = findChild<GLWrapper *>("openGLWidget");
+    //register event filter
+    installEventFilter(this);
 }
+
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+void MainWindow::onRenderStarted() {
+    auto glWidget = findChild<GLWrapper *>("openGLWidget");
+    glWidget->startGeneration({}, {});
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        auto glWidget = findChild<GLWrapper *>("openGLWidget");
+        glWidget->keyPressEvent(keyEvent);
+    }
+    if (event->type() == QEvent::KeyRelease) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        auto glWidget = findChild<GLWrapper *>("openGLWidget");
+        glWidget->keyReleaseEvent(keyEvent);
+    }
+    return QObject::eventFilter(obj, event);
+
 }
 

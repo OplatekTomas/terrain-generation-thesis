@@ -58,8 +58,8 @@ namespace MapGenerator {
         program = std::make_shared<ge::gl::Program>(vs, fs);
     }
 
-    void Skybox::draw() {
-        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    void Skybox::draw(int frameBuffer) {
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         auto projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
         auto view = camera->getViewMatrix();
         gl->glDepthFunc(GL_LEQUAL);
@@ -72,7 +72,7 @@ namespace MapGenerator {
         gl->glBindTexture(GL_TEXTURE_CUBE_MAP, texture->getId());
         gl->glDrawArrays(GL_TRIANGLES, 0, 36);
         gl->glDepthFunc(GL_LESS);
-        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
     }
 

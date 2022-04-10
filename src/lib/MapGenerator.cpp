@@ -134,7 +134,8 @@ namespace MapGenerator {
 
             //Now we can generate the trees -> when we have at least basic texture
             if (!vegetationDone && currentResolution >= 1024) {
-                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::ConiferousForest);
+                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::ConiferousForest
+                );
                 generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::Field);
                 vegetationDone = true;
             }

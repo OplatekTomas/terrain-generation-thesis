@@ -18,17 +18,34 @@
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <QGuiApplication>
+#include <QPainter>
+#include <QApplication>
+#include <QPushButton>
+#include <QMouseEvent>
+
 
 namespace MapGenerator {
-    Renderer::Renderer(QWindow *parent) {
-
+    Renderer::Renderer(QWindow *parent) : QWindow(parent), m_backingStore(new QBackingStore(this)) {
         initialized = false;
         context = nullptr;
-        setSurfaceType(
-                QWindow::OpenGLSurface); //this needs to be set otherwise makeCurrent and other gl context related functions will fail
-        surfaceFormat.setVersion(4, 5);
-        surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
-        surfaceFormat.setDepthBufferSize(8);
+        background = new BaseWidget();
+        background->setFixedSize(size());
+        background->setGeometry(0, 0, 300, 100);
+
+        QPalette pal = QPalette();
+// set black background
+// Qt::black / "#000000" / "black"
+        pal.setColor(QPalette::Window, Qt::white);
+        background->setAutoFillBackground(true);
+        background->setPalette(pal);
+
+        QCoreApplication::instance()->installEventFilter(background);
+
+        drawGui = true;
+        swapUi();
+
+        //setGeometry(100, 100, 300, 200);
+
         setupLib();
 
     }
@@ -115,14 +132,15 @@ namespace MapGenerator {
                 ::raise(SIGSEGV);
             }
             //Set up the camera
-            camera = std::make_shared<Camera>((Renderer *) this);
+            camera = std::make_shared<Camera>();
             connect(this, SIGNAL(keyPressEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(keyReleaseEvent(QKeyEvent * )), camera.get(), SLOT(keyEvent(QKeyEvent * )));
             connect(this, SIGNAL(mouseMoveEvent(QMouseEvent * )), camera.get(), SLOT(mouseMoved(QMouseEvent * )));
             connect(this, SIGNAL(wheelEvent(QWheelEvent * )), camera.get(), SLOT(scrolled(QWheelEvent * )));
 
         }
-        //set up the context and get ready for rendering
+        //set up the context and get ready for renderin
+
         context->makeCurrent(this);
         ge::gl::init();
         gl = std::make_shared<ge::gl::Context>();
@@ -144,7 +162,7 @@ namespace MapGenerator {
         //Prepare gBuffer render targets
         initializeLightning();
         initializeGBuffer();
-        this->ssao = std::make_shared<SSAO>(this->gl, this->width(), this->height(), [this]() { drawQuad(); });
+        this->ssao = std::make_shared<SSAO>(this->gl, this->width(), this->height(), 0 ,[this]() { drawQuad(); });
         this->skybox = std::make_shared<Skybox>(this->gl, this->camera, (float) width(), (float) height());
         //Prepare the scene - used in geometry pass
         scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
@@ -223,15 +241,21 @@ namespace MapGenerator {
         }
     }
 
+    void Renderer::render(QPainter *painter) {
+        background->render(painter);
+        //button->show();
+        //painter->drawText(QRectF(0, 0, width(), height()), Qt::AlignCenter, QStringLiteral("QWindow"));
+    }
+
     void Renderer::render() {
         clearView();
         gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         geometryPass();
-        ssao->render(gPosition, gNormal);
-        ssao->renderBlur();
+        ssao->render(gPosition, gNormal, 0);
+        ssao->renderBlur(0);
         lightningPass();
-        skybox->draw();
+        skybox->draw(0);
         context->swapBuffers(this);
     }
 
@@ -275,7 +299,6 @@ namespace MapGenerator {
     }
 
     void Renderer::clearView() {
-        //PROBABLY FUCKED TODO FIX
         const qreal retinaScale = devicePixelRatio();
         gl->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getId());
         gl->glViewport(0, 0, width() * retinaScale, height() * retinaScale);
@@ -284,39 +307,80 @@ namespace MapGenerator {
     }
 
     void Renderer::renderNow() {
-        if (!isExposed()) return;
-        if (!initialized) {
-            initialize();
-        };
-        render();
+        if (drawGui) {
+            if (!isExposed())
+                return;
+
+            QRect rect(0, 0, width(), height());
+            m_backingStore->beginPaint(rect);
+            QPaintDevice *device = m_backingStore->paintDevice();
+            QPainter painter(device);
+            //painter.fillRect(0, 0, width(), height(), QGradient::NightFade);
+            render(&painter);
+            painter.end();
+
+
+            m_backingStore->endPaint();
+            m_backingStore->flush(rect);
+        } else {
+            if (!isExposed()) return;
+            if (!initialized) {
+                initialize();
+            };
+            render();
+        }
+
     }
 
     void Renderer::resizeRender() {
+
         initializeGBufferTextures();
         ssao->setDimensions(this->width(), this->height());
         skybox->setDimensions(this->width(), this->height());
     }
 
 
+    void Renderer::swapUi(){
+        drawGui = !drawGui;
+        if(drawGui){
+            setSurfaceType(QWindow::RasterSurface);
+        }else{
+            setSurfaceType(
+                    QWindow::OpenGLSurface); //this needs to be set otherwise makeCurrent and other gl context related functions will fail
+            surfaceFormat.setVersion(4, 5);
+            surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+            surfaceFormat.setDepthBufferSize(8);
+        }
+    }
+
     bool Renderer::event(QEvent *event) {
+        //std::cout << event->type() << std::endl;
         switch (event->type()) {
             case QEvent::UpdateRequest:
                 renderNow();
                 return true;
             case QEvent::Resize:
+                m_backingStore->resize(((QResizeEvent *) event)->size());
+
                 if (initialized) {
                     resizeRender();
-
                 }
                 return true;
             case QEvent::Close:
                 //TODO stop render thread
                 //deleteLater();
                 return QWindow::event(event);
+            case QEvent::KeyPress:
+                if (((QKeyEvent*)event)->key() == Qt::Key_Q) {
+                    swapUi();
+                    return true;
+                }
+                break;
             default:
                 return QWindow::event(event);
 
         }
+        return QWindow::event(event);
     }
 
 

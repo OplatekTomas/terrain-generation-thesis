@@ -18,23 +18,28 @@
 namespace MapGenerator {
     class SSAO {
     public:
-        SSAO(const std::shared_ptr<ge::gl::Context> &gl, int width, int height, const std::function<void()> &drawFn);
+        SSAO(const std::shared_ptr<ge::gl::Context> &gl, int width, int height, int fbo,
+             const std::function<void()> &drawFn);
 
-        void setDimensions(int width, int height);
+        void setDimensions(int width, int height, int fbo = 0);
 
-        void render(const std::shared_ptr<ge::gl::Texture> &depthTexture, const std::shared_ptr<ge::gl::Texture> &normalTexture);
+        void render(const std::shared_ptr<ge::gl::Texture> &depthTexture,
+                    const std::shared_ptr<ge::gl::Texture> &normalTexture, int fbo);
+
         void bind(int unit);
+
         void bindWithoutBlur(int unit);
-        void renderBlur();
+
+        void renderBlur(int fbo);
 
     private:
 
 
         void initBlur();
 
-        void initSSAO();
+        void initSSAO(int fbo);
 
-        void resize();
+        void resize(int fbo);
 
         std::function<void()> drawFn;
         std::shared_ptr<ge::gl::Context> gl;

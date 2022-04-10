@@ -9,10 +9,13 @@
 #include <memory>
 #include <glm/ext/matrix_transform.hpp>
 #include <iostream>
+#include <chrono>
+
+using namespace std::chrono;
 
 namespace MapGenerator {
-    Camera::Camera(Renderer *parent) {
-        this->parent = parent;
+    Camera::Camera() {
+        //this->parent = parent;
         w_down = a_down = s_down = d_down = space_down = ctrl_down = false;
         position = glm::vec3(0.5, 0.7, -0.5);
         up = glm::vec3(0, 1, 0);
@@ -74,7 +77,7 @@ namespace MapGenerator {
             case Qt::Key::Key_D:
                 d_down = pressed;
                 break;
-            case Qt::Key::Key_Space:
+            case Qt::Key::Key_Shift:
                 space_down = pressed;
                 break;
             case Qt::Key::Key_Control:
@@ -150,26 +153,31 @@ namespace MapGenerator {
     void Camera::mouseMoved(QMouseEvent *event) {
         static int prevX = 0;
         static int prevY = 0;
-        if (event->buttons() != Qt::LeftButton) {
-            prevX = prevY = 0;
-            return;
-        }
-
+        static milliseconds timeSincePrevious;
         if (prevX == 0 && prevY == 0) {
             prevX = event->x();
             prevY = event->y();
+            timeSincePrevious = duration_cast<milliseconds>(system_clock::now().time_since_epoch());;
             return;
         }
-        xMove += prevX - event->x();
-        yMove += prevY - event->y();
+        auto dx = prevX - event->x();
+        auto dy = prevY - event->y();
+        auto dt = duration_cast<milliseconds>(system_clock::now().time_since_epoch()) - timeSincePrevious;
+        if (dt.count() > 100) { //not a great way to do this, but it works for now
+            prevX = prevY = 0;
+            return;
+        }
+        xMove += dx;
+        yMove += dy;
         prevX = event->x();
         prevY = event->y();
+        timeSincePrevious = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     }
 
     void Camera::scrolled(QWheelEvent *event) {
-        if(event->delta() > 0){
+        if (event->delta() > 0) {
             moveSpeed *= 1.1;
-        }else{
+        } else {
             moveSpeed *= 0.9;
         }
     }

@@ -13,12 +13,15 @@
 #include <renderer/SSAO.h>
 #include <QWindow>
 #include <renderer/Skybox.h>
+#include <ui/BaseWidget.h>
 #include <QOpenGLContext>
 #include <renderer/Camera.h>
 #include <MapGenerator.h>
 #include <QThread>
 #include <QResizeEvent>
 #include <renderer/Scene3D.h>
+#include <QBackingStore>
+#include <QPushButton>
 
 namespace MapGenerator {
     class Camera;
@@ -45,6 +48,7 @@ namespace MapGenerator {
         void keyReleaseEvent(QKeyEvent *event) override;
 
         void mouseMoveEvent(QMouseEvent *) override;
+
         void wheelEvent(QWheelEvent *) override;
 
 
@@ -73,6 +77,16 @@ namespace MapGenerator {
 
         void drawQuad();
 
+        void resizeRender();
+
+        void swapUi();
+
+        string readShader(string path);
+
+        void render(QPainter *painter);
+
+        QBackingStore *m_backingStore;
+
 
         std::shared_ptr<MapGenerator> mapGenerator;
         std::shared_ptr<Scene3D> scene;
@@ -98,10 +112,12 @@ namespace MapGenerator {
         std::shared_ptr<SSAO> ssao;
         std::shared_ptr<class Skybox> skybox;
 
-        string readShader(string path);
+
+        bool drawGui = true;
 
 
-        void resizeRender();
+        BaseWidget *background;
+
     };
 
 }

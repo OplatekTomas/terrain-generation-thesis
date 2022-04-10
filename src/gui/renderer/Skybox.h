@@ -17,11 +17,11 @@ namespace MapGenerator {
 
 
     public:
-        explicit Skybox(std::shared_ptr<ge::gl::Context> gl, std::shared_ptr<class Camera> camera, float width, float height);
+        explicit Skybox(std::shared_ptr<ge::gl::Context> gl, std::shared_ptr<class Camera> camera ,float width, float height);
 
         void setDimensions(float width, float height);
 
-        void draw();
+        void draw(int frameBuffer);
 
     private:
         void loadCubeMap(std::vector<std::string> paths);
