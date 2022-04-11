@@ -43,7 +43,11 @@ namespace MapGenerator {
         map<int, shared_ptr<ge::gl::Framebuffer>> frameBuffers;
         map<int, shared_ptr<ge::gl::Renderbuffer>> renderBuffers;
         map<int, shared_ptr<ge::gl::Buffer>> instances;
+        map<int, std::vector<float>> instanceRandomData;
         int gBufferId;
+        //Uniform random value generator
+        std::mt19937 rng;
+        std::uniform_real_distribution<float> dist;
 
         shared_ptr<ge::gl::Texture> getTexture(int id, const shared_ptr<Texture> &texture, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
 
@@ -61,13 +65,12 @@ namespace MapGenerator {
 
         void checkForErrors();
 
-        shared_ptr<ge::gl::Texture> getTextureArray();
-
-        shared_ptr<ge::gl::Texture> getTextureArray(int id);
-
         shared_ptr<ge::gl::Texture> getTextureArray(int id, shared_ptr<TextureArray> arr);
 
         void setupUniforms(int progId, int modelId);
+
+
+        int cullInstances(int modelId);
     };
 }
 

@@ -189,6 +189,11 @@ namespace MapGenerator {
         std::cout << "Camera up: " << up.x << " " << up.y << " " << up.z << std::endl;
     }
 
+    glm::vec2 Camera::getPositionOnScreen(glm::vec2 pos) {
+        return pos;
+
+    }
+
 
 }
 

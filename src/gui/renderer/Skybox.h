@@ -86,6 +86,7 @@ namespace MapGenerator {
         };
 
 
+        void checkError();
     };
 }
 

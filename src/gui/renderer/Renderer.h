@@ -87,6 +87,7 @@ using namespace MapGenerator;
         std::shared_ptr<class Skybox> skybox;
 
 
+        void checkGLError();
     };
 
 

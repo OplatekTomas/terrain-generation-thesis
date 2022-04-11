@@ -12,6 +12,13 @@ namespace MapGenerator {
         this->gl = ctx;
         this->camera = camera;
         this->gBufferId = gBuffer;
+        //initialize the random distribution between 0-1
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        this->rng = std::mt19937(rd());
+        this->dist = std::uniform_real_distribution<float>(0, 1);
+
     }
 
 
@@ -50,9 +57,11 @@ namespace MapGenerator {
                 auto drawCount = useModel(modelId);
                 setupUniforms(programId, modelId);
                 if (scene->getModel(modelId)->isInstanced) {
+                    //Recreate the instance buffer to cull the instances
+                    auto instanceCount = cullInstances(modelId);
                     gl->glViewport(0, 0, width * scale, height * scale);
                     gl->glDrawElementsInstanced(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, nullptr,
-                                                scene->getModel(modelId)->instanceData.size() / 2);
+                                                instanceCount);
                 } else if (origProgram->drawTarget != Program::DRAW_TO_SCREEN) {
                     gl->glViewport(0, 0, origProgram->drawTextureResolution, origProgram->drawTextureResolution);
                     drawToTexture(origProgram, programId, drawCount);
@@ -64,6 +73,28 @@ namespace MapGenerator {
             }
         }
         return 0;
+    }
+
+    int Scene3D::cullInstances(int modelId) {
+        auto model = scene->getModel(modelId);
+        auto instanceBuffer = instances[modelId];
+        auto cameraPos = glm::vec2(camera->getPosition().x, camera->getPosition().z);
+        std::vector<float> instanceDistance;
+        for (int i = 0; i < model->instanceData.size(); i += 2) {
+            glm::vec2 pos(model->instanceData[i], model->instanceData[i + 1]);
+            //Check distance to camera
+            auto distance = glm::distance(pos, cameraPos);
+            //Grab random number from the generator
+            auto shouldDraw = distance < (instanceRandomData[modelId][i / 2]);
+            if (!shouldDraw) {
+                continue;
+            }
+            instanceDistance.push_back(pos.x);
+            instanceDistance.push_back(pos.y);
+        }
+        //Update the instance buffer
+        instanceBuffer->setData(instanceDistance);
+        return instanceDistance.size() / 2;
     }
 
     void Scene3D::checkForErrors() {
@@ -114,8 +145,6 @@ namespace MapGenerator {
     int Scene3D::useModel(int id) {
         auto model = scene->getModel(id);
         if (models.find(id) != models.end()) {
-            if (model->isInstanced) {
-            }
             auto vao = models[id];
             vao->bind();
             return model->indices.size();
@@ -145,6 +174,12 @@ namespace MapGenerator {
             vao->addAttrib(instanceVAO, 4, 2, GL_FLOAT, 2 * sizeof(float), 0);
             gl->glVertexAttribDivisor(4, 1);
             instances[id] = instanceVAO;
+            instanceRandomData[id] = std::vector<float>(model->instanceData.size() / 2);
+            for (int i = 0; i < model->instanceData.size() / 2; i++) {
+                //Random data
+                auto random = dist(rng);
+                instanceRandomData[id][i] = random;
+            }
         }
 
         models[id] = vao;

@@ -75,7 +75,7 @@ void Renderer::startGeneration(GeneratorOptions genOptions, LibConfig libConf) {
 
 void Renderer::paintGL() {
     auto frameBuffer = (int) defaultFramebufferObject();
-    gl->glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     gl->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     geometryPass();
@@ -149,9 +149,17 @@ void Renderer::drawQuad() {
 void Renderer::initializeEffects() {
     this->ssao = std::make_shared<SSAO>(this->gl, this->width(), this->height(), defaultFramebufferObject(),
                                         [this]() { drawQuad(); });
+    checkGLError();
     this->skybox = std::make_shared<Skybox>(this->gl, this->camera, (float) width(), (float) height());
+    checkGLError();
 }
 
+void Renderer::checkGLError(){
+    GLenum error = gl->glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cout << "OpenGL error: " << error << std::endl;
+    }
+}
 
 void Renderer::initializeGBufferTextures() {
     gBuffer->bind(GL_FRAMEBUFFER);

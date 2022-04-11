@@ -32,12 +32,19 @@ namespace MapGenerator {
 
     void Skybox::loadCubeMap(std::vector<std::string> textures) {
         texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_CUBE_MAP, GL_RGBA, 0, 512, 512);
-        texture->bind(GL_TEXTURE_CUBE_MAP);
+        //texture->bind(GL_TEXTURE_CUBE_MAP);
+        gl->glBindTexture(GL_TEXTURE_CUBE_MAP, texture->getId());
+        checkError();
         for (int i = 0; i < 6; i++) {
+
             auto data = readPng(textures[i]);
-            texture->setData2D(data.data(), GL_RGBA, GL_UNSIGNED_BYTE, 0,
-                               GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 512, 512);
+            gl->glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                             data.data());
+            //texture->setData2D((unsigned char *)data.data(), GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, width, height);
+            checkError();
+
         }
+
         texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         texture->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -60,6 +67,13 @@ namespace MapGenerator {
         program = std::make_shared<ge::gl::Program>(vs, fs);
     }
 
+    void Skybox::checkError() {
+        GLenum error = gl->glGetError();
+        if (error != GL_NO_ERROR) {
+            std::cout << "GL ERROR: " << error << std::endl;
+        }
+    }
+
     void Skybox::draw(int frameBuffer) {
         gl->glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         auto projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
@@ -70,7 +84,7 @@ namespace MapGenerator {
         program->setMatrix4fv("projection", glm::value_ptr(projection));
         program->setMatrix4fv("view", glm::value_ptr(view));
         program->set3f("cameraPos", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
-        //texture->bind(0);
+
         gl->glBindTexture(GL_TEXTURE_CUBE_MAP, texture->getId());
         gl->glDrawArrays(GL_TRIANGLES, 0, 36);
         gl->glDepthFunc(GL_LESS);

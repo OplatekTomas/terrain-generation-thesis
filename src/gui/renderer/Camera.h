@@ -21,7 +21,7 @@ namespace MapGenerator {
     public:
         Camera();
         glm::vec3 getPosition();
-
+        glm::vec2 getPositionOnScreen(glm::vec2 position);
         glm::mat4 getViewMatrix();
         void print();
 
