@@ -48,8 +48,7 @@ include_directories(${PNG_INCLUDE_DIR})
 set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
-        renderer/Renderer.cpp renderer/Renderer.h
-        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h ui/BaseWidget.cpp ui/BaseWidget.h glwrapper.cpp glwrapper.h)
+        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h)
 
 #Create dummy files so that they at least exist when CMake project is loaded
 file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/*.shader)

@@ -5,10 +5,9 @@
 #pragma once
 
 #include <QMainWindow>
-#include <renderer/Renderer.h>
 #include <QOpenGLContext>
 #include <QOpenGLWidget>
-#include <glwrapper.h>
+#include "renderer/Renderer.h"
 
 
 QT_BEGIN_NAMESPACE

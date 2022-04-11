@@ -10,13 +10,10 @@
 #include <memory>
 #include <QtCore>
 #include <QMouseEvent>
-#include "Renderer.h"
 #include <glm/fwd.hpp>
 
 
 namespace MapGenerator {
-    class Renderer;
-
     class Camera : public QObject {
     Q_OBJECT
 

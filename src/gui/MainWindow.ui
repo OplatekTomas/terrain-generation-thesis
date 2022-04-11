@@ -23,7 +23,7 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="GLWrapper" name="openGLWidget" native="true"/>
+     <widget class="Renderer" name="openGLWidget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -31,9 +31,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GLWrapper</class>
+   <class>Renderer</class>
    <extends>QWidget</extends>
-   <header>glwrapper.h</header>
+   <header>renderer/Renderer.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

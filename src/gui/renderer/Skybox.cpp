@@ -5,6 +5,8 @@
 #include <renderer/Skybox.h>
 #include <StaticFunctions.h>
 #include <shaders_gui/Shaders.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace MapGenerator {
 

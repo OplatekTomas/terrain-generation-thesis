@@ -10,6 +10,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 #include <chrono>
+#include <QScreen>
 
 using namespace std::chrono;
 

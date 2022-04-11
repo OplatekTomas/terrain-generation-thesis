@@ -1,126 +1,95 @@
 //
-// Created by tomas on 06.10.21.
+// Created by tomas on 10.04.22.
 //
+
 
 #pragma once
 
 
+#include <QOpenGLWidget>
+#include <QOpenGLContext>
+#include <memory>
 #include <QExposeEvent>
-#include <geGL/OpenGLContext.h>
+#include "geGL/OpenGLContext.h"
 #include <QWidget>
 #include <QSurfaceFormat>
-#include <QScreen>
 #include <renderer/SSAO.h>
-#include <QWindow>
 #include <renderer/Skybox.h>
-#include <ui/BaseWidget.h>
-#include <QOpenGLContext>
 #include <renderer/Camera.h>
 #include <MapGenerator.h>
-#include <QThread>
-#include <QResizeEvent>
 #include <renderer/Scene3D.h>
-#include <QBackingStore>
-#include <QPushButton>
 
-namespace MapGenerator {
-    class Camera;
+using namespace MapGenerator;
 
-    class Scene3D;
-
-    class Renderer : public QWindow {
-    Q_OBJECT
+    class Renderer : public QOpenGLWidget {
+        Q_OBJECT
     public:
-        explicit Renderer(QWindow *parent = nullptr);
+        Renderer(QWidget *parent) : QOpenGLWidget(parent) {}
 
-        virtual void render();
+        bool isInitialized() { return initialized; }
 
-        virtual void initialize();
+        void startGeneration(GeneratorOptions options, LibConfig config);
+
+
+    protected:
+        void initializeGL() override;
+
+        void paintGL() override;
+
+        void resizeGL(int w, int h) override;
+
+        bool event(QEvent *event) override;
 
     public slots:
-
-        void renderNow();
-
-    signals:
 
         void keyPressEvent(QKeyEvent *event) override;
 
         void keyReleaseEvent(QKeyEvent *event) override;
 
-        void mouseMoveEvent(QMouseEvent *) override;
 
-        void wheelEvent(QWheelEvent *) override;
-
-
-        void resizeEvent(QResizeEvent *) override;
-
-    protected:
-        bool event(QEvent *event) override;
-
-        void exposeEvent(QExposeEvent *event) override;
-
-        bool setupLib();
-
-        void clearView();
+    private:
+        void initializeLightning();
 
         void initializeGBufferTextures();
 
-        void lightningPass();
+        void initializeEffects();
 
-        void checkForErrors();
-
-        void geometryPass();
+        void initializeCamera();
 
         void initializeGBuffer();
 
-        void initializeLightning();
+        void lightningPass();
 
         void drawQuad();
 
-        void resizeRender();
-
-        void swapUi();
-
-        string readShader(string path);
-
-        void render(QPainter *painter);
-
-        QBackingStore *m_backingStore;
+        void geometryPass();
 
 
-        std::shared_ptr<MapGenerator> mapGenerator;
-        std::shared_ptr<Scene3D> scene;
-        bool renderLoopRunning = false;
-        double refreshRate;
         bool initialized;
+        std::shared_ptr<class MapGenerator> mapGenerator;
+        std::shared_ptr<Scene3D> scene;
+        std::shared_ptr<Camera> camera;
+
         QOpenGLContext *context;
+        QSurfaceFormat surfaceFormat;
         std::shared_ptr<ge::gl::Context> gl;
         std::shared_ptr<ge::gl::Framebuffer> gBuffer;
         std::shared_ptr<ge::gl::Texture> gPosition;
         std::shared_ptr<ge::gl::Texture> gNormal;
         std::shared_ptr<ge::gl::Texture> gAlbedo;
-        shared_ptr<ge::gl::VertexArray> quadVAO;
-        shared_ptr<ge::gl::Buffer> quadBuffer;
-        shared_ptr<ge::gl::Renderbuffer> rboDepth;
-        shared_ptr<ge::gl::Shader> lightningVS;
-        shared_ptr<ge::gl::Shader> lightningFS;
-        shared_ptr<ge::gl::Program> lightningProgram;
-        std::shared_ptr<Camera> camera;
-        QSurfaceFormat surfaceFormat;
-        std::unique_ptr<QTimer> renderTimer;
-
+        std::shared_ptr<ge::gl::VertexArray> quadVAO;
+        std::shared_ptr<ge::gl::Buffer> quadBuffer;
+        std::shared_ptr<ge::gl::Renderbuffer> rboDepth;
+        std::shared_ptr<ge::gl::Shader> lightningVS;
+        std::shared_ptr<ge::gl::Shader> lightningFS;
+        std::shared_ptr<ge::gl::Program> lightningProgram;
         std::shared_ptr<SSAO> ssao;
         std::shared_ptr<class Skybox> skybox;
 
 
-        bool drawGui = true;
-
-
-        BaseWidget *background;
-
     };
 
-}
+
 
 
 
