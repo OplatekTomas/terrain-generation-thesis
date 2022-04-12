@@ -9,6 +9,7 @@ in vec3 Normal_VS_Out;
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedo;
+layout (location = 3) out vec4 gSpecular;
 //in vec2 TexCoord;
 
 uniform vec3 lightPos;
@@ -34,4 +35,5 @@ void main() {
     gPosition = WorldPos_VS_Out.xyz;
     gNormal = normalize(Normal_VS_Out).xyz;
     gAlbedo = vec4(baseColor.rgb, 1.0);
+    gSpecular = vec4(0.0, 0.0, 0.0, 0.0);
 }

@@ -6,8 +6,8 @@
 #include <Helper.h>
 
 namespace MapGenerator {
-    Scene3D::Scene3D(const shared_ptr<Scene> &scene, const shared_ptr<ge::gl::Context> &ctx,
-                     const shared_ptr<Camera> &camera, int gBuffer) {
+    Scene3D::Scene3D(const shared_ptr <Scene> &scene, const shared_ptr <ge::gl::Context> &ctx,
+                     const shared_ptr <Camera> &camera, int gBuffer) {
         this->scene = scene;
         this->gl = ctx;
         this->camera = camera;
@@ -76,10 +76,13 @@ namespace MapGenerator {
     }
 
     int Scene3D::cullInstances(int modelId) {
+
+        //Get function runtime
         auto model = scene->getModel(modelId);
         auto instanceBuffer = instances[modelId];
         auto cameraPos = glm::vec2(camera->getPosition().x, camera->getPosition().z);
         std::vector<float> instanceDistance;
+#pragma omp parallel for schedule(dynamic) default(none) shared(instanceBuffer, cameraPos, instanceDistance, modelId, model)
         for (int i = 0; i < model->instanceData.size(); i += 2) {
             glm::vec2 pos(model->instanceData[i], model->instanceData[i + 1]);
             //Check distance to camera
@@ -89,11 +92,17 @@ namespace MapGenerator {
             if (!shouldDraw) {
                 continue;
             }
-            instanceDistance.push_back(pos.x);
-            instanceDistance.push_back(pos.y);
+            //lock the instance
+#pragma omp critical
+            {
+                instanceDistance.push_back(pos.x);
+                instanceDistance.push_back(pos.y);
+            };
+
         }
         //Update the instance buffer
         instanceBuffer->setData(instanceDistance);
+        //Get function runtime
         return instanceDistance.size() / 2;
     }
 
@@ -105,7 +114,7 @@ namespace MapGenerator {
         }
     }
 
-    void Scene3D::drawToScreen(const shared_ptr<Program> &program, int drawCount) {
+    void Scene3D::drawToScreen(const shared_ptr <Program> &program, int drawCount) {
 
         auto drawMode = GL_TRIANGLES;
         if (program->tessControlShader != -1 && program->tessEvaluationShader != -1) {
@@ -116,10 +125,10 @@ namespace MapGenerator {
         gl->glDrawElements(drawMode, drawCount, GL_UNSIGNED_INT, nullptr);
     }
 
-    void Scene3D::drawToTexture(const shared_ptr<Program> &program, int programId, int drawCount) {
+    void Scene3D::drawToTexture(const shared_ptr <Program> &program, int programId, int drawCount) {
         //Set up the frame buffer
-        shared_ptr<ge::gl::Framebuffer> frameBuffer;
-        shared_ptr<ge::gl::Renderbuffer> depthBuffer;
+        shared_ptr <ge::gl::Framebuffer> frameBuffer;
+        shared_ptr <ge::gl::Renderbuffer> depthBuffer;
         if (!mapContainsKey(frameBuffers, programId)) {
             frameBuffer = make_shared<ge::gl::Framebuffer>();
             frameBuffers[programId] = frameBuffer;
@@ -205,7 +214,7 @@ namespace MapGenerator {
         }
     }
 
-    std::shared_ptr<ge::gl::Texture> Scene3D::getTextureArray(int id, std::shared_ptr<TextureArray> arr) {
+    std::shared_ptr <ge::gl::Texture> Scene3D::getTextureArray(int id, std::shared_ptr <TextureArray> arr) {
         if (textureArrays.find(id) != textureArrays.end()) {
             return textureArrays[id];
         }
@@ -234,7 +243,7 @@ namespace MapGenerator {
         return texture;
     }
 
-    std::shared_ptr<ge::gl::Program> Scene3D::useProgram(int programId) {
+    std::shared_ptr <ge::gl::Program> Scene3D::useProgram(int programId) {
         //The program exists - use it
         if (programs.find(programId) != programs.end()) {
             programs[programId]->use();
@@ -245,7 +254,7 @@ namespace MapGenerator {
         if (program == nullptr) {
             return nullptr;
         }
-        std::vector<std::shared_ptr<ge::gl::Shader>> shaderObjects;
+        std::vector <std::shared_ptr<ge::gl::Shader>> shaderObjects;
         for (auto shaderId: program->getShaders()) {
             auto shader = getShader(shaderId);
             if (shader == nullptr) {
@@ -263,8 +272,8 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr<ge::gl::Texture>
-    Scene3D::getTexture(int id, const std::shared_ptr<Texture> &tex, GLenum format, GLenum type) {
+    std::shared_ptr <ge::gl::Texture>
+    Scene3D::getTexture(int id, const std::shared_ptr <Texture> &tex, GLenum format, GLenum type) {
         if (textures.find(id) != textures.end()) {
             return textures[id];
         }
@@ -283,7 +292,7 @@ namespace MapGenerator {
         return texture;
     }
 
-    std::shared_ptr<ge::gl::Shader> Scene3D::getShader(int id) {
+    std::shared_ptr <ge::gl::Shader> Scene3D::getShader(int id) {
         if (id == -1) {
             return nullptr;
         }

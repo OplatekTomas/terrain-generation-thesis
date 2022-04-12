@@ -128,10 +128,12 @@ void Renderer::geometryPass() {
 
 void Renderer::lightningPass() {
     lightningProgram->use();
+    lightningProgram->set3v("cameraPos", glm::value_ptr(camera->getPosition()));
     gPosition->bind(0);
     gNormal->bind(1);
     gAlbedo->bind(2);
-    ssao->bind(3);
+    gSpecular->bind(3);
+    ssao->bind(4);
     drawQuad();
     gl->glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->getId());
     gl->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFramebufferObject());
@@ -154,7 +156,7 @@ void Renderer::initializeEffects() {
     checkGLError();
 }
 
-void Renderer::checkGLError(){
+void Renderer::checkGLError() {
     GLenum error = gl->glGetError();
     if (error != GL_NO_ERROR) {
         std::cout << "OpenGL error: " << error << std::endl;
@@ -185,8 +187,16 @@ void Renderer::initializeGBufferTextures() {
     gAlbedo->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo->getId(), 0);
 
-    unsigned int att[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-    gl->glDrawBuffers(3, att);
+
+    gSpecular = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, width, height);
+    gl->glBindTexture(GL_TEXTURE_2D, gSpecular->getId());
+    gSpecular->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gSpecular->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gSpecular->getId(), 0);
+
+
+    unsigned int att[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+    gl->glDrawBuffers(4, att);
 
     this->rboDepth = std::make_shared<ge::gl::Renderbuffer>();
     this->rboDepth->bind();

@@ -14,6 +14,7 @@ layout (binding = 4) uniform sampler2DArray ForestTexture;
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedo;
+layout (location = 3) out vec4 gSpecular;
 
 
 bool equals(float a, float b) {
@@ -32,12 +33,14 @@ void main(){
     vec4 metadata = texture(MetadataTexture, TexCoord_FS_in);
     float r = metadata.r;
     vec4 color;
+    vec4 specular = vec4(0.0);
     if (r == 255){ // Pixel is used as a "unkown" area
         color = vec4(1.0);
     } else if (equals(r, 1.0)){ //Pixel is used as a forrest
         color = getColor(r, TexCoord_FS_in, 100, ForestTexture);
     } else if (equals(r, 2.0)){ //Pixel is used as a water
         color = vec4(0.0, 0.0, 0.5, 1.0);
+        specular = vec4(0.0, 0.0, 0.5, 1.0);
     } else if (equals(r, 3.0)){ //Pixel is used as a field
         color =  getColor(r, TexCoord_FS_in, 100, FieldTextures);
     } else if (equals(r, 4.0)){ //Pixel is used as a road
@@ -55,4 +58,5 @@ void main(){
     gPosition = WorldPos_FS_in.xyz;
     gNormal = normalize(Normal_FS_in).xyz;
     gAlbedo = vec4(color.rgb, 1.0);
+    gSpecular = specular;
 }

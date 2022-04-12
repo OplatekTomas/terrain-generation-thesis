@@ -31,6 +31,8 @@ if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
     file(DOWNLOAD https://github.com/TheLartians/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake ${CPM_DOWNLOAD_LOCATION})
 endif()
 
+
+
 include(${CPM_DOWNLOAD_LOCATION})
 include(FetchContent)
 
@@ -49,6 +51,15 @@ set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
         renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h)
+
+OPTION (USE_OpenMP "Use OpenMP" ON)
+IF(USE_OpenMP)
+    FIND_PACKAGE(OpenMP)
+    IF(OPENMP_FOUND)
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} ")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -O3 ")
+    ENDIF()
+ENDIF()
 
 #Create dummy files so that they at least exist when CMake project is loaded
 file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/*.shader)

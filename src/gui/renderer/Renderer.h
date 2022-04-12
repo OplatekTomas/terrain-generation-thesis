@@ -77,6 +77,7 @@ using namespace MapGenerator;
         std::shared_ptr<ge::gl::Texture> gPosition;
         std::shared_ptr<ge::gl::Texture> gNormal;
         std::shared_ptr<ge::gl::Texture> gAlbedo;
+        std::shared_ptr<ge::gl::Texture> gSpecular;
         std::shared_ptr<ge::gl::VertexArray> quadVAO;
         std::shared_ptr<ge::gl::Buffer> quadBuffer;
         std::shared_ptr<ge::gl::Renderbuffer> rboDepth;
