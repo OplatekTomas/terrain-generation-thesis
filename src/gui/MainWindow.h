@@ -36,6 +36,7 @@ private:
     QLayout* baseGridLayout;
 
 
+    void onMapLoaded();
 };
 
 

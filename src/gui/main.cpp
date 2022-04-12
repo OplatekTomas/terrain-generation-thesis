@@ -8,6 +8,6 @@ int main(int argc, char *argv[]) {
     MainWindow window;
     window.resize(1600, 900);
     window.show();
-    //window.setWindowTitle(QApplication::translate("toplevel", "gui"));
+    window.setWindowTitle(QApplication::translate("toplevel", "gui"));
     return QApplication::exec();
 }

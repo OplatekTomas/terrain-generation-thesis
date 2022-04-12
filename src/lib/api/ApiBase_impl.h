@@ -23,12 +23,9 @@ namespace MapGenerator {
             std::cerr << "Error: " << result.status_code << std::endl;
             return nullptr;
         }
-        auto jsonObj = nlohmann::json::parse(result.text);
-        auto obj = new T();
-        nlohmann::from_json(jsonObj, *obj);
-        auto sharedPtr = std::shared_ptr<T>(obj);
-        //requestCache.insert(std::make_pair(h, sharedPtr));
-        return sharedPtr;
+        T data = nlohmann::json::parse(result.text);
+        return std::shared_ptr<T>(&data);
+
     }
 
     template<class T>

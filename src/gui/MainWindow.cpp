@@ -7,6 +7,8 @@
 
 #include <MainWindow.h>
 #include <ui_MainWindow.h>
+#include <ui/mapview.h>
+
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -15,10 +17,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QSizePolicy sizePolicy;
     sizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);
     sizePolicy.setVerticalPolicy(QSizePolicy::Expanding);
-
-    auto glWidget = findChild<Renderer *>("openGLWidget");
-    //register event filter
     installEventFilter(this);
+    auto mapView = new MapView(this);
+    mapView->setSizePolicy(sizePolicy);
+
+    baseGridLayout->addWidget(mapView);
+    // Add button to create the map
+
 }
 
 
@@ -34,13 +39,13 @@ void MainWindow::onRenderStarted() {
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        auto glWidget = findChild<Renderer *>("openGLWidget");
-        glWidget->keyPressEvent(keyEvent);
+        //auto glWidget = findChild<Renderer *>("openGLWidget");
+        //glWidget->keyPressEvent(keyEvent);
     }
     if (event->type() == QEvent::KeyRelease) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        auto glWidget = findChild<Renderer *>("openGLWidget");
-        glWidget->keyReleaseEvent(keyEvent);
+        //auto glWidget = findChild<Renderer *>("openGLWidget");
+        //glWidget->keyReleaseEvent(keyEvent);
     }
     return QObject::eventFilter(obj, event);
 

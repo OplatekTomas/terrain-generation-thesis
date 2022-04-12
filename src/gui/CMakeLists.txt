@@ -44,13 +44,14 @@ CPMAddPackage(
 )
 
 
+
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
 set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
-        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h)
+        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h ui/Map.cpp ui/Map.h ui/mapview.cpp ui/mapview.h ui/mapview.ui)
 
 OPTION (USE_OpenMP "Use OpenMP" ON)
 IF(USE_OpenMP)
@@ -85,7 +86,9 @@ endif()
 
 
 
+
 find_package(GPUEngine COMPONENTS geGL geSG geUtil)
+find_package(Marble REQUIRED)
 
 set(SHADER_COPY_GUI shaderCopyTargetGUI)
 add_custom_target(shaderCopyTargetGUI
@@ -111,7 +114,5 @@ add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI_HELP} ${TEXTURE_COPY_GUI})
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(vut-bp-gui)
 endif()
-
 target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/include/lighting)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets geGL geSG geUtil lib  ${PNG_LIBRARY})
-
+target_link_libraries(${PROJECT_NAME} PRIVATE Marble Qt${QT_VERSION_MAJOR}::Widgets geGL geSG geUtil lib ${PNG_LIBRARY})

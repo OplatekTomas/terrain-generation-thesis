@@ -8,13 +8,15 @@
 #include <api/models/openstreetmap/MetadataResult.h>
 #include <api/models/openstreetmap/OSMData.h>
 
-namespace MapGenerator{
+namespace MapGenerator {
     class OpenStreetMapApi : ApiBase {
     public:
         explicit OpenStreetMapApi(std::string key);
+
         std::string getBaseAddress() override;
 
         std::shared_ptr<OSMData> getMetadata(double lat1, double long1, double lat2, double long2);
+
     };
 }
 

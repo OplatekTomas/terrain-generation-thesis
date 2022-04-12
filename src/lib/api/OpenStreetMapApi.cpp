@@ -5,6 +5,7 @@
 #include <api/models/openstreetmap/MetadataResult.h>
 #include "OpenStreetMapApi.h"
 #include <iostream>
+#include <tuple>
 #include <fmt/format.h>
 
 namespace MapGenerator {
@@ -33,7 +34,6 @@ namespace MapGenerator {
         data->lon2 = lon2;
         return data;
     }
-
 
     MapGenerator::OpenStreetMapApi::OpenStreetMapApi(std::string key) : ApiBase(key) {
 
