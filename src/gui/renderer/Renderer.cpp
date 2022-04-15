@@ -8,10 +8,13 @@
 #include "shaders_gui/Shaders.h"
 
 
-void Renderer::startGeneration(GeneratorOptions genOptions, LibConfig libConf) { //TODO remove static code
+bool Renderer::startGeneration(GeneratorOptions genOptions, std::string configPath) { //TODO remove static code
     bool hasError = false;
-    auto config = ConfigReader::read(QCoreApplication::arguments().at(1).toStdString(), &hasError);
-    GeneratorOptions options;
+    auto config = ConfigReader::read(configPath, &hasError);
+    if(hasError) {
+        std::cout << "Error while reading config file" << std::endl;
+        return false;
+    }
     std::vector<double> posHome{
             49.883325913713, 17.8657865524292, 49.89402618295204, 17.890548706054688
     };
@@ -60,17 +63,10 @@ void Renderer::startGeneration(GeneratorOptions genOptions, LibConfig libConf) {
             46.631426377462304, 13.222294893455746,
             46.55290962338361, 13.297562841791274
     };
-    auto currentPos = posHome;
-
-    options.lat1 = currentPos[0];
-    options.lon1 = currentPos[1];
-    options.lat2 = currentPos[2];
-    options.lon2 = currentPos[3];
-    options.terrainResolution = 32;
-    this->mapGenerator = std::make_shared<class MapGenerator>(config, options);
+    this->mapGenerator = std::make_shared<class MapGenerator>(config, genOptions);
     auto map = mapGenerator->generateMap();
     scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
-
+    return true;
 }
 
 void Renderer::paintGL() {

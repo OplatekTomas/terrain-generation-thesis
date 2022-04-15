@@ -23,6 +23,7 @@ public:
 
 protected slots:
     void onSearch();
+    void onRender();
     void onDefaultClicked();
 
 private:

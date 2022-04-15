@@ -17,6 +17,8 @@ public:
     explicit Map(QWidget *parent = 0);
     void customPaint(GeoPainter* painter) override;
 
+    glm::vec4 getSelectedArea();
+    bool hasSelectedArea();
     ~Map() = default;
 
 protected slots:

@@ -8,6 +8,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLWidget>
 #include "renderer/Renderer.h"
+#include <ui/rendererlayout.h>
 
 
 QT_BEGIN_NAMESPACE
@@ -23,20 +24,21 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
+
     bool eventFilter(QObject *obj, QEvent *event) override;
 
-
-
-    protected slots:
-    void onRenderStarted();
+    void drawMap(glm::vec4 area);
 
 private:
     Ui::MainWindow *ui;
     //Renderer* renderer;
-    QLayout* baseGridLayout;
+    QLayout *baseGridLayout;
 
 
     void onMapLoaded();
+
+    bool isRendering;
+    RendererLayout *rendererLayout;
 };
 
 

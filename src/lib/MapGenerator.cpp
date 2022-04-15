@@ -36,7 +36,6 @@ namespace MapGenerator {
     /// This method will start the generation process. The data will be made available in the scene when ready.
     /// \return
     std::shared_ptr<class Scene> MapGenerator::generateMap() {
-
         //Create an empty scene.
         scene = std::make_shared<Scene>();
         //Add the surface mesh.

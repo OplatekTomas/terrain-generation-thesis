@@ -108,7 +108,7 @@ foreach(file ${SHADERS_SRC_FILES})
     set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
     file(WRITE "${DUMMY_FILE}" "")
-    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}" api/models/openstreetmap/SearchResult.h)
+    set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}")
 endforeach()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
 

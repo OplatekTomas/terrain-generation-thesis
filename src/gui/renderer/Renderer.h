@@ -28,7 +28,7 @@ using namespace MapGenerator;
 
         bool isInitialized() { return initialized; }
 
-        void startGeneration(GeneratorOptions options, LibConfig config);
+        bool startGeneration(GeneratorOptions options, std::string configPath);
 
 
     protected:
@@ -65,7 +65,7 @@ using namespace MapGenerator;
         void geometryPass();
 
 
-        bool initialized;
+        bool initialized = false;
         std::shared_ptr<class MapGenerator> mapGenerator;
         std::shared_ptr<Scene3D> scene;
         std::shared_ptr<Camera> camera;

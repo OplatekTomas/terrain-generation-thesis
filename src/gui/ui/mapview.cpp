@@ -6,6 +6,7 @@
 
 #include <ui/mapview.h>
 #include "ui_mapview.h"
+#include "MainWindow.h"
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <api/OpenStreetMapApi.h>
@@ -13,6 +14,7 @@
 #include <marble/MarbleModel.h>
 #include <marble/SearchRunnerManager.h>
 #include <marble/GeoDataPlacemark.h>
+#include <QMessageBox>
 
 
 MapView::MapView(QWidget *parent) : QWidget(parent), ui(new Ui::MapView) {
@@ -36,7 +38,7 @@ void MapView::onSearch() {
         GeoDataCoordinates coordinates = searchResult.at(0)->coordinate();
         //Get zoom level for coordinate
         ui->map->centerOn(coordinates, true);
-        ui->map->zoomView(2750, FlyToMode::Linear);
+        ui->map->zoomView(2500, FlyToMode::Automatic);
     }
     //Clear search box
     ui->searchBar->clear();
@@ -51,6 +53,22 @@ void MapView::onSearch() {
 
 void MapView::onDefaultClicked() {
 //Start the rendering here.
+}
+
+void MapView::onRender() {
+    if(!ui->map->hasSelectedArea()){
+        QMessageBox::warning(this, "No area selected", "Please select an area to render");
+        return;
+    }
+    //Get the selected area
+    auto box = ui->map->getSelectedArea();
+    //Get the current window to call the render function
+    auto mainWindow = (MainWindow *) qApp->activeWindow();
+    if(mainWindow == nullptr) {
+        QMessageBox::warning(this, "No window", "No window is active - this should not happen");
+        return;
+    }
+    mainWindow->drawMap(box);
 }
 
 

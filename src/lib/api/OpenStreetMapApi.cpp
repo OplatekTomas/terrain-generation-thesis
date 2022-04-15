@@ -21,9 +21,9 @@ namespace MapGenerator {
         auto queryResult = encodeUrl(fmt::format(query, lat1, lon1, lat2, lon2));
         auto url = getBaseAddress() + "?data=" + queryResult;
 
-        auto result = this->readData<MetadataResult>("../../../examples/osm.json");
+        //auto result = this->readData<MetadataResult>("../../../examples/osm.json");
 
-        //auto result = this->sendRequest<MetadataResult>(url);
+        auto result = this->sendRequest<MetadataResult>(url);
         if (result == nullptr) {
             return nullptr;
         }
