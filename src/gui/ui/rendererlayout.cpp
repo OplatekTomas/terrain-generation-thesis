@@ -76,6 +76,6 @@ void RendererLayout::ssaoChecked(int state) {
 }
 
 void RendererLayout::cullingDistanceChanged(int value) {
-    ui->renderer->cullFactor = value / 100.0f;
+    ui->renderer->cullFactor = -(value / 100.0f);
 }
 

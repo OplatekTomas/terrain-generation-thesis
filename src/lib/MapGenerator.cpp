@@ -41,38 +41,17 @@ namespace MapGenerator {
         //Create an empty scene.
         scene = std::make_shared<Scene>();
         //Add the surface mesh.
-        auto surface = generateSurface();
-        auto surfaceId = scene->addModel(surface);
 
-        //Set up the shaders required for the terrain.
-        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::GroundVertexShader(), Shader::VERTEX));
-        auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::GroundFragmentShader(), Shader::FRAGMENT));
-        auto tcsId = scene->addShader(
-                std::make_shared<Shader>(Shaders::GroundTessellationControlShader(), Shader::TESS_CONTROL));
-        auto tesId = scene->addShader(
-                std::make_shared<Shader>(Shaders::GroundTessellationEvaluationShader(), Shader::TESS_EVALUATION));
-        //Set up the program for the shaders.
-        auto program = std::make_shared<Program>();
-        program->vertexShader = vertexId;
-        program->fragmentShader = fragmentId;
-        program->tessControlShader = tcsId;
-        program->tessEvaluationShader = tesId;
-        auto programId = scene->addProgram(program);
-        loadTexturesForSurface(programId);
-
-        scene->bindProgram(programId, surfaceId);
-        vegetationGenerator = std::make_shared<VegetationGenerator>(options, elevationData);
-        generateHeightMap(surfaceId, vertexId, tcsId);
 
         //Load models.
 
 
         //Start async texture generation.
         if (true) {
-            std::thread t1(&MapGenerator::runAsyncGenerators, this, programId);
+            std::thread t1(&MapGenerator::runAsyncGenerators, this);
             t1.detach();
         } else {
-            runAsyncGenerators(programId);
+            runAsyncGenerators();
         }
 
         return scene;
@@ -101,7 +80,29 @@ namespace MapGenerator {
     }
 
 
-    void MapGenerator::runAsyncGenerators(int surfaceProgramId) {
+    void MapGenerator::runAsyncGenerators() {
+        auto surface = generateSurface();
+        auto surfaceId = scene->addModel(surface);
+
+        //Set up the shaders required for the terrain.
+        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::GroundVertexShader(), Shader::VERTEX));
+        auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::GroundFragmentShader(), Shader::FRAGMENT));
+        auto tcsId = scene->addShader(
+                std::make_shared<Shader>(Shaders::GroundTessellationControlShader(), Shader::TESS_CONTROL));
+        auto tesId = scene->addShader(
+                std::make_shared<Shader>(Shaders::GroundTessellationEvaluationShader(), Shader::TESS_EVALUATION));
+        //Set up the program for the shaders.
+        auto program = std::make_shared<Program>();
+        program->vertexShader = vertexId;
+        program->fragmentShader = fragmentId;
+        program->tessControlShader = tcsId;
+        program->tessEvaluationShader = tesId;
+        auto programId = scene->addProgram(program);
+        loadTexturesForSurface(programId);
+
+        scene->bindProgram(programId, surfaceId);
+        vegetationGenerator = std::make_shared<VegetationGenerator>(options, elevationData);
+        generateHeightMap(surfaceId, vertexId, tcsId);
         buildingsDone = false;
         //Grab OSM metadata
         if (options.lat1 > options.lat2) {
@@ -134,9 +135,9 @@ namespace MapGenerator {
             }
             auto texId = scene->addTexture(texture);
             if (prevId != -1) {
-                scene->unbindTexture(prevId, surfaceProgramId);
+                scene->unbindTexture(prevId, programId);
             }
-            scene->bindTexture(texId, surfaceProgramId);
+            scene->bindTexture(texId, programId);
             prevId = texId;
 
             //Now we can generate the trees -> when we have at least basic texture

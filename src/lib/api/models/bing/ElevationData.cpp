@@ -30,7 +30,7 @@ namespace MapGenerator {
     }
 
     void ElevationData::setAt(int row, int col, double value) {
-        auto position = row * this->rows + col;
+        auto position = row * this->rows + (this->cols - col - 1);
         (*data)[position] = value;
     }
 

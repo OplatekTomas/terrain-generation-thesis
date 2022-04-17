@@ -41,7 +41,7 @@ namespace MapGenerator {
         bool canceled;
 
 
-        void runAsyncGenerators(int programId);
+        void runAsyncGenerators();
 
         std::shared_ptr<Model> generateSurface();
 

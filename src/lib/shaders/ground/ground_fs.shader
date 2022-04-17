@@ -64,7 +64,7 @@ void main(){
     }
 
     else {
-        discard; //We have no idea - discard
+        color = vec4(1.0); //We have no idea - discard
     }
 
     gPosition = WorldPos_FS_in.xyz;
