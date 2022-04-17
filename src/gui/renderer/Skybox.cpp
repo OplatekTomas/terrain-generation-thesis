@@ -6,6 +6,7 @@
 #include <StaticFunctions.h>
 #include <shaders_gui/Shaders.h>
 #include <glm/glm.hpp>
+#include <Logger.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace MapGenerator {
@@ -70,7 +71,7 @@ namespace MapGenerator {
     void Skybox::checkError() {
         GLenum error = gl->glGetError();
         if (error != GL_NO_ERROR) {
-            std::cout << "GL ERROR: " << error << std::endl;
+            Logger::log("GL_ERROR in sky rendering" + std::to_string(error));
         }
     }
 
@@ -96,5 +97,6 @@ namespace MapGenerator {
         this->width = width;
         this->height = height;
     }
+
 
 }

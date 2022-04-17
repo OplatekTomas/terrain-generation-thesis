@@ -7,11 +7,11 @@
 
 #include <MainWindow.h>
 #include <ui_MainWindow.h>
-#include <ui/mapview.h>
-#include <ui/rendererlayout.h>
+#include <Logger.h>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+    Logger::init(true);
     isRendering = false;
     ui->setupUi(this);
     baseGridLayout = this->findChild<QGridLayout *>("baseGridLayout");
@@ -19,11 +19,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     sizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);
     sizePolicy.setVerticalPolicy(QSizePolicy::Expanding);
     installEventFilter(this);
-    auto mapView = new MapView(this);
-    mapView->setObjectName("mapView");
-    mapView->setSizePolicy(sizePolicy);
+    this->mapView = new MapView(this);
+    this->mapView->setObjectName("mapView");
+    this->mapView->setSizePolicy(sizePolicy);
 
     baseGridLayout->addWidget(mapView);
+
 
     rendererLayout = new RendererLayout(this);
     rendererLayout->setVisible(false);
@@ -64,15 +65,22 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 
 }
 
-void MainWindow::drawMap(glm::vec4 box) {
-    auto mapWidget = findChild<MapView *>("mapView");
-    mapWidget->setVisible(false);
+void MainWindow::drawRenderer(glm::vec4 box) {
+    mapView->setVisible(false);
     rendererLayout->setVisible(true);
-    ui->baseGridLayout->removeWidget(mapWidget);
+    ui->baseGridLayout->removeWidget(mapView);
     ui->baseGridLayout->addWidget(rendererLayout);
-    //create renderer
-    //auto tmp = glm::vec4( 49.883325913713, 17.8657865524292, 49.89402618295204, 17.890548706054688);
     rendererLayout->startRendering(box);
     this->isRendering = true;
+}
+
+void MainWindow::drawMap(){
+    mapView->setVisible(true);
+    rendererLayout->setVisible(false);
+    ui->baseGridLayout->removeWidget(rendererLayout);
+    rendererLayout->deleteLater();
+    rendererLayout = new RendererLayout(this);
+    ui->baseGridLayout->addWidget(mapView);
+    this->isRendering = false;
 }
 

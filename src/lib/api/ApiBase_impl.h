@@ -12,7 +12,7 @@
 
 namespace MapGenerator {
     template<class T>
-    std::shared_ptr<T> ApiBase::sendRequest(std::string uri) {
+    std::shared_ptr<T> ApiBase::sendRequest(std::string uri, int *size) {
         auto url = cpr::Url{std::move(uri)};
         auto session = new cpr::Session();
         session->SetHeader({{"Content-Type", "application/json"}});
@@ -23,6 +23,7 @@ namespace MapGenerator {
             std::cerr << "Error: " << result.status_code << std::endl;
             return nullptr;
         }
+        *size = result.downloaded_bytes;
         auto jsonObj = nlohmann::json::parse(result.text);
         auto obj = new T();
         nlohmann::from_json(jsonObj, *obj);
@@ -33,7 +34,7 @@ namespace MapGenerator {
     }
 
     template<class T>
-    std::shared_ptr<T> ApiBase::postRequest(std::string uri, const std::string& bodyType, const std::string& body) {
+    std::shared_ptr<T> ApiBase::postRequest(std::string uri, const std::string &bodyType, const std::string &body) {
         auto url = cpr::Url{std::move(uri)};
         auto session = new cpr::Session();
         session->SetHeader({{"Content-Type", bodyType}});

@@ -23,7 +23,7 @@ namespace MapGenerator {
     public:
         LandTypeGenerator(shared_ptr<OSMData> osmData);
         shared_ptr <Texture> generateTexture(int resolution);
-
+        void cancel();
     private:
         std::shared_ptr<OSMData> osmData;
         std::vector<std::shared_ptr<AreaOnMap>> areas;
@@ -37,6 +37,7 @@ namespace MapGenerator {
 
         void prepareAreas();
 
+        bool cancelled;
     };
 
 

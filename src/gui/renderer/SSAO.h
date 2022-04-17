@@ -21,6 +21,8 @@ namespace MapGenerator {
         SSAO(const std::shared_ptr<ge::gl::Context> &gl, int width, int height, int fbo,
              const std::function<void()> &drawFn);
 
+        void clear(int fbo);
+
         void setDimensions(int width, int height, int fbo = 0);
 
         void render(const std::shared_ptr<ge::gl::Texture> &depthTexture,

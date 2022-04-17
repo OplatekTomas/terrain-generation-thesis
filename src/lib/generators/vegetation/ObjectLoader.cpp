@@ -55,7 +55,7 @@ namespace MapGenerator {
         auto scale = findScale(allVertices);
         std::vector<std::shared_ptr<Model>> models;
         for (int i = 0; i < modelVertices.size(); i++) {
-            auto model = std::make_shared<Model>();
+            auto model = std::make_shared<Model>("model" + std::to_string(i));
             for (int j = 0; j < modelVertices[i].size(); j++) {
                 model->addVertex(modelVertices[i][j] * scale, modelNormals[i][j], modelUVs[i][j]);
             }
@@ -108,7 +108,7 @@ namespace MapGenerator {
         auto scale = findScale(allVertices);
         std::vector<std::shared_ptr<Model>> models;
         for (int i = 0; i < modelVertices.size(); i++) {
-            auto model = std::make_shared<Model>();
+            auto model = std::make_shared<Model>("model" + std::to_string(i));
             for (int j = 0; j < modelVertices[i].size(); j++) {
                 model->addVertex(modelVertices[i][j] * scale, modelNormals[i][j], modelUVs[i][j]);
             }

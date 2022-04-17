@@ -142,40 +142,56 @@ namespace MapGenerator {
         switch (hash(routeType)) {
             case hash("motorway", 8):
             case hash("motorway_link", 13):
+                rgba[0] = 4;
                 width = 16;
                 break;
             case hash("trunk", 5):
             case hash("trunk_link", 11):
+                rgba[0] = 4;
                 width = 12;
                 break;
             case hash("primary", 7):
             case hash("primary_link", 12):
+                rgba[0] = 4;
                 width = 8;
                 break;
             case hash("secondary", 9):
             case hash("secondary_link", 14):
+                rgba[0] = 4;
                 width = 6;
                 break;
             case hash("tertiary", 8):
             case hash("tertiary_link", 13):
+                rgba[0] = 4;
                 width = 4;
                 break;
             case hash("residential", 11):
             case hash("living_street", 14):
+                rgba[0] = 4;
                 width = 4;
                 break;
             case hash("unclassified", 12):
+                rgba[0] = 4;
                 width = 2;
                 break;
-            case hash("footway", 7):
-            case hash("path", 4):
             case hash("cycleway", 8):
+                rgba[0] = 4;
+                width = 1;
+                break;
+            case hash("footway", 7):
             case hash("track", 5):
+                rgba[0] = 11;
+                priority = 9;
+                width = 1;
+                break;
+            case hash("path", 4):
+                priority = 9;
+                rgba[0] = 10;
                 width = 1;
                 break;
         }
-        if(mapContainsKeyAndValue(*this->node.tags, "tunnel", "true")) {
-            width = width * 2;
+        if (mapContainsKeyAndValue(*this->node.tags, "tunnel", "true")) {
+            width = 0;
         }
         return width;
     }
@@ -197,20 +213,18 @@ namespace MapGenerator {
         bool randColor = false;
         auto tags = *node.tags;
         //Check if area is covered by a forest
-
-        if (randColor) {
-            rgba[0] = rand() % 255;
-            rgba[1] = rand() % 255;
-            rgba[2] = rand() % 255;
-        }
-
-
-        std::vector<std::string> landUseLightTypes = {"village_green", "plant_nursery", "grass", "grassland", "meadow", "orchard", "vineyard"};
+        std::vector<std::string> landUseLightTypes = {"village_green", "plant_nursery", "grass", "grassland", "meadow",
+                                                      "orchard", "vineyard"};
         std::vector<std::string> leisureTypes = {"park", "garden", "plant_nursery", "pitch", "playground"};
 
-        //Check for forrest
+        //Check for forest
         if (mapContainsKeyAndValue(tags, "natural", "wood") || mapContainsKeyAndValue(tags, "landuse", "forest")) {
             rgba[0] = 1;
+            if (mapContainsKeyAndValue(tags, "leaf_type", "broadleaved")) {
+                rgba[0] = 8;
+            } else if (mapContainsKeyAndValue(tags, "leaf_type", "mixed")) {
+                rgba[0] = 9;
+            }
         }//Check for water
         else if (mapContainsKeyAndValue(tags, "natural", "water") ||
                  mapContainsKeyAndValue(tags, "waterway", "riverbank") ||
@@ -218,27 +232,40 @@ namespace MapGenerator {
                  mapContainsKeyAndValue(tags, "waterway", "stream")) {
             rgba[0] = 2;
             priority = 2;
-        }//Check for fields
-        else if (mapContainsKeyAndValue(tags, "landuse", "farmland")) {
+        }
+            //Check for fields
+        else if (
+                mapContainsKeyAndValue(tags,
+                                       "landuse", "farmland")) {
             rgba[0] = 3;
         } // Check for roads
-        else if (mapContainsKey(tags, "highway")) {
-            rgba[0] = 4;
+        else if (
+                mapContainsKey(tags,
+                               "highway")) {
             priority = 10;
         } // Check for buildings
-        else if (mapContainsKey(tags, "building")) {
+        else if (
+                mapContainsKey(tags,
+                               "building")) {
             rgba[0] = 5;
             priority = 2;
         } // Check for leisure
-        else if (boolinq::from(leisureTypes).any([&](const std::string &type) {
-            return mapContainsKeyAndValue(tags, "leisure", type);
-        }) || boolinq::from(landUseLightTypes).any(
-                [&](const std::string &type) { return mapContainsKeyAndValue(tags, "landuse", type); })) {
+        else if (
+                boolinq::from(leisureTypes).any([&](const std::string &type) {
+                    return mapContainsKeyAndValue(tags, "leisure", type);
+                }) ||
+                boolinq::from(landUseLightTypes).any([&](const std::string &type) {
+                    return mapContainsKeyAndValue(tags, "landuse", type);
+                })) {
             rgba[0] = 6;
         } // Check if the area is residential, industrial or commercial
-        else if (mapContainsKeyAndValue(tags, "landuse", "residential") ||
-                 mapContainsKeyAndValue(tags, "landuse", "industrial") ||
-                 mapContainsKeyAndValue(tags, "landuse", "commercial")
+        else if (
+                mapContainsKeyAndValue(tags,
+                                       "landuse", "residential") ||
+                mapContainsKeyAndValue(tags,
+                                       "landuse", "industrial") ||
+                mapContainsKeyAndValue(tags,
+                                       "landuse", "commercial")
                 ) {
             rgba[0] = 7;
 
@@ -246,9 +273,25 @@ namespace MapGenerator {
         else if (mapContainsKeyAndValue(tags, "boundary", "administrative")) {
             rgba[0] = 7;
             priority = -1;
-        } //Check for farmland
-        else {
-            //If the area is unknown, just make the priority low, so it will be drawn last
+        } else if (mapContainsKeyAndValue(tags, "place", "ocean") ||
+                   mapContainsKeyAndValue(tags, "place", "sea") ||
+                   mapContainsKeyAndValue(tags, "place", "bay") ||
+                   mapContainsKeyAndValue(tags, "place", "pond") ||
+                   mapContainsKeyAndValue(tags, "place", "lake") ||
+                   mapContainsKeyAndValue(tags, "place", "canal") ||
+                   mapContainsKeyAndValue(tags, "place", "reservoir")) {
+            rgba[0] = 2;
+            priority = 0;
+        }
+            // Check for sandy areas (beaches, etc)
+        else if (mapContainsKeyAndValue(tags, "natural", "beach") ||
+                 mapContainsKeyAndValue(tags, "natural", "coastline") ||
+                 mapContainsKeyAndValue(tags, "natural", "sand") ||
+                 mapContainsKeyAndValue(tags, "natural", "desert") ||
+                 mapContainsKeyAndValue(tags, "natural", "dune")) {
+            rgba[0] = 12;
+        } else {
+//If the area is unknown, just make the priority low, so it will be drawn last
             rgba[0] = 255;
             priority = -1;
         }

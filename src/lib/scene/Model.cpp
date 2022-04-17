@@ -5,9 +5,10 @@
 #include <scene/Model.h>
 
 namespace MapGenerator {
-    Model::Model() {
+    Model::Model(std::string name) {
         vertices = std::vector<float>();
         indices = std::vector<int>();
+        this->name = name;
     }
 
     void Model::addVertex(const Vertex &v, const Vertex &n, const PointF &uv, const Vertex &t) {
@@ -57,6 +58,7 @@ namespace MapGenerator {
 
 
     void Model::calculateTangents() {
+        if(m_tangentsCalculated)    return;
         for (int i = 0; i < this->indices.size(); i += 3) {
             auto i1 = this->indices[i] * 11;
             auto i2 = this->indices[i + 1] * 11;

@@ -6,7 +6,8 @@
 #include <Helper.h>
 #include <iostream>
 #include <CDT.h>
-#include "boolinq.h"
+#include <Logger.h>
+#include <chrono>
 
 namespace MapGenerator {
 
@@ -170,7 +171,11 @@ namespace MapGenerator {
         auto heightInM = 420.0 / 100.0;
 
         if (mapContainsKey(*building.tags, "building:levels")) {
-            numberOfFloors = std::stoi(building.tags->at("building:levels"));
+            try{
+                numberOfFloors = std::stoi(building.tags->at("building:levels"));
+            }catch(...){
+                numberOfFloors = 1;
+            }
         }
 
         auto height = ((heightInM - heightData->getNormalizedMin()) /
@@ -198,7 +203,11 @@ namespace MapGenerator {
 
 
     std::shared_ptr<Model> BuildingsGenerator::generate() {
-        auto model = std::make_shared<Model>();
+        //grab time
+        auto start = std::chrono::high_resolution_clock::now();
+        Logger::log("Generating buildings...");
+
+        auto model = std::make_shared<Model>("buildings");
         int index = 0;
         std::vector<std::tuple<std::vector<Vertex>, std::vector<Vertex>>> buildingModels;
         for (auto &building: buildings) {
@@ -239,6 +248,10 @@ namespace MapGenerator {
             }
 
         }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+        Logger::log("Building generation took: " + std::to_string(duration.count()) + "s");
         return model;
     }
 }

@@ -8,6 +8,7 @@
 #include "scene/Point.h"
 #include <iostream>
 #include <filesystem>
+#include <Logger.h>
 
 
 namespace fs = std::filesystem;
@@ -86,8 +87,10 @@ namespace MapGenerator {
                 requestedBiomeId = 1.0f;
                 break;
             case VegetationType::DeciduousForest:
+                requestedBiomeId = 8.0f;
+                break;
             case VegetationType::MixedForest:
-                requestedBiomeId = -1.0f;
+                requestedBiomeId = 9.0f;
                 break;
             case VegetationType::Field:
                 requestedBiomeId = 3.0f;
@@ -104,11 +107,11 @@ namespace MapGenerator {
         currentModelsScaled.clear();
         switch (type) {
             case VegetationType::MixedForest:
-                modelHeight = 20.0;
+                modelHeight = 15.0;
                 currentModels = mixedTrees;
                 break;
             case VegetationType::DeciduousForest:
-                modelHeight = 20.0;
+                modelHeight = 15.0;
                 currentModels = deciduousTrees;
                 break;
             case VegetationType::ConiferousForest:
@@ -155,6 +158,10 @@ namespace MapGenerator {
 
     std::vector<std::shared_ptr<Model>>
     VegetationGenerator::getVegetation(const std::shared_ptr<Texture> &texture, int resolution, VegetationType type) {
+        //Start time
+        auto start = std::chrono::high_resolution_clock::now();
+        Logger::log("Generating vegetation...");
+
         std::vector<std::shared_ptr<Model>> result;
         PointF min = {0.005, 0.005};
         PointF max = {0.995, 0.995};
@@ -180,7 +187,7 @@ namespace MapGenerator {
             scaleZ->valueFloat = 1.0;
         }
         for (int i = 0; i < currentModels.size(); i++) {
-            auto model = std::make_shared<Model>();
+            auto model = std::make_shared<Model>("vegetation");
             auto current = currentModelsScaled[i];
             auto orig = currentModels[i];
             auto origV = orig->vertices;
@@ -208,6 +215,11 @@ namespace MapGenerator {
             result[idx]->instanceData.push_back(point.x);
             result[idx]->instanceData.push_back(point.y);
         }
+
+        //End time
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+        Logger::log("Vegetation generated in " + std::to_string(duration) + "s");
         return result;
 
     }

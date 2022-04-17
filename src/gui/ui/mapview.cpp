@@ -7,10 +7,6 @@
 #include <ui/mapview.h>
 #include "ui_mapview.h"
 #include "MainWindow.h"
-#include <QFuture>
-#include <QtConcurrent/QtConcurrent>
-#include <api/OpenStreetMapApi.h>
-#include <marble/MarbleWidget.h>
 #include <marble/MarbleModel.h>
 #include <marble/SearchRunnerManager.h>
 #include <marble/GeoDataPlacemark.h>
@@ -19,6 +15,12 @@
 
 MapView::MapView(QWidget *parent) : QWidget(parent), ui(new Ui::MapView) {
     ui->setupUi(this);
+    vector<double> start = {49.19256141221154, 16.594543972568715,
+            49.19827707820228, 16.604973078397315};
+    auto geo = Marble::GeoDataLatLonBox(start[2], start[0], start[3], start[1], Marble::GeoDataCoordinates::Degree);
+    ui->map->centerOn(geo);
+    ui->map->zoomView(2200);
+    ui->map->update();
 }
 
 MapView::~MapView() {
@@ -68,7 +70,7 @@ void MapView::onRender() {
         QMessageBox::warning(this, "No window", "No window is active - this should not happen");
         return;
     }
-    mainWindow->drawMap(box);
+    mainWindow->drawRenderer(box);
 }
 
 

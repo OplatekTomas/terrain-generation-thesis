@@ -5,7 +5,7 @@
 #include <api/BingApi.h>
 #include <fmt/format.h>
 #include <chrono>  // for high_resolution_clock
-
+#include <Logger.h>
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
@@ -127,6 +127,10 @@ namespace MapGenerator {
 
     std::shared_ptr<ElevationResult>
     BingApi::sendElevationRequest(double lat1, double long1, double lat2, double long2, int rows, int cols) {
+        //Start the clock and log it
+        auto start = std::chrono::high_resolution_clock::now();
+        Logger::log("Downloading height data from Bing API");
+
         if (lat1 > lat2) {
             std::swap(lat1, lat2);
         }
@@ -138,8 +142,14 @@ namespace MapGenerator {
 
         //TODO: return proper data
         //auto result = this->readData<ElevationResult>("../../../examples/bing.json");
+        int size = 0;
+        auto result = this->sendRequest<ElevationResult>(url, &size);
+        //Log the time taken
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+        Logger::log("Downloaded height data in " + std::to_string(duration) + "s");
+        Logger::log("Downloaded size " + std::to_string(size / (1024*1024)) + "MB");
 
-        auto result = this->sendRequest<ElevationResult>(url);
         return result;
     }
 

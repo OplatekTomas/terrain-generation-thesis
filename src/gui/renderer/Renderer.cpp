@@ -6,79 +6,45 @@
 #include <iostream>
 #include "config/ConfigReader.h"
 #include "shaders_gui/Shaders.h"
-
+#include <Logger.h>
 
 bool Renderer::startGeneration(GeneratorOptions genOptions, std::string configPath) { //TODO remove static code
     bool hasError = false;
     auto config = ConfigReader::read(configPath, &hasError);
-    if(hasError) {
-        std::cout << "Error while reading config file" << std::endl;
+    if (hasError) {
+        Logger::log("Error while reading config file. Nothing can render");
         return false;
     }
-    std::vector<double> posHome{
-            49.883325913713, 17.8657865524292, 49.89402618295204, 17.890548706054688
-    };
-
-    std::vector<double> posHomeL{
-            49.96736286729904, 17.860572894482512,
-
-            49.8718795233479, 17.955027618972238};
-
-    std::vector<double> posBrno = {
-            49.19256141221154, 16.594543972568715,
-            49.19827707820228, 16.604973078397315
-    };
-
-    std::vector<double> posRand = {
-            49.9619918488622, 17.8586352852208, 49.91684506727818, 17.94300583538308
-
-    };
-
-    std::vector<double> posMountains = {
-            50.10588121964279, 17.198770606455174,
-            50.05709781257081, 17.28661015961763
-
-    };
-    std::vector<double> posBrnoVeryLarge{
-            49.23019297366651, 16.565201713369547, 49.171611576900936, 16.71542469343281
-    };
-
-
-    std::vector<double> posBrnoMar{
-            49.22264878390983, 16.695949499486055,
-            49.20984129157041, 16.72238587076677
-    };
-
-    std::vector<double> brazil{
-            -22.940051163948276, -43.226979529278665,
-            -22.96603878773571, -43.18380161954447
-    };
-
-    std::vector<double> moni{
-            49.206206330276416, 16.693695548101253,
-            49.20443981462129, 16.697611471199462
-    };
-
-    std::vector<double> nassfeld{
-            46.631426377462304, 13.222294893455746,
-            46.55290962338361, 13.297562841791274
-    };
+    this->generating = true;
     this->mapGenerator = std::make_shared<class MapGenerator>(config, genOptions);
     auto map = mapGenerator->generateMap();
     scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
     return true;
 }
 
+
 void Renderer::paintGL() {
+
     auto frameBuffer = (int) defaultFramebufferObject();
     gl->glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     gl->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ssao->clear(frameBuffer);
+    if (!generating) {
+        update();
+        QOpenGLWidget::paintGL();
+        return;
+    }
+    if (scene == nullptr) {
+        update();
+        QOpenGLWidget::paintGL();
+        return;
+    }
     geometryPass();
-    ssao->render(gPosition, gNormal, frameBuffer);
-    ssao->renderBlur(frameBuffer);
+    ssaoPass(frameBuffer);
     lightningPass();
-    skybox->draw(frameBuffer);
+    skyboxPass(frameBuffer);
+
     update();
     QOpenGLWidget::paintGL();
 }
@@ -91,8 +57,7 @@ void Renderer::initializeGL() {
     context->setFormat(surfaceFormat);
     auto result = context->create();
     if (!result) {
-        std::cout << "Failed to create OpenGL context" << std::endl;
-        exit(1); //TODO FAIL
+        Logger::log("Error while creating OpenGL context");
     }
     ge::gl::init();
     gl = std::make_shared<ge::gl::Context>();
@@ -109,14 +74,25 @@ void Renderer::initializeGL() {
 }
 
 
-void Renderer::geometryPass() {
-    if (scene == nullptr) {
-        return;
+void Renderer::ssaoPass(int frameBuffer) {
+    if (!ssaoEnabled) {
+      return;
     }
+    ssao->render(gPosition, gNormal, frameBuffer);
+    ssao->renderBlur(frameBuffer);
+}
+
+void Renderer::skyboxPass(int frameBuffer) {
+    if (!skyboxEnabled) { return; }
+    skybox->draw(frameBuffer);
+}
+
+void Renderer::geometryPass() {
     gl->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getId());
     gl->glClearColor(0.0, 0.0, 0.0, 1.0); // keep it black so it doesn't leak into g-buffer
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     const qreal retinaScale = devicePixelRatio();
+    scene->setCulling(cullingEnabled, cullFactor);
     scene->draw(height(), width(), retinaScale);
     gl->glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 }
@@ -155,7 +131,7 @@ void Renderer::initializeEffects() {
 void Renderer::checkGLError() {
     GLenum error = gl->glGetError();
     if (error != GL_NO_ERROR) {
-        std::cout << "OpenGL error: " << error << std::endl;
+        Logger::log("OpenGL error: " + std::to_string(error));
     }
 }
 
@@ -201,7 +177,7 @@ void Renderer::initializeGBufferTextures() {
 
     // finally check if framebuffer is complete
     if (gl->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer not complete!" << std::endl;
+        Logger::log("Framebuffer not complete. You should not see this message!!");
     gl->glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 
 }
@@ -264,6 +240,17 @@ void Renderer::keyReleaseEvent(QKeyEvent *event) {
     camera->keyEvent(event);
     QWidget::keyReleaseEvent(event);
 }
+
+void Renderer::cancelGeneration() {
+    this->generating = false;
+    this->mapGenerator->cancel();
+    this->scene = nullptr;
+    this->mapGenerator = nullptr;
+}
+
+
+
+
 
 
 

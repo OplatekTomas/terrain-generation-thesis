@@ -18,10 +18,19 @@ Q_OBJECT
 public:
     explicit RendererLayout(QWidget *parent = nullptr);
 
-    void startRendering(glm::vec4 box, int terrainResolution = 32);
+    void startRendering(glm::vec4 box, int terrainResolution = 64);
 
     ~RendererLayout() override;
 
+protected slots:
+    void backClicked();
+    void ssaoChecked(int state);
+    void skyboxChecked(int state);
+    void cullingChecked(int state);
+    void cullingDistanceChanged(int value);
+
 private:
     Ui::RendererLayout *ui;
+
+    void receivedMessage(const std::string &message);
 };

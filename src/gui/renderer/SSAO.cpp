@@ -11,8 +11,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "shaders_gui/Shaders.h"
 
-namespace MapGenerator{
-    SSAO::SSAO(const std::shared_ptr<ge::gl::Context>& gl, int width, int height ,int fbo,const std::function<void()>& drawFn) {
+namespace MapGenerator {
+    SSAO::SSAO(const std::shared_ptr<ge::gl::Context> &gl, int width, int height, int fbo,
+               const std::function<void()> &drawFn) {
         this->gl = gl;
         this->width = width;
         this->height = height;
@@ -21,13 +22,13 @@ namespace MapGenerator{
         this->initBlur();
     }
 
-    void SSAO::initSSAO(int fbo){
+    void SSAO::initSSAO(int fbo) {
         std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
         std::default_random_engine generator;
         for (unsigned int i = 0; i < 64; ++i) {
             glm::vec3 sample(
                     randomFloats(generator) * 2.0 - 1.0,
-                    randomFloats(generator)  * 2.0 - 1.0,
+                    randomFloats(generator) * 2.0 - 1.0,
                     randomFloats(generator)
 
             );
@@ -56,7 +57,8 @@ namespace MapGenerator{
         this->ssaoColorTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RED, 0, width, height);
         this->ssaoColorTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         this->ssaoColorTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->ssaoColorTexture->getId(), 0);
+        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->ssaoColorTexture->getId(),
+                                   0);
 
         this->ssaoFS = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, GUIShaders::getSSAOFS());
         this->ssaoVS = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, GUIShaders::getSSAOVS());
@@ -66,13 +68,14 @@ namespace MapGenerator{
 
     }
 
-    void SSAO::initBlur(){
+    void SSAO::initBlur() {
         this->blurFBO = std::make_shared<ge::gl::Framebuffer>();
         gl->glBindFramebuffer(GL_FRAMEBUFFER, this->blurFBO->getId());
         this->blurColorTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RED, 0, width, height);
         this->blurColorTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         this->blurColorTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->blurColorTexture->getId(), 0);
+        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->blurColorTexture->getId(),
+                                   0);
 
         this->blurFS = std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, GUIShaders::getSSAOBlurFS());
         this->blurVS = std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, GUIShaders::getSSAOBlurVS());
@@ -80,10 +83,9 @@ namespace MapGenerator{
     }
 
     void SSAO::render(const std::shared_ptr<ge::gl::Texture> &depthTexture, const std::shared_ptr<ge::gl::Texture> &normalTexture, int fbo) {
-        ssaoFBO->bind(GL_FRAMEBUFFER);
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, this->ssaoFBO->getId());
         gl->glClear(GL_COLOR_BUFFER_BIT);
         ssaoProgram->use();
-        //ssaoProgram->use();
         depthTexture->bind(0);
         normalTexture->bind(1);
         noiseTexture->bind(2);
@@ -109,19 +111,21 @@ namespace MapGenerator{
         gl->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     }
 
-    void SSAO::resize(int fbo){
+    void SSAO::resize(int fbo) {
         //Scale the textures to current width and height
         this->ssaoFBO->bind(GL_FRAMEBUFFER);
         this->ssaoColorTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RED, 0, width, height);
         this->ssaoColorTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         this->ssaoColorTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->ssaoColorTexture->getId(), 0);
+        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->ssaoColorTexture->getId(),
+                                   0);
 
         this->blurFBO->bind(GL_FRAMEBUFFER);
         this->blurColorTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RED, 0, width, height);
         this->blurColorTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         this->blurColorTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->blurColorTexture->getId(), 0);
+        gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->blurColorTexture->getId(),
+                                   0);
 
         gl->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -136,8 +140,19 @@ namespace MapGenerator{
     void SSAO::bindWithoutBlur(int unit) {
         ssaoColorTexture->bind(unit);
     }
-    void SSAO::bind(int unit){
+
+    void SSAO::bind(int unit) {
         blurColorTexture->bind(unit);
+    }
+
+    void SSAO::clear(int fbo) {
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, this->ssaoFBO->getId());
+        gl->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        gl->glClear(GL_COLOR_BUFFER_BIT);
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, this->blurFBO->getId());
+        gl->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        gl->glClear(GL_COLOR_BUFFER_BIT);
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     }
 
 

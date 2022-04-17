@@ -14,7 +14,6 @@ namespace MapGenerator {
     class SurfaceGenerator {
     public:
         SurfaceGenerator(std::shared_ptr<ElevationData> elevationData, GeneratorOptions options);
-
         std::shared_ptr<Model> getSurface();
 
     private:

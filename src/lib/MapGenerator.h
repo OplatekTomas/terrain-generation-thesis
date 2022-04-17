@@ -24,7 +24,7 @@ namespace MapGenerator {
         explicit MapGenerator(const LibConfig &config, GeneratorOptions options);
 
         std::shared_ptr<class Scene> generateMap();
-
+        void cancel();
     private:
 
         LibConfig config;
@@ -38,6 +38,7 @@ namespace MapGenerator {
         std::shared_ptr<Scene> scene;
         std::shared_ptr<OSMData> osmData;
         std::shared_ptr<ElevationData> elevationData;
+        bool canceled;
 
 
         void runAsyncGenerators(int programId);
@@ -54,6 +55,7 @@ namespace MapGenerator {
                                 VegetationGenerator::VegetationType type);
 
 
+        bool buildingsDone = false;
     };
 }
 

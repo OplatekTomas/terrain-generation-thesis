@@ -9,6 +9,8 @@
 #include <QOpenGLWidget>
 #include "renderer/Renderer.h"
 #include <ui/rendererlayout.h>
+#include <ui/mapview.h>
+#include <ui/rendererlayout.h>
 
 
 QT_BEGIN_NAMESPACE
@@ -27,7 +29,9 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *event) override;
 
-    void drawMap(glm::vec4 area);
+    void drawRenderer(glm::vec4 box);
+
+    void drawMap();
 
 private:
     Ui::MainWindow *ui;
@@ -39,6 +43,8 @@ private:
 
     bool isRendering;
     RendererLayout *rendererLayout;
+    MapView *mapView;
+
 };
 
 

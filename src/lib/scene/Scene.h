@@ -44,6 +44,7 @@ namespace MapGenerator{
         std::shared_ptr<Shader> getShader(int id);
     private:
         template<typename T> int generateId(std::map<int, T> &map);
+        int itemId = 0;
 
         std::map<int, std::shared_ptr<class Model>> models;
         std::map<int, std::shared_ptr<class Texture>> textures;

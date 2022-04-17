@@ -18,6 +18,7 @@ namespace fs = std::filesystem;
 namespace MapGenerator {
 
     MapGenerator::MapGenerator(const LibConfig &config, GeneratorOptions options) {
+        this->canceled = false;
         this->config = config;
         this->options = options;
         bing = std::make_unique<BingApi>(config.keys[0].key);
@@ -36,6 +37,7 @@ namespace MapGenerator {
     /// This method will start the generation process. The data will be made available in the scene when ready.
     /// \return
     std::shared_ptr<class Scene> MapGenerator::generateMap() {
+        this->canceled = false;
         //Create an empty scene.
         scene = std::make_shared<Scene>();
         //Add the surface mesh.
@@ -58,7 +60,7 @@ namespace MapGenerator {
         auto programId = scene->addProgram(program);
         loadTexturesForSurface(programId);
 
-        scene->bindProgram(surfaceId, programId);
+        scene->bindProgram(programId, surfaceId);
         vegetationGenerator = std::make_shared<VegetationGenerator>(options, elevationData);
         generateHeightMap(surfaceId, vertexId, tcsId);
 
@@ -100,6 +102,7 @@ namespace MapGenerator {
 
 
     void MapGenerator::runAsyncGenerators(int surfaceProgramId) {
+        buildingsDone = false;
         //Grab OSM metadata
         if (options.lat1 > options.lat2) {
             std::swap(options.lat1, options.lat2);
@@ -112,7 +115,6 @@ namespace MapGenerator {
             std::cerr << "Well fuck. There is no data";
             return;
         }
-        generateBuildings();
         int prevId = -1;
         int currentResolution = options.minTextureResolution;
         bool vegetationDone = false;
@@ -123,7 +125,13 @@ namespace MapGenerator {
             if (textureGenerator == nullptr) {
                 textureGenerator = std::make_shared<LandTypeGenerator>(osmData);
             }
+            if(canceled) {
+                return;
+            }
             auto texture = textureGenerator->generateTexture(currentResolution);
+            if(canceled) {
+                return;
+            }
             auto texId = scene->addTexture(texture);
             if (prevId != -1) {
                 scene->unbindTexture(prevId, surfaceProgramId);
@@ -132,10 +140,18 @@ namespace MapGenerator {
             prevId = texId;
 
             //Now we can generate the trees -> when we have at least basic texture
+            if(!buildingsDone){
+                generateBuildings();
+
+            }
             if (!vegetationDone && currentResolution >= 1024) {
                 generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::ConiferousForest
                 );
                 generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::Field);
+                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::DeciduousForest);
+                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::MixedForest);
+
+
                 vegetationDone = true;
             }
             currentResolution = currentResolution * options.textureResolutionStep;
@@ -180,11 +196,12 @@ namespace MapGenerator {
         auto programId = scene->addProgram(program);
         scene->bindTexture(heightTextureId, programId);
         scene->bindProgram(programId, modelId);
+        buildingsDone = true;
     }
 
     void MapGenerator::loadTexturesForSurface(int surfaceId) {
         auto texturePath = "../lib/assets/textures/";
-        auto textureTypes = {"asphalt", "field", "meadow", "forrest"};
+        auto textureTypes = {"asphalt", "field", "meadow", "forrest", "water", "footpath", "path", "sand"};
         for (std::string textureType: textureTypes) {
             auto textureArray = std::make_shared<TextureArray>(1024, 1024);
             auto dir = texturePath + textureType;
@@ -211,6 +228,11 @@ namespace MapGenerator {
             auto id = scene->addTextureArray(textureArray);
             scene->bindTextureArray(id, surfaceId);
         }
+    }
+
+    void MapGenerator::cancel() {
+        this->canceled = true;
+        this->textureGenerator->cancel();
     }
 
 

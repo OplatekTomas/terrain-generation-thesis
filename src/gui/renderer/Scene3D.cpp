@@ -4,10 +4,11 @@
 
 #include <renderer/Scene3D.h>
 #include <Helper.h>
+#include <Logger.h>
 
 namespace MapGenerator {
-    Scene3D::Scene3D(const shared_ptr <Scene> &scene, const shared_ptr <ge::gl::Context> &ctx,
-                     const shared_ptr <Camera> &camera, int gBuffer) {
+    Scene3D::Scene3D(const shared_ptr<Scene> &scene, const shared_ptr<ge::gl::Context> &ctx,
+                     const shared_ptr<Camera> &camera, int gBuffer) {
         this->scene = scene;
         this->gl = ctx;
         this->camera = camera;
@@ -21,6 +22,14 @@ namespace MapGenerator {
 
     }
 
+
+    void Scene3D::setCulling(bool enabled, float factor) {
+        if (enabled != cullingEnabled) {
+            regenerateCulling = this->instances.size();
+        }
+        cullingEnabled = enabled;
+        cullFactor = factor;
+    }
 
     int Scene3D::draw(int height, int width, double scale) {
         auto view = camera->getViewMatrix();
@@ -76,9 +85,14 @@ namespace MapGenerator {
     }
 
     int Scene3D::cullInstances(int modelId) {
-
-        //Get function runtime
         auto model = scene->getModel(modelId);
+        if (!cullingEnabled) {
+            if (regenerateCulling) {
+                regenerateCulling--;
+                instances[modelId]->setData(model->instanceData);
+            }
+            return model->instanceData.size() / 2;
+        }
         auto instanceBuffer = instances[modelId];
         auto cameraPos = glm::vec2(camera->getPosition().x, camera->getPosition().z);
         std::vector<float> instanceDistance;
@@ -88,7 +102,7 @@ namespace MapGenerator {
             //Check distance to camera
             auto distance = glm::distance(pos, cameraPos);
             //Grab random number from the generator
-            auto shouldDraw = distance < (instanceRandomData[modelId][i / 2]);
+            auto shouldDraw = distance < (instanceRandomData[modelId][i / 2]) + cullFactor;
             if (!shouldDraw) {
                 continue;
             }
@@ -109,12 +123,12 @@ namespace MapGenerator {
     void Scene3D::checkForErrors() {
         GLenum err;
         while ((err = gl->glGetError()) != GL_NO_ERROR) {
-            std::cout << "OpenGL error: " << err << std::endl;
+            Logger::log("OpenGL error: " + std::to_string(err));
             throw std::runtime_error("OpenGL error");
         }
     }
 
-    void Scene3D::drawToScreen(const shared_ptr <Program> &program, int drawCount) {
+    void Scene3D::drawToScreen(const shared_ptr<Program> &program, int drawCount) {
 
         auto drawMode = GL_TRIANGLES;
         if (program->tessControlShader != -1 && program->tessEvaluationShader != -1) {
@@ -125,10 +139,10 @@ namespace MapGenerator {
         gl->glDrawElements(drawMode, drawCount, GL_UNSIGNED_INT, nullptr);
     }
 
-    void Scene3D::drawToTexture(const shared_ptr <Program> &program, int programId, int drawCount) {
+    void Scene3D::drawToTexture(const shared_ptr<Program> &program, int programId, int drawCount) {
         //Set up the frame buffer
-        shared_ptr <ge::gl::Framebuffer> frameBuffer;
-        shared_ptr <ge::gl::Renderbuffer> depthBuffer;
+        shared_ptr<ge::gl::Framebuffer> frameBuffer;
+        shared_ptr<ge::gl::Renderbuffer> depthBuffer;
         if (!mapContainsKey(frameBuffers, programId)) {
             frameBuffer = make_shared<ge::gl::Framebuffer>();
             frameBuffers[programId] = frameBuffer;
@@ -214,7 +228,7 @@ namespace MapGenerator {
         }
     }
 
-    std::shared_ptr <ge::gl::Texture> Scene3D::getTextureArray(int id, std::shared_ptr <TextureArray> arr) {
+    std::shared_ptr<ge::gl::Texture> Scene3D::getTextureArray(int id, std::shared_ptr<TextureArray> arr) {
         if (textureArrays.find(id) != textureArrays.end()) {
             return textureArrays[id];
         }
@@ -243,7 +257,7 @@ namespace MapGenerator {
         return texture;
     }
 
-    std::shared_ptr <ge::gl::Program> Scene3D::useProgram(int programId) {
+    std::shared_ptr<ge::gl::Program> Scene3D::useProgram(int programId) {
         //The program exists - use it
         if (programs.find(programId) != programs.end()) {
             programs[programId]->use();
@@ -254,7 +268,7 @@ namespace MapGenerator {
         if (program == nullptr) {
             return nullptr;
         }
-        std::vector <std::shared_ptr<ge::gl::Shader>> shaderObjects;
+        std::vector<std::shared_ptr<ge::gl::Shader>> shaderObjects;
         for (auto shaderId: program->getShaders()) {
             auto shader = getShader(shaderId);
             if (shader == nullptr) {
@@ -272,8 +286,8 @@ namespace MapGenerator {
     }
 
 
-    std::shared_ptr <ge::gl::Texture>
-    Scene3D::getTexture(int id, const std::shared_ptr <Texture> &tex, GLenum format, GLenum type) {
+    std::shared_ptr<ge::gl::Texture>
+    Scene3D::getTexture(int id, const std::shared_ptr<Texture> &tex, GLenum format, GLenum type) {
         if (textures.find(id) != textures.end()) {
             return textures[id];
         }
@@ -292,7 +306,7 @@ namespace MapGenerator {
         return texture;
     }
 
-    std::shared_ptr <ge::gl::Shader> Scene3D::getShader(int id) {
+    std::shared_ptr<ge::gl::Shader> Scene3D::getShader(int id) {
         if (id == -1) {
             return nullptr;
         }
@@ -356,6 +370,5 @@ namespace MapGenerator {
     }
 
     Scene3D::~Scene3D() = default;
-
 }
 

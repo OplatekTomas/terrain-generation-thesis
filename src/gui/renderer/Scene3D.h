@@ -26,6 +26,7 @@ namespace MapGenerator {
         ~Scene3D();
 
         int draw(int height, int width, double scale);
+        void setCulling(bool enabled, float factor);
 
     private:
 
@@ -71,6 +72,11 @@ namespace MapGenerator {
 
 
         int cullInstances(int modelId);
+
+
+        bool cullingEnabled = true;
+        float cullFactor = 0.0f;
+        int regenerateCulling = 0;
     };
 }
 

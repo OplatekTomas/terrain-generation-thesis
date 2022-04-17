@@ -16,7 +16,7 @@ namespace MapGenerator {
         ApiBase(std::string apiKey);
 
         template<class T>
-        std::shared_ptr<T> sendRequest(std::string uri);
+        std::shared_ptr<T> sendRequest(std::string uri, int* size);
 
         template<class T>
         std::shared_ptr<T> postRequest(std::string uri, const std::string &bodyType, const std::string& body);

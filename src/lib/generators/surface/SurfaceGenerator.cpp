@@ -3,6 +3,9 @@
 //
 
 #include <generators/surface/SurfaceGenerator.h>
+#include <iostream>
+#include <Logger.h>
+#include <chrono>
 
 namespace MapGenerator{
 
@@ -12,11 +15,14 @@ namespace MapGenerator{
     }
 
     std::shared_ptr<Model> SurfaceGenerator::getSurface() {
-
         if (data->getData()->empty()) {
             return nullptr;
         }
-        auto model = std::make_shared<Model>();
+        //get start time
+        auto start = std::chrono::high_resolution_clock::now();
+        Logger::log("Generating surface...");
+
+        auto model = std::make_shared<Model>("Surface");
         auto res = options.terrainResolution - 1;
         //Let's create the model
         auto fRes = (float) res;
@@ -84,6 +90,11 @@ namespace MapGenerator{
             normal = normal.normalize();
             model->addVertex(vertices[i], normal, verticesTextureCoords[i]);
         }
+
+        //get end time
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+        Logger::log("Surface generated in " + std::to_string(duration.count()) + "s");
         return model;
     }
 

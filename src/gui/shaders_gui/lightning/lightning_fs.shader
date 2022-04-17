@@ -16,6 +16,9 @@ vec3 CalcDirLight(vec3 normal){
 
     //Get AO
     float ao = texture(ssao, TexCoords).r;
+    if(ao == 0.0){
+        ao = 1.0;
+    }
 
     //Calculate light direction
     vec3 lightDir = vec3(0.5, 1.0, 0.0);

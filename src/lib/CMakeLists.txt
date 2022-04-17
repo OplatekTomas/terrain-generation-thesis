@@ -128,7 +128,7 @@ add_library (lib
         scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h config/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
         scene/Vertex.h scene/Vertex.cpp
         generators/vegetation/ObjectLoader.cpp generators/vegetation/ObjectLoader.h generators/vegetation/VegetationGenerator.cpp generators/vegetation/VegetationGenerator.h scene/Point.cpp scene/Point.h
-scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h scene/TextureArray.cpp scene/TextureArray.h Helper.cpp scene/Uniform.cpp scene/Uniform.h)
+scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h scene/TextureArray.cpp scene/TextureArray.h Helper.cpp scene/Uniform.cpp scene/Uniform.h Logger.h Logger.cpp )
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
 endif()
