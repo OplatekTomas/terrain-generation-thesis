@@ -37,7 +37,6 @@ namespace MapGenerator {
         bool updateKeyboardEvents();
 
         bool updateMouseEvents();
-        bool rotate = false;
         double refreshRate;
         int idleTimeoutIterations;
         //Renderer *parent;

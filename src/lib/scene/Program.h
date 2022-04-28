@@ -12,7 +12,6 @@ namespace MapGenerator {
         enum DrawTarget {
             DRAW_TO_SCREEN,
             DRAW_TO_TEXTURE,
-            DRAW_DEPTH_TO_TEXTURE
         };
 
         Program() = default;

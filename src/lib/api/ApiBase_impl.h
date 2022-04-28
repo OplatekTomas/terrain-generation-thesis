@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <utility>
 #include <iostream>
+#include <Logger.h>
 
 namespace MapGenerator {
     template<class T>
@@ -21,6 +22,7 @@ namespace MapGenerator {
         delete session;
         if (result.status_code != 200) {
             std::cerr << "Error: " << result.status_code << std::endl;
+            Logger::log("Error: " + std::to_string(result.status_code));
             return nullptr;
         }
         *size = result.downloaded_bytes;

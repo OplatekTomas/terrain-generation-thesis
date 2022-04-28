@@ -24,6 +24,7 @@ public:
 protected slots:
     void onSearch();
     void onRender();
+    void onStyleChanged(int index);
     void onDefaultClicked();
 
 private:

@@ -57,6 +57,37 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QComboBox" name="themes">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>140</width>
+         <height>0</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>OpenStreetMap</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Topographic</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Satellite</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -136,9 +167,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>themes</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>MapView</receiver>
+   <slot>onStyleChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>719</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSearch()</slot>
   <slot>onRender()</slot>
+  <slot>onStyleChanged(int)</slot>
  </slots>
 </ui>

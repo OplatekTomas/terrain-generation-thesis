@@ -38,11 +38,6 @@ CPMAddPackage(
         GITHUB_REPOSITORY libcpr/cpr
         GIT_TAG 290fbaff7321b3df66c4ac5b039815f25e4333bb
 )
-CPMAddPackage(
-        NAME poly2tri
-        GITHUB_REPOSITORY jhasse/poly2tri
-        GIT_TAG 8b5fa15800ab8ef44ed7b0ec7061e907d5e49059
-)
 
 if(CDT_ADDED)
     add_library(CDT INTERFACE IMPORTED)

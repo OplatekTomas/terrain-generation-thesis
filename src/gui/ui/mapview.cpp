@@ -74,5 +74,31 @@ void MapView::onRender() {
     mainWindow->drawRenderer(box);
 }
 
+void MapView::onStyleChanged(int style) {
+    QString styleId = "";
+    switch(style){
+        case 0:
+            styleId = "earth/openstreetmap/openstreetmap.dgml";
+            break;
+        case 1:
+            styleId = "earth/srtm/srtm.dgml";
+            break;
+        case 2:
+            styleId = "earth/bluemarble/bluemarble.dgml";
+            break;
+        default:
+            styleId = "earth/openstreetmap/openstreetmap.dgml";
+            break;
+    }
+    ui->map->setMapThemeId(styleId);
+    ui->map->setShowBorders(true);
+    ui->map->setShowCompass(false);
+    ui->map->setShowOverviewMap(false);
+    ui->map->setShowScaleBar(true);
+    ui->map->setShowCrosshairs(false);
+    ui->map->setShowGrid(false);
+    ui->map->setStyleSheet("background-color: black;");
+}
+
 
 

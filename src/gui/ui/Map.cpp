@@ -14,15 +14,17 @@
 
 
 #include <iostream>
+#include <QMessageBox>
 
 Map::Map(QWidget *parent) : MarbleWidget(parent) {
     this->dragRect = glm::vec4(0);
     setProjection(Marble::Mercator);
+    //Use satellite imagery
     setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
     setShowBorders(true);
     setShowCompass(false);
     setShowOverviewMap(false);
-    setShowScaleBar(false);
+    setShowScaleBar(true);
     setShowCrosshairs(false);
     setShowGrid(false);
     setStyleSheet("background-color: black;");
@@ -67,12 +69,39 @@ void Map::mouseReleaseEvent(QMouseEvent *event) {
     QWidget::mouseReleaseEvent(event);
 }
 
+double Map::getDistance(double lat1, double lat2, double long1, double long2) {
+    const auto R = 6378.137; // Radius of earth in KM
+    auto dLat = lat2 * M_PI / 180 - lat1 * M_PI / 180;
+    auto dLon = long2 * M_PI / 180 - long1 * M_PI / 180;
+    auto a = sin(dLat / 2) * sin(dLat / 2) +
+             cos(lat1 * M_PI / 180) * cos(lat2 * M_PI / 180) *
+             sin(dLon / 2) * sin(dLon / 2);
+    auto c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    auto d = R * c;
+    return d; // km
+}
+
 void Map::boundingBoxCreated(glm::vec2 start, glm::vec2 end) {
     double startX, startY = 0;
     viewport()->geoCoordinates(start.x, start.y, startX, startY, Marble::GeoDataCoordinates::Degree);
     double endX, endY = 0;
     viewport()->geoCoordinates(end.x, end.y, endX, endY, Marble::GeoDataCoordinates::Degree);
-    dragRect = glm::vec4(endX, endY, startX, startY);
+    auto width = getDistance(startY, startY, startX, endX);
+    auto height = getDistance(startY, endY, startX, startX);
+    auto area = width * height;
+    if (area < 100.0) {
+        dragRect = glm::vec4(endX, endY, startX, startY);
+        update();
+        return;
+    }
+    std::string text = "Selected area is over 100km2 (" + std::to_string(area) + ") and might take a while to create.\nDo you want to continue?";
+    auto reply = QMessageBox::question(this, "Are you sure?", QString::fromStdString(text),
+                                       QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        dragRect = glm::vec4(endX, endY, startX, startY);
+    }
+    //Calculate the size of selected area in square km
+
     update();
 }
 

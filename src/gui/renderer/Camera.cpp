@@ -38,25 +38,7 @@ namespace MapGenerator {
 
 
     glm::mat4 Camera::getViewMatrix() {
-        static float pos = 0;
-        glm::vec3 eyeLocal;
-        glm::vec3 centerLocal;
-        glm::vec3 upLocal;
-        if (rotate) {
-            pos += 0.0075;
-            const float radius = 0.7f;
-            float camX = sin(pos) * radius;
-            float camZ = cos(pos) * radius;
-            centerLocal = glm::vec3(0.5, 0.5, 0.5);
-            eyeLocal = glm::vec3(0.5 - camX, 0.65, 0.5 - camZ);
-            upLocal = glm::vec3(0, 1, 0);
-        } else {
-            pos = 0;
-            eyeLocal = position;
-            centerLocal = this->position + this->front;
-            upLocal = this->up;
-        }
-        return glm::lookAt(eyeLocal, centerLocal, upLocal);
+        return glm::lookAt(position, this->position + this->front, this->up);
     }
 
     glm::vec3 Camera::getPosition() {
@@ -94,12 +76,10 @@ namespace MapGenerator {
         auto mouseMoved = updateMouseEvents();
         if (keyboardMoved || mouseMoved) {
             iterations = 0;
-            rotate = false;
         } else {
             iterations++;
             if (iterations > idleTimeoutIterations) {
                 iterations = 0;
-                rotate = false;  //TODO FIX
             }
         }
     }

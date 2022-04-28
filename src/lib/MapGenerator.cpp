@@ -10,7 +10,7 @@
 #include <boolinq.h>
 #include <Helper.h>
 #include <generators/surface/SurfaceGenerator.h>
-
+#include <Logger.h>
 using namespace boolinq;
 namespace fs = std::filesystem;
 
@@ -113,7 +113,7 @@ namespace MapGenerator {
         }
         osmData = osm->getMetadata(options.lat1, options.lon1, options.lat2, options.lon2);
         if (osmData == nullptr) {
-            std::cerr << "Well fuck. There is no data";
+            Logger::log("OSM returned no data. Please go back and try again");
             return;
         }
         int prevId = -1;

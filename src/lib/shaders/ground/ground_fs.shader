@@ -62,9 +62,8 @@ void main(){
     }else if(equals(r, 12.0)){ //sandy stuff
         color = getColor(r, TexCoord_FS_in, 150, SandTexture);
     }
-
     else {
-        color = vec4(1.0); //We have no idea - discard
+        color = vec4(0.5, 0.5, 0.5, 1.0);
     }
 
     gPosition = WorldPos_FS_in.xyz;
