@@ -99,8 +99,11 @@ void Renderer::geometryPass() {
 
 
 void Renderer::lightningPass() {
+    const qreal scale = devicePixelRatio();
+    gl->glViewport(0, 0, width() * scale, height() * scale);
     lightningProgram->use();
     lightningProgram->set3v("cameraPos", glm::value_ptr(camera->getPosition()));
+    lightningProgram->setMatrix4fv("worldToView", glm::value_ptr(camera->getViewMatrix()));
     gPosition->bind(0);
     gNormal->bind(1);
     gAlbedo->bind(2);
@@ -239,6 +242,10 @@ void Renderer::keyPressEvent(QKeyEvent *event) {
 void Renderer::keyReleaseEvent(QKeyEvent *event) {
     camera->keyEvent(event);
     QWidget::keyReleaseEvent(event);
+}
+
+void Renderer::scrollEvent(QWheelEvent *ev){
+    camera->scrolled(ev);
 }
 
 void Renderer::cancelGeneration() {

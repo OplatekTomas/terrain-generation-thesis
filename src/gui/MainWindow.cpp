@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->mapView = new MapView(this);
     this->mapView->setObjectName("mapView");
     this->mapView->setSizePolicy(sizePolicy);
-
     baseGridLayout->addWidget(mapView);
 
     rendererLayout = new RendererLayout(this);
@@ -36,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     auto btn = new QPushButton("Test");
     btn->setObjectName("testButton");
     connect(btn, &QPushButton::clicked, this, [&]{
-        glm::vec4 box = {49.867818155822576, 17.897403150249588, 49.89398059876471, 17.86308532460262};
+        glm::vec4 box = {49.23757036758039, 16.498296596199317, 49.159263117191315, 16.676375765580808};
         box = glm::vec4(box.y, box.x, box.w, box.z);
         drawRenderer(box);
     });
@@ -67,6 +66,14 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
             return QObject::eventFilter(obj, event);
         }
         glWidget->keyReleaseEvent(keyEvent);
+    }
+    if(event->type() == QEvent::Wheel) {
+        auto *wheelEvent = static_cast<QWheelEvent *>(event);
+        auto glWidget = findChild<Renderer *>("renderer");
+        if(glWidget == nullptr) {
+            return QObject::eventFilter(obj, event);
+        }
+        glWidget->scrollEvent(wheelEvent);
     }
     return QObject::eventFilter(obj, event);
 

@@ -202,7 +202,7 @@ namespace MapGenerator {
 
     void MapGenerator::loadTexturesForSurface(int surfaceId) {
         auto texturePath = "../lib/assets/textures/";
-        auto textureTypes = {"asphalt", "field", "meadow", "forrest", "water", "footpath", "path", "sand"};
+        auto textureTypes = {"asphalt", "field", "meadow", "forrest", "water", "footpath", "sand"};
         for (std::string textureType: textureTypes) {
             auto textureArray = std::make_shared<TextureArray>(1024, 1024);
             auto dir = texturePath + textureType;

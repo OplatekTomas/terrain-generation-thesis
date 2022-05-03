@@ -20,6 +20,15 @@ namespace MapGenerator {
         this->rng = std::mt19937(rd());
         this->dist = std::uniform_real_distribution<float>(0, 1);
 
+        vector<unsigned char> data;
+        data.push_back(0);
+        data.push_back(0);
+        data.push_back(0);
+        data.push_back(0);
+        this->emptyTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA, 0, 1, 1);
+        this->emptyTexture->setData2D(data.data(), GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0, 0, 1, 1);
+
+
     }
 
 
@@ -51,7 +60,7 @@ namespace MapGenerator {
                 }
                 drawCounts[programId]++;
                 //Setup textures - sets up all textures for the model and binds them to the correct texture units
-                useTextures(programId);
+                auto textureCount = useTextures(programId);
                 //Setup uniforms (right now only view and projection are supported)
                 if (program->getUniformLocation("view") != -1) {
                     program->setMatrix4fv("view", glm::value_ptr(view));
@@ -77,6 +86,9 @@ namespace MapGenerator {
                 } else {
                     gl->glViewport(0, 0, width * scale, height * scale);
                     drawToScreen(origProgram, drawCount);
+                }
+                for (int i = 0; i < textureCount; i++) {
+                    emptyTexture->bind(GL_TEXTURE_2D + i);
                 }
                 gl->glBindFramebuffer(GL_FRAMEBUFFER, gBufferId);
             }
@@ -210,11 +222,11 @@ namespace MapGenerator {
         return model->indices.size();
     }
 
-    void Scene3D::useTextures(int programId) {
+    int Scene3D::useTextures(int programId) {
         auto programTextures = scene->getTexturesForProgram(programId);
         auto programTextureArrays = scene->getTextureArraysForProgram(programId);
         if (programTextures.empty() && programTextureArrays.empty()) {
-            return;
+            return 0;
         }
         size_t i = 0;
         for (; i < programTextures.size(); i++) {
@@ -226,6 +238,7 @@ namespace MapGenerator {
                                                 scene->getTextureArray(programTextureArrays[j]));
             textureArray->bind(i + j);
         }
+        return programTextureArrays.size() + programTextures.size();
     }
 
     std::shared_ptr<ge::gl::Texture> Scene3D::getTextureArray(int id, std::shared_ptr<TextureArray> arr) {
@@ -291,8 +304,7 @@ namespace MapGenerator {
         if (textures.find(id) != textures.end()) {
             return textures[id];
         }
-        auto texture = std::make_shared<ge::gl::Texture>();
-        texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, format, 0, tex->getWidth(), tex->getHeight());
+        auto texture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, format, 0, tex->getWidth(), tex->getHeight());
         texture->bind(GL_TEXTURE_2D);
         texture->setData2D(tex->getData(), format, type, 0, GL_TEXTURE_2D, 0, 0, tex->getWidth(),
                            tex->getHeight());

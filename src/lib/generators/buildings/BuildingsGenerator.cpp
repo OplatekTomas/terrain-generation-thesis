@@ -44,6 +44,7 @@ namespace MapGenerator {
     }
 
     int BuildingsGenerator::isOutsideBounds(GeoPoint point) {
+        //Return number according to which side of the bounding box the point is on
         if (point.lat > data->lat2) {
             return 1;
         }
@@ -117,9 +118,7 @@ namespace MapGenerator {
                     break;
             }
             result.emplace_back(y, x);
-            __asm__("nop");
         }
-        __asm__("nop");
         return result;
     }
 
@@ -195,7 +194,7 @@ namespace MapGenerator {
                 continue;
             }
 
-            positions.emplace_back(Vertex(std::get<0>(vertex), 0, std::get<1>(vertex)));
+            positions.emplace_back(Vertex((float)std::get<0>(vertex), 0, (float)std::get<1>(vertex)));
         }
         positions.emplace_back(positions[0]);
         return {vertices, positions};
@@ -224,7 +223,6 @@ namespace MapGenerator {
                 model->addVertex(v, normal);
                 model->addIndex(index);
                 index++;
-
             }
             //Let's build the walls and make compiler pay for it
             for (int i = 0; i < ((int) positions.size()) - 1; i++) {
@@ -255,8 +253,3 @@ namespace MapGenerator {
         return model;
     }
 }
-
-
-/*
-
-            */

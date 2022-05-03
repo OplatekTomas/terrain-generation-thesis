@@ -45,6 +45,7 @@ namespace MapGenerator {
         map<int, shared_ptr<ge::gl::Renderbuffer>> renderBuffers;
         map<int, shared_ptr<ge::gl::Buffer>> instances;
         map<int, std::vector<float>> instanceRandomData;
+        shared_ptr<ge::gl::Texture> emptyTexture;
         int gBufferId;
         //Uniform random value generator
         std::mt19937 rng;
@@ -54,7 +55,7 @@ namespace MapGenerator {
 
         shared_ptr<ge::gl::Shader> getShader(int id);
 
-        void useTextures(int programId);
+        int useTextures(int programId);
 
         int useModel(int id);
 

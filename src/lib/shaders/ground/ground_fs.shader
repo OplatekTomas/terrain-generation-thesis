@@ -12,8 +12,7 @@ layout (binding = 3) uniform sampler2DArray GrassTextures;
 layout (binding = 4) uniform sampler2DArray ForestTexture;
 layout (binding = 5) uniform sampler2DArray WaterTexture;
 layout (binding = 6) uniform sampler2DArray FootPathTexture;
-layout (binding = 7) uniform sampler2DArray PathTexture;
-layout (binding = 8) uniform sampler2DArray SandTexture;
+layout (binding = 7) uniform sampler2DArray SandTexture;
 
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;

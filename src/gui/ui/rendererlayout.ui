@@ -133,6 +133,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="tip04">
+        <property name="text">
+         <string>- to move up or down use Shift and Ctrl keys</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="loglabel">
         <property name="text">
          <string>Log:</string>

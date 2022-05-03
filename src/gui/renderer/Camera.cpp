@@ -38,25 +38,30 @@ namespace MapGenerator {
 
 
     glm::mat4 Camera::getViewMatrix() {
-        return glm::lookAt(position, this->position + this->front, this->up);
+        return glm::lookAt(this->position, this->position + this->front, this->up);
     }
 
     glm::vec3 Camera::getPosition() {
         return position;
     }
 
+
     void Camera::keyEvent(QKeyEvent *event) {
         auto pressed = event->type() == QEvent::KeyPress;
         switch (event->key()) {
+            case Qt::Key::Key_Up:
             case Qt::Key::Key_W:
                 w_down = pressed;
                 break;
+            case Qt::Key::Key_Left:
             case Qt::Key::Key_A:
                 a_down = pressed;
                 break;
+            case Qt::Key::Key_Down:
             case Qt::Key::Key_S:
                 s_down = pressed;
                 break;
+            case Qt::Key::Key_Right:
             case Qt::Key::Key_D:
                 d_down = pressed;
                 break;

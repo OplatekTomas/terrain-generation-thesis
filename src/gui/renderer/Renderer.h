@@ -52,6 +52,7 @@ public slots:
     void keyPressEvent(QKeyEvent *event) override;
 
     void keyReleaseEvent(QKeyEvent *event) override;
+    void scrollEvent(QWheelEvent *ev);
 
 
 private:
@@ -103,6 +104,7 @@ private:
 
 
     void setCulling(bool enabled, float factor);
+
 };
 
 

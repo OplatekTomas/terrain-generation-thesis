@@ -28,15 +28,15 @@ namespace MapGenerator{
             this->normalizedMin = min;
         }
 
-        float getScale(){
+        [[nodiscard]] float getScale() const{
             return this->scale;
         }
 
         double getAt(int row, int col);
-        double getNormalizedMax(){
+        [[nodiscard]] double getNormalizedMax() const{
             return this->normalizedMax;
         }
-        double getNormalizedMin(){
+        [[nodiscard]] double getNormalizedMin() const{
             return this->normalizedMin;
         }
         double getAt(float row, float col);
