@@ -128,10 +128,10 @@ namespace MapGenerator {
         position.y = y;
 
         if (space_down) {
-            position += worldUp * moveSpeed;
+            moveSpeed *= 1.1;
         }
         if (ctrl_down) {
-            position -= worldUp * moveSpeed;
+            moveSpeed *= 0.9;
         }
         return w_down || s_down || d_down || a_down || space_down || ctrl_down;
     }
@@ -162,9 +162,9 @@ namespace MapGenerator {
 
     void Camera::scrolled(QWheelEvent *event) {
         if (event->delta() > 0) {
-            moveSpeed *= 1.1;
+            position += worldUp * moveSpeed;
         } else {
-            moveSpeed *= 0.9;
+            position -= worldUp * moveSpeed;
         }
     }
 

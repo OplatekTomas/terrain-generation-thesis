@@ -24,6 +24,10 @@ namespace MapGenerator {
         explicit MapGenerator(const LibConfig &config, GeneratorOptions options);
 
         std::shared_ptr<class Scene> generateMap();
+        bool metadataDownloaded() const{
+            return gotMetadata;
+        };
+
         void cancel();
     private:
 
@@ -39,7 +43,7 @@ namespace MapGenerator {
         std::shared_ptr<OSMData> osmData;
         std::shared_ptr<ElevationData> elevationData;
         bool canceled;
-
+        bool gotMetadata = false;
 
         void runAsyncGenerators();
 

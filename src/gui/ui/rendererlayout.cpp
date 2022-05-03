@@ -23,14 +23,13 @@ RendererLayout::~RendererLayout() {
 }
 
 void RendererLayout::receivedMessage(const std::string &message) {
-    if(ui->log == nullptr) {
+    if (ui->log == nullptr) {
         return;
     }
-    auto* timer = new QTimer();
+    auto *timer = new QTimer();
     timer->moveToThread(qApp->thread());
     timer->setSingleShot(true);
-    QObject::connect(timer, &QTimer::timeout, [=]()
-    {
+    QObject::connect(timer, &QTimer::timeout, [=]() {
         // main thread
         ui->log->append("- " + QString::fromStdString(message));
         timer->deleteLater();
@@ -53,6 +52,10 @@ void RendererLayout::startRendering(glm::vec4 box, int terrainResolution) {
 void RendererLayout::backClicked() {
     Logger::setTargetFn([this](const std::string &msg) {
     });
+    if (!ui->renderer->canCancel()) {
+        QMessageBox::warning(this, "Please wait", "Please wait for download of metadata to finish.\nUntil then, you can't go back.");
+        return;
+    }
     ui->renderer->cancelGeneration();
     auto mainWindow = (MainWindow *) qApp->activeWindow();
     if (mainWindow == nullptr) {

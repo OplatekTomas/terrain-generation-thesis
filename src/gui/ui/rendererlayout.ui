@@ -52,6 +52,70 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="tooltip">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+          <underline>true</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Tips:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tip01">
+        <property name="text">
+         <string>- to move use WASD or arrow keys on your keyboard</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tip04">
+        <property name="text">
+         <string>- to move up or down use mouse scroll wheel</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tip02">
+        <property name="text">
+         <string>- to look around drag with left mouse button</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tip03">
+        <property name="text">
+         <string>- adjust movement speed with Shift key to move faster, Ctrl key to move slower.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="loglabel_2">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+          <underline>true</underline>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="text">
+         <string>Settings:</string>
+        </property>
+        <property name="margin">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="ssaoEnabled">
         <property name="text">
          <string>SSAO enabled</string>
@@ -105,42 +169,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="tooltip">
-        <property name="text">
-         <string>Tips:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="tip01">
-        <property name="text">
-         <string>- to move use WASD keys on your keyboard</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="tip02">
-        <property name="text">
-         <string>- to look around drag with left mouse button</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="tip03">
-        <property name="text">
-         <string>- adjust movement speed with mouse wheel</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="tip04">
-        <property name="text">
-         <string>- to move up or down use Shift and Ctrl keys</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="loglabel">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+          <underline>true</underline>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
         <property name="text">
          <string>Log:</string>
         </property>

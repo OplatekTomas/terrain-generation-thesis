@@ -30,6 +30,8 @@ public:
 
     bool startGeneration(GeneratorOptions options, std::string configPath);
 
+    bool canCancel();
+
     void cancelGeneration();
 
     bool ssaoEnabled = true;

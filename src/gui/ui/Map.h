@@ -24,6 +24,8 @@ public:
 protected slots:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+
 private:
     bool isDragging = false;
     glm::vec2 dragStart;
@@ -33,6 +35,7 @@ private:
     void boundingBoxCreated(glm::vec2 start, glm::vec2 end);
 
     double getDistance(double lat1, double lat2, double lon1, double lon2);
+
 };
 
 

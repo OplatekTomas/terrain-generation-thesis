@@ -31,6 +31,7 @@ protected slots:
 
 private:
     Ui::RendererLayout *ui;
+    bool backEnabled = false;
 
     void receivedMessage(const std::string &message);
 };

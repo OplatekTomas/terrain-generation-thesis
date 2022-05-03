@@ -112,6 +112,7 @@ namespace MapGenerator {
             std::swap(options.lon1, options.lon2);
         }
         osmData = osm->getMetadata(options.lat1, options.lon1, options.lat2, options.lon2);
+        gotMetadata = true;
         if (osmData == nullptr) {
             Logger::log("OSM returned no data. Please go back and try again");
             return;
@@ -235,7 +236,6 @@ namespace MapGenerator {
         this->canceled = true;
         this->textureGenerator->cancel();
     }
-
 
 }
 

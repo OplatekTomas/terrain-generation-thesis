@@ -255,6 +255,10 @@ void Renderer::cancelGeneration() {
     this->mapGenerator = nullptr;
 }
 
+bool Renderer::canCancel() {
+    return this->mapGenerator->metadataDownloaded();
+}
+
 
 
 
