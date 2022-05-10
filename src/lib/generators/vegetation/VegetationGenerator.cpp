@@ -33,7 +33,7 @@ namespace MapGenerator {
     }
 
     void VegetationGenerator::loadModels() {
-        auto base = "../lib/assets/models/";
+        auto base = "lib/assets/models/";
         std::vector<std::string> types = {"coniferous_trees", "deciduous_trees", "grass", "crops"};
         loadModels(base + types[0], coniferousTrees);
         loadModels(base + types[1], deciduousTrees);

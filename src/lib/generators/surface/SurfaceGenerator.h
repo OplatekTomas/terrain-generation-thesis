@@ -7,7 +7,7 @@
 #include <scene/Model.h>
 #include <api/models/bing/ElevationData.h>
 #include <memory>
-#include <config/GeneratorOptions.h>
+#include <config/LibConfig.h>
 #include <scene/Vertex.h>
 
 namespace MapGenerator {

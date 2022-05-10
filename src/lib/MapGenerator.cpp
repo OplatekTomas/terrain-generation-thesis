@@ -17,10 +17,11 @@ namespace fs = std::filesystem;
 
 namespace MapGenerator {
 
-    MapGenerator::MapGenerator(const LibConfig &config, GeneratorOptions options) {
+    MapGenerator::MapGenerator(const LibConfig &config) {
+        heightTextureId = 0;
         this->canceled = false;
         this->config = config;
-        this->options = options;
+        this->options = config.options;
         bing = std::make_unique<BingApi>(config.keys[0].key);
         osm = std::make_unique<OpenStreetMapApi>("");
         while (options.terrainResolution % 32 != 0) {
@@ -40,20 +41,13 @@ namespace MapGenerator {
         this->canceled = false;
         //Create an empty scene.
         scene = std::make_shared<Scene>();
-        //Add the surface mesh.
-
-
-        //Load models.
-
-
         //Start async texture generation.
-        if (true) {
+        if (true) { //used for debug purposes where async is worse to use.
             std::thread t1(&MapGenerator::runAsyncGenerators, this);
             t1.detach();
         } else {
             runAsyncGenerators();
         }
-
         return scene;
     };
 
@@ -147,13 +141,11 @@ namespace MapGenerator {
 
             }
             if (!vegetationDone && currentResolution >= 1024) {
-                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::ConiferousForest
-                );
-                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::Field);
+                //Generate all types of vegetation
+                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::ConiferousForest);
                 generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::DeciduousForest);
                 generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::MixedForest);
-
-
+                generateVegetation(texture, currentResolution, VegetationGenerator::VegetationType::Field);
                 vegetationDone = true;
             }
             currentResolution = currentResolution * options.textureResolutionStep;
@@ -171,6 +163,7 @@ namespace MapGenerator {
     void MapGenerator::generateVegetation(const shared_ptr<Texture> &texture, int resolution,
                                           VegetationGenerator::VegetationType type) {
         auto vegetation = vegetationGenerator->getVegetation(texture, resolution, type);
+        //Add vegetation to scene -- multiple vegetation types could have been generated, so we need to bind all of them.
         for (auto &i: vegetation) {
             auto vegetationId = scene->addModel(i);
             auto program = std::make_shared<Program>();
@@ -187,6 +180,7 @@ namespace MapGenerator {
 
 
     void MapGenerator::generateBuildings() {
+        //Mostly just connecting all the programs together and making sure everything runs the way it should.
         auto surfaceGenerator = std::make_shared<BuildingsGenerator>(osmData, elevationData, options);
         auto model = surfaceGenerator->generate();
         auto modelId = scene->addModel(model);
@@ -202,7 +196,7 @@ namespace MapGenerator {
     }
 
     void MapGenerator::loadTexturesForSurface(int surfaceId) {
-        auto texturePath = "../lib/assets/textures/";
+        auto texturePath = "lib/assets/textures/";
         auto textureTypes = {"asphalt", "field", "meadow", "forrest", "water", "footpath", "sand"};
         for (std::string textureType: textureTypes) {
             auto textureArray = std::make_shared<TextureArray>(1024, 1024);
@@ -220,6 +214,10 @@ namespace MapGenerator {
             for (auto &file: files) {
                 //read the entire file using libpng
                 auto data = readPng(file);
+                if(data.empty()) {
+                    Logger::log("ERROR: Could not read file: " + file);
+                    data = std::vector<unsigned char>(1024 * 1024 * 4, 0);
+                }
                 auto texture = std::make_shared<Texture>(1024, 1024);
                 auto stepSize = data.size() == 1024 * 1024 * 4 ? 4 : 3;
                 for (int i = 0; i < data.size(); i += stepSize) {
@@ -236,6 +234,8 @@ namespace MapGenerator {
         this->canceled = true;
         this->textureGenerator->cancel();
     }
+
+
 
 }
 

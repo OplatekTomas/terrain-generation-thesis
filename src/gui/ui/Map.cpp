@@ -57,6 +57,7 @@ void Map::mouseMoveEvent(QMouseEvent *event) {
     if (isDragging) {
         double endX, endY = 0;
         double startX, startY = 0;
+        //Read the coordinates from the viewport
         viewport()->geoCoordinates(dragStart.x, dragStart.y, startX, startY, Marble::GeoDataCoordinates::Degree);
         viewport()->geoCoordinates(event->localPos().x(), event->localPos().y(), endX, endY,
                                    Marble::GeoDataCoordinates::Degree);
@@ -76,6 +77,7 @@ void Map::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 double Map::getDistance(double lat1, double lat2, double long1, double long2) {
+    //Haversine formula
     const auto R = 6378.137; // Radius of earth in KM
     auto dLat = lat2 * M_PI / 180 - lat1 * M_PI / 180;
     auto dLon = long2 * M_PI / 180 - long1 * M_PI / 180;

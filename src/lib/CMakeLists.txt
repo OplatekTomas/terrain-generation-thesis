@@ -10,20 +10,24 @@ include(FetchContent)
 
 
 #set correct directory for CPM
-if(CPM_SOURCE_CACHE)
+if (CPM_SOURCE_CACHE)
     set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
-elseif(DEFINED ENV{CPM_SOURCE_CACHE})
+elseif (DEFINED ENV{CPM_SOURCE_CACHE})
     set(CPM_DOWNLOAD_LOCATION "$ENV{CPM_SOURCE_CACHE}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
-else()
+else ()
     set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
-endif()
+endif ()
 #download cpm
-if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
+if (NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
     message(STATUS "Downloading CPM.cmake to ${CPM_DOWNLOAD_LOCATION}")
     file(DOWNLOAD https://github.com/TheLartians/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake ${CPM_DOWNLOAD_LOCATION})
-endif()
+endif ()
 
 include(${CPM_DOWNLOAD_LOCATION})
+
+
+set(CMAKE_INSTALL_RPATH ".")
+
 
 #add packages
 CPMAddPackage(
@@ -38,13 +42,6 @@ CPMAddPackage(
         GITHUB_REPOSITORY libcpr/cpr
         GIT_TAG 290fbaff7321b3df66c4ac5b039815f25e4333bb
 )
-
-if(CDT_ADDED)
-    add_library(CDT INTERFACE IMPORTED)
-    target_include_directories(CDT INTERFACE "${CDT_SOURCE_DIR}/CDT/include")
-    message(STATUS "CDT_SOURCE_DIR: ${CDT_SOURCE_DIR}")
-endif()
-
 
 CPMAddPackage("gh:fmtlib/fmt#8.0.1")
 
@@ -79,24 +76,29 @@ FetchContent_Declare(
 )
 
 
-
 FetchContent_MakeAvailable(boolinq)
 FetchContent_MakeAvailable(poisson_disk_sampling)
 
-OPTION (USE_OpenMP "Use OpenMP" ON)
-IF(USE_OpenMP)
+option(ASSIMP_BUILD_TESTS OFF)
+SET(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build assimp tests" FORCE)
+
+option(ASSIMP_BUILD_ASSIMP_VIEW OFF)
+option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+
+OPTION(USE_OpenMP "Use OpenMP" ON)
+IF (USE_OpenMP)
     FIND_PACKAGE(OpenMP)
-    IF(OPENMP_FOUND)
+    IF (OPENMP_FOUND)
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} ")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -O3 ")
-    ENDIF()
-ENDIF()
+    ENDIF ()
+ENDIF ()
 
 
 #Create dummy files so that they at least exist when CMake project is loaded
 file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.shader)
 set(SHADERS_DST_FILES "")
-foreach(file ${SHADERS_SRC_FILES})
+foreach (file ${SHADERS_SRC_FILES})
     #Get file name after shaders dir
     string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/shaders/" "" PATH_IN_SHADERS_DIR "${file}")
     #Create a dummy file
@@ -104,14 +106,14 @@ foreach(file ${SHADERS_SRC_FILES})
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
     file(WRITE "${DUMMY_FILE}" "")
     set(SHADERS_DST_FILES "${SHADERS_DST_FILES};${DUMMY_FILE}")
-endforeach()
+endforeach ()
 message(STATUS "Found ${SHADERS_SRC_FILES} shader files")
 
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
 
-add_library (lib
+add_library(lib
         shaders/Shaders.h ${SHADERS_DST_FILES}
         config/LibConfig.h
         api/ApiBase.h api/BingApi.cpp api/BingApi.h
@@ -120,18 +122,17 @@ add_library (lib
         api/OpenStreetMapApi.cpp api/OpenStreetMapApi.h api/models/bing/ElevationData.cpp api/models/bing/ElevationData.h api/models/openstreetmap/OSMData.cpp api/models/openstreetmap/OSMData.h
         api/models/openstreetmap/MetadataResult.h Helper.h
         generators/landtype/LandTypeGenerator.cpp generators/landtype/LandTypeGenerator.h generators/landtype/AreaOnMap.cpp generators/landtype/AreaOnMap.h
-        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h config/GeneratorOptions.h scene/Shader.cpp scene/Shader.h
+        scene/Scene.cpp scene/Scene.h scene/Texture.cpp scene/Texture.h scene/Model.cpp scene/Model.h scene/Shader.cpp scene/Shader.h
         scene/Vertex.h scene/Vertex.cpp
         generators/vegetation/ObjectLoader.cpp generators/vegetation/ObjectLoader.h generators/vegetation/VegetationGenerator.cpp generators/vegetation/VegetationGenerator.h scene/Point.cpp scene/Point.h
-scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h scene/TextureArray.cpp scene/TextureArray.h Helper.cpp scene/Uniform.cpp scene/Uniform.h Logger.h Logger.cpp )
+        scene/Program.cpp scene/Program.h generators/surface/SurfaceGenerator.cpp generators/surface/SurfaceGenerator.h generators/buildings/BuildingsGenerator.cpp generators/buildings/BuildingsGenerator.h scene/TextureArray.cpp scene/TextureArray.h Helper.cpp scene/Uniform.cpp scene/Uniform.h Logger.h Logger.cpp)
 if (nlohmann_json_ADDED)
     target_include_directories(lib PUBLIC ${nlohmann_json_SOURCE_DIR}/include)
-endif()
+endif ()
 
 if (cdt_ADDED)
     target_include_directories(lib PUBLIC ${cdt_SOURCE_DIR}/CDT/include)
-endif()
-
+endif ()
 
 #Create fake target that calls the shaders/CMakeLists.txt file just before compile time to include the current version
 #of a shader and not the one that would be read during loading of the project
@@ -143,17 +144,17 @@ add_custom_target(shaderCopyTarget
 
 set(ASSET_COPY assetCopyTarget)
 add_custom_target(assetCopyTarget
-        COMMAND ${CMAKE_COMMAND} -E copy_directory assets ${CMAKE_CURRENT_BINARY_DIR}/assets
+        COMMAND ${CMAKE_COMMAND} -E copy_directory assets ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/assets
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
-add_dependencies(${PROJECT_NAME} ${SHADER_COPY}  ${ASSET_COPY})
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY} ${ASSET_COPY})
 
-target_link_libraries(lib PUBLIC cpr::cpr fmt assimp ${PNG_LIBRARY})
 
-target_include_directories (lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+target_include_directories(lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(lib PUBLIC ${boolinq_SOURCE_DIR})
 target_include_directories(lib PUBLIC ${poisson_disk_sampling_SOURCE_DIR})
-
-
+target_link_libraries(lib PUBLIC cpr::cpr fmt assimp ${PNG_LIBRARY})
 
 

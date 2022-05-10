@@ -38,22 +38,19 @@ void RendererLayout::receivedMessage(const std::string &message) {
 
 }
 
-void RendererLayout::startRendering(glm::vec4 box, int terrainResolution) {
-    GeneratorOptions options;
-    options.lon1 = box.x;
-    options.lat1 = box.y;
-    options.lon2 = box.z;
-    options.lat2 = box.w;
-    options.terrainResolution = terrainResolution;
+void RendererLayout::startRendering(glm::vec4 box) {
     auto renderer = ui->renderer;
-    renderer->startGeneration(options, QCoreApplication::arguments().at(1).toStdString());
+    renderer->startGeneration({box.y, box.w},
+                              {box.x, box.z},
+                              QCoreApplication::arguments().at(1).toStdString());
 }
 
 void RendererLayout::backClicked() {
     Logger::setTargetFn([this](const std::string &msg) {
     });
     if (!ui->renderer->canCancel()) {
-        QMessageBox::warning(this, "Please wait", "Please wait for download of metadata to finish.\nUntil then, you can't go back.");
+        QMessageBox::warning(this, "Please wait",
+                             "Please wait for download of metadata to finish.\nUntil then, you can't go back.");
         return;
     }
     ui->renderer->cancelGeneration();

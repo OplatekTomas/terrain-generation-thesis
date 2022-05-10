@@ -43,6 +43,7 @@ namespace MapGenerator {
     int Scene3D::draw(int height, int width, double scale) {
         auto view = camera->getViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
+        //We render geometry for each object
         for (auto &modelPair: scene->getModels()) {
             auto modelId = modelPair.first;
             //Setup shaders/program

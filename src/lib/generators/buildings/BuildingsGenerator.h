@@ -11,7 +11,7 @@
 #include <scene/Model.h>
 //#include <delaunator.hpp>
 #include <scene/Vertex.h>
-#include <config/GeneratorOptions.h>
+#include <config/LibConfig.h>
 #include <api/models/bing/ElevationData.h>
 
 namespace MapGenerator {

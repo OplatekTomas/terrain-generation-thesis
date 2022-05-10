@@ -5,16 +5,16 @@
 #include <png.h>
 #include <stdexcept>
 
-float lerp(float a, float b, float f){
+float lerp(float a, float b, float f) {
     return a + f * (b - a);
 }
 
 
 //code edited by me, originally from https://gist.github.com/niw/5963798
-std::vector<unsigned char> readPng(const std::string &path){
+std::vector<unsigned char> readPng(const std::string &path) {
     FILE *fp = fopen(path.data(), "rb");
-    if(fp == nullptr){
-        throw std::runtime_error("Failed to open file: " + path);
+    if (fp == nullptr) {
+        return {};
     }
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     png_infop info = png_create_info_struct(png);
@@ -35,9 +35,9 @@ std::vector<unsigned char> readPng(const std::string &path){
     if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
         png_set_gray_to_rgb(png);
     png_read_update_info(png, info);
-    png_bytep *row_pointers = (png_bytep *)malloc(sizeof(png_bytep) * png_get_image_height(png, info));
+    png_bytep *row_pointers = (png_bytep *) malloc(sizeof(png_bytep) * png_get_image_height(png, info));
     for (int y = 0; y < png_get_image_height(png, info); y++) {
-        row_pointers[y] = (png_byte *)malloc(png_get_rowbytes(png, info));
+        row_pointers[y] = (png_byte *) malloc(png_get_rowbytes(png, info));
     }
     png_read_image(png, row_pointers);
     std::vector<unsigned char> data;

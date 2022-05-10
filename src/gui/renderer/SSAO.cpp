@@ -9,7 +9,7 @@
 #include <random>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "shaders_gui/Shaders.h"
+#include <assets/shaders_gui/Shaders.h>
 
 namespace MapGenerator {
     SSAO::SSAO(const std::shared_ptr<ge::gl::Context> &gl, int width, int height, int fbo,

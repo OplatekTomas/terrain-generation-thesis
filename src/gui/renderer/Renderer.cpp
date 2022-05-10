@@ -5,18 +5,22 @@
 #include "Renderer.h"
 #include <iostream>
 #include "config/ConfigReader.h"
-#include "shaders_gui/Shaders.h"
+#include <assets/shaders_gui/Shaders.h>
 #include <Logger.h>
 
-bool Renderer::startGeneration(GeneratorOptions genOptions, std::string configPath) { //TODO remove static code
+bool Renderer::startGeneration(const PointF& latitudePoints, const PointF& longitudePoints, const std::string& configPath) {
     bool hasError = false;
     auto config = ConfigReader::read(configPath, &hasError);
     if (hasError) {
         Logger::log("Error while reading config file. Nothing can render");
         return false;
     }
+    config.options.lat1 = latitudePoints.x;
+    config.options.lat2 = latitudePoints.y;
+    config.options.lon1 = longitudePoints.x;
+    config.options.lon2 = longitudePoints.y;
     this->generating = true;
-    this->mapGenerator = std::make_shared<class MapGenerator>(config, genOptions);
+    this->mapGenerator = std::make_shared<class MapGenerator>(config);
     auto map = mapGenerator->generateMap();
     scene = std::make_shared<Scene3D>(map, gl, camera, gBuffer->getId());
     return true;
@@ -24,7 +28,7 @@ bool Renderer::startGeneration(GeneratorOptions genOptions, std::string configPa
 
 
 void Renderer::paintGL() {
-
+    //Get current time in milliseconds
     auto frameBuffer = (int) defaultFramebufferObject();
     gl->glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     gl->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -40,11 +44,11 @@ void Renderer::paintGL() {
         QOpenGLWidget::paintGL();
         return;
     }
+    //Render every single pass
     geometryPass();
     ssaoPass(frameBuffer);
     lightningPass();
     skyboxPass(frameBuffer);
-
     update();
     QOpenGLWidget::paintGL();
 }
@@ -141,7 +145,7 @@ void Renderer::checkGLError() {
 void Renderer::initializeGBufferTextures() {
     gBuffer->bind(GL_FRAMEBUFFER);
     //checkForErrors();
-
+    //Initialize all the textures
     int width = this->width();
     int height = this->height();
     gPosition = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA16F, 0, width, height);
@@ -172,7 +176,7 @@ void Renderer::initializeGBufferTextures() {
 
     unsigned int att[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
     gl->glDrawBuffers(4, att);
-
+    //prep the buffers
     this->rboDepth = std::make_shared<ge::gl::Renderbuffer>();
     this->rboDepth->bind();
     gl->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
@@ -223,6 +227,9 @@ void Renderer::resizeGL(int w, int h) {
 
 bool Renderer::event(QEvent *e) {
     switch (e->type()) {
+        case QEvent::MouseButtonPress:
+            this->setFocus();
+            return true;
         case QEvent::MouseMove:
             camera->mouseMoved(static_cast<QMouseEvent *>(e));
             return true;

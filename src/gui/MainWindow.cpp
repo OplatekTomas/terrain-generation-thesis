@@ -32,10 +32,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     rendererLayout->setSizePolicy(sizePolicy);
     //baseGridLayout->addWidget(rendererLayout);
 
+    //Button used only for testing purposes. Hidden.
     auto btn = new QPushButton("Test");
     btn->setObjectName("testButton");
     connect(btn, &QPushButton::clicked, this, [&]{
-        glm::vec4 box = {49.23757036758039, 16.498296596199317, 49.159263117191315, 16.676375765580808};
+        glm::vec4 box = {49.89242240462562, 17.868975817590403, 49.876920580140556, 17.886408269731767};
+        glm::vec4 boxBrno = {49.25440812813568, 16.48189923100568, 49.14353217455856, 16.72984417931722};
+        box = boxBrno;
         box = glm::vec4(box.y, box.x, box.w, box.z);
         drawRenderer(box);
     });
@@ -47,6 +50,7 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+//Event filter that sends events to renderer when it is active.
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
     if (!isRendering) {
         return QObject::eventFilter(obj, event);

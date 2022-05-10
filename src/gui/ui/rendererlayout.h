@@ -18,7 +18,7 @@ Q_OBJECT
 public:
     explicit RendererLayout(QWidget *parent = nullptr);
 
-    void startRendering(glm::vec4 box, int terrainResolution = 64);
+    void startRendering(glm::vec4 box);
 
     ~RendererLayout() override;
 

@@ -4,7 +4,7 @@
 
 #include <renderer/Skybox.h>
 #include <StaticFunctions.h>
-#include <shaders_gui/Shaders.h>
+#include <assets/shaders_gui/Shaders.h>
 #include <glm/glm.hpp>
 #include <Logger.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -17,7 +17,7 @@ namespace MapGenerator {
         this->camera = camera;
         this->width = width;
         this->height = height;
-        std::string path = "renderer/textures/";
+        std::string path = "assets/textures/";
         auto extension = ".png";
         std::vector<std::string> faces;
         faces.push_back(path + "right" + extension);

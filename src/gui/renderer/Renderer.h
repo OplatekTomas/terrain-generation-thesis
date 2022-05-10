@@ -26,13 +26,13 @@ Q_OBJECT
 public:
     Renderer(QWidget *parent) : QOpenGLWidget(parent) {}
 
-    bool isInitialized() { return initialized; }
 
-    bool startGeneration(GeneratorOptions options, std::string configPath);
+    bool startGeneration(const PointF& latitudePoints, const PointF& longitudePoints, const std::string& configPath);
 
     bool canCancel();
 
     void cancelGeneration();
+    bool isInitialized() { return initialized; }
 
     bool ssaoEnabled = true;
     bool skyboxEnabled = true;

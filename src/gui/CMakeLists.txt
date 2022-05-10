@@ -38,11 +38,12 @@ include(FetchContent)
 
 CPMAddPackage(
         NAME GPUEngine
-        OPTIONS "GPUENGINE_BUILD_GESG ON"
         GITHUB_REPOSITORY Rendering-FIT/GPUEngine
         GIT_TAG 53c587c52d99b57e77817bb4df1d625fcea1d5be
 )
-
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 
 
 find_package(PNG REQUIRED)
@@ -51,9 +52,10 @@ include_directories(${PNG_INCLUDE_DIR})
 set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
-        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h ui/Map.cpp ui/Map.h ui/mapview.cpp ui/mapview.h ui/mapview.ui ui/rendererlayout.cpp ui/rendererlayout.h ui/rendererlayout.ui)
+        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h assets/shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h assets/shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h ui/Map.cpp ui/Map.h ui/mapview.cpp ui/mapview.h ui/mapview.ui ui/rendererlayout.cpp ui/rendererlayout.h ui/rendererlayout.ui)
 
 OPTION (USE_OpenMP "Use OpenMP" ON)
+OPTION (ASSIMP_NO_EXPORT ON)
 IF(USE_OpenMP)
     FIND_PACKAGE(OpenMP)
     IF(OPENMP_FOUND)
@@ -63,11 +65,11 @@ IF(USE_OpenMP)
 ENDIF()
 
 #Create dummy files so that they at least exist when CMake project is loaded
-file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/*.shader)
+file(GLOB_RECURSE SHADERS_SRC_FILES assets/shaders_gui/*.shader)
 set(SHADERS_DST_FILES "")
 foreach(file ${SHADERS_SRC_FILES})
     #Get file name after shaders dir
-    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/" "" PATH_IN_SHADERS_DIR "${file}")
+    string(REPLACE "assets/shaders_gui/" "" PATH_IN_SHADERS_DIR "${file}")
     #Create a dummy file
     set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders_gui/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
@@ -87,32 +89,41 @@ endif()
 
 
 
-find_package(GPUEngine COMPONENTS geGL geSG geUtil)
+find_package(GPUEngine COMPONENTS geGL geUtil)
 find_package(Marble REQUIRED)
 
 set(SHADER_COPY_GUI shaderCopyTargetGUI)
 add_custom_target(shaderCopyTargetGUI
-        COMMAND ${CMAKE_COMMAND} -P "shaders_gui/CMakeLists.txt"
+        COMMAND ${CMAKE_COMMAND} -P "assets/shaders_gui/CMakeLists.txt"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
 
 set(SHADER_COPY_GUI_HELP shaderCopyTargetGUIHelp)
 add_custom_target(shaderCopyTargetGUIHelp
-        COMMAND ${CMAKE_COMMAND} -E copy_directory shaders_gui/include ${CMAKE_CURRENT_BINARY_DIR}/shaders_gui/include
+        COMMAND ${CMAKE_COMMAND} -E copy_directory assets/shaders_gui/include ${CMAKE_CURRENT_BINARY_DIR}/shaders_gui/include
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
+
+set(GPUENGINE_HELP_TARGET gpuEngineFix)
+add_custom_target(gpuEngineFix
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${GPUEngine_BINARY_DIR}/geCore/geCore/ ${GPUEngine_SOURCE_DIR}/geCore/src/geCore/)
 set(TEXTURE_COPY_GUI textureCopyTarget)
 
 add_custom_target(textureCopyTarget
-        COMMAND ${CMAKE_COMMAND} -E copy_directory renderer/textures ${CMAKE_CURRENT_BINARY_DIR}/renderer/textures
+        COMMAND ${CMAKE_COMMAND} -E copy_directory assets/textures ${CMAKE_BINARY_DIR}/out/assets/textures
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
 add_dependencies(${SHADER_COPY_GUI_HELP} ${SHADER_COPY_GUI})
-add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI_HELP} ${TEXTURE_COPY_GUI})
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI_HELP} ${TEXTURE_COPY_GUI} ${GPUENGINE_HELP_TARGET})
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(vut-bp-gui)
 endif()
-target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/shaders_gui/include/lighting)
-target_link_libraries(${PROJECT_NAME} PRIVATE Marble Qt${QT_VERSION_MAJOR}::Widgets geGL geSG geUtil lib ${PNG_LIBRARY})
+target_include_directories (${PROJECT_NAME} PUBLIC assets/shaders_gui/include/lighting)
+target_link_libraries(${PROJECT_NAME} PRIVATE Marble Qt${QT_VERSION_MAJOR}::Widgets geGL geUtil lib ${PNG_LIBRARY})
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${GPUEngine_BINARY_DIR}/lib ${CMAKE_BINARY_DIR}/out/lib || (exit 0)
+        COMMENT "Copying from ${GPUEngine_BINARY_DIR}/lib to ${CMAKE_BINARY_DIR}/out/lib"
+        )

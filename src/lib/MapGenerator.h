@@ -10,7 +10,7 @@
 #include <api/OpenStreetMapApi.h>
 #include <api/models/openstreetmap/MetadataResult.h>
 #include <scene/Scene.h>
-#include <config/GeneratorOptions.h>
+#include <config/LibConfig.h>
 #include <iostream>
 #include <future>
 #include <thread>
@@ -21,7 +21,7 @@
 namespace MapGenerator {
     class MapGenerator {
     public:
-        explicit MapGenerator(const LibConfig &config, GeneratorOptions options);
+        explicit MapGenerator(const LibConfig &config);
 
         std::shared_ptr<class Scene> generateMap();
         bool metadataDownloaded() const{

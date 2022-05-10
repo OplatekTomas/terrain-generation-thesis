@@ -2,7 +2,7 @@
 // Created by tomas on 05.04.22.
 //
 
-#include <shaders_gui/Shaders.h>
+#include <assets/shaders_gui/Shaders.h>
 
 const char *GUIShaders::lightning_vs =
 #include <shaders_gui/include/lightning/lightning_vs.shader.out>
