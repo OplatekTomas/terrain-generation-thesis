@@ -1,0 +1,15 @@
+{
+"keys":[
+{
+"service": "bing",
+"key": "<REDACTED>"
+}
+], "options":{
+"terrainResolution": 64,
+"minTextureResolution": 512,
+"maxTextureResolution": 8192,
+"textureResolutionStep": 2,
+"generateVegetationAt": 1024,
+"randomSeed": 6
+}
+}

@@ -54,7 +54,7 @@ namespace MapGenerator {
 
         this->ssaoFBO = std::make_shared<ge::gl::Framebuffer>();
         this->ssaoFBO->bind();
-        this->ssaoColorTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_R16F, 0, width, height);
+        this->ssaoColorTexture = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RED, 0, width, height);
         this->ssaoColorTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         this->ssaoColorTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->ssaoColorTexture->getId(),
