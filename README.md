@@ -1,10 +1,11 @@
 # Terrain generation and adjustment
 
+
 C++ & OpenGL written app that generates 3D objects which represent small-ish area (max I tested was around 200 km^2) anywhere in the world. Buildings are 3D (they are triangulated, can be a bit broken *sometimes*) and there are multiple types of vegetation generated (using poisson sampling). The height is interpolated using NP Triangle interpolation to deal with low resolution Bing Maps heightmaps and their amazing rate limiting.
 
 The result is renderer using deffered shading with SSAO as post processing effect.
 
-The thesis text (in czech) is available in the `text.pdf` file.
+This was my bachelor's degree thesis. The text (in czech) is available in the `text.pdf` file.
 
 ## Compilation
 
