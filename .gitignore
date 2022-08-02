@@ -8,3 +8,5 @@ src/build-gui-Desktop-Debug
 *.user
 /src/lib/shaders/include/
 /src/config.json
+
+src/gui/shaders_gui/*

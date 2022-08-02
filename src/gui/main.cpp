@@ -1,6 +1,14 @@
 #include <QApplication>
 #include <QPushButton>
+#include <iostream>
+#include <fstream>
+
+#ifdef DEBUG
+#include "DevelopWindow.h"
+#else
 #include "MainWindow.h"
+#endif
+
 int main(int argc, char *argv[]) {
     std::srand(std::time(nullptr));
     if(argc != 2){
@@ -16,7 +24,11 @@ int main(int argc, char *argv[]) {
     }
     QApplication a(argc, argv);
     //MapGenerator::Renderer window;
+#ifdef DEBUG
+    DevelopWindow window;
+#else
     MainWindow window;
+#endif
     window.resize(1600, 900);
     window.show();
     window.setWindowTitle(QApplication::translate("toplevel", "EarthGamel"));

@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CPM_DOWNLOAD_VERSION 0.32.0)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
 
 
 find_package(QT NAMES Qt5 COMPONENTS Widgets REQUIRED)
@@ -49,10 +50,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
+
 set(PROJECT_SOURCES
         main.cpp
         MainWindow.cpp MainWindow.h MainWindow.ui
-        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h assets/shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h assets/shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h ui/Map.cpp ui/Map.h ui/mapview.cpp ui/mapview.h ui/mapview.ui ui/rendererlayout.cpp ui/rendererlayout.h ui/rendererlayout.ui)
+        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h assets/shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h assets/shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h ui/Map.cpp ui/Map.h ui/mapview.cpp ui/mapview.h ui/mapview.ui ui/rendererlayout.cpp ui/rendererlayout.h ui/rendererlayout.ui DevelopWindow.cpp DevelopWindow.h DevelopWindow.ui)
 
 OPTION (USE_OpenMP "Use OpenMP" ON)
 OPTION (ASSIMP_NO_EXPORT ON)

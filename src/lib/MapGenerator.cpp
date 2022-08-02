@@ -61,10 +61,10 @@ namespace MapGenerator {
         auto program = std::make_shared<Program>();
         program->vertexShader = vertexShaderId;
         program->fragmentShader = scene->addShader(
-                std::make_shared<Shader>(Shaders::HeightmapFragmentShader(), Shader::FRAGMENT));
+                std::make_shared<Shader>(Shaders::HeightmapFragmentShader(), Shader::FRAGMENT, "HeightmapFragmentShader"));
         program->tessControlShader = tcsShaderId;
         program->tessEvaluationShader = scene->addShader(
-                std::make_shared<Shader>(Shaders::HeightmapEvaluationShader(), Shader::TESS_EVALUATION));
+                std::make_shared<Shader>(Shaders::HeightmapEvaluationShader(), Shader::TESS_EVALUATION, "HeightmapEvaluationShader"));
         program->drawTarget = Program::DRAW_TO_TEXTURE;
         program->drawTextureResolution = resolution;
         program->drawTexture = heightTextureId;
@@ -79,12 +79,12 @@ namespace MapGenerator {
         auto surfaceId = scene->addModel(surface);
 
         //Set up the shaders required for the terrain.
-        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::GroundVertexShader(), Shader::VERTEX));
-        auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::GroundFragmentShader(), Shader::FRAGMENT));
+        auto vertexId = scene->addShader(std::make_shared<Shader>(Shaders::GroundVertexShader(), Shader::VERTEX, "GroundVertexShader"));
+        auto fragmentId = scene->addShader(std::make_shared<Shader>(Shaders::GroundFragmentShader(), Shader::FRAGMENT, "GroundFragmentShader"));
         auto tcsId = scene->addShader(
-                std::make_shared<Shader>(Shaders::GroundTessellationControlShader(), Shader::TESS_CONTROL));
+                std::make_shared<Shader>(Shaders::GroundTessellationControlShader(), Shader::TESS_CONTROL, "GroundTessellationControlShader"));
         auto tesId = scene->addShader(
-                std::make_shared<Shader>(Shaders::GroundTessellationEvaluationShader(), Shader::TESS_EVALUATION));
+                std::make_shared<Shader>(Shaders::GroundTessellationEvaluationShader(), Shader::TESS_EVALUATION, "GroundTessellationEvaluationShader"));
         //Set up the program for the shaders.
         auto program = std::make_shared<Program>();
         program->vertexShader = vertexId;
@@ -168,9 +168,9 @@ namespace MapGenerator {
             auto vegetationId = scene->addModel(i);
             auto program = std::make_shared<Program>();
             program->vertexShader = scene->addShader(
-                    std::make_shared<Shader>(Shaders::TreesVertexShader(), Shader::VERTEX));
+                    std::make_shared<Shader>(Shaders::TreesVertexShader(), Shader::VERTEX, "VegetationVertexShader"));
             program->fragmentShader = scene->addShader(
-                    std::make_shared<Shader>(Shaders::TreesFragmentShader(), Shader::FRAGMENT));
+                    std::make_shared<Shader>(Shaders::TreesFragmentShader(), Shader::FRAGMENT, "VegetationFragmentShader"));
             program->drawTarget = Program::DRAW_TO_SCREEN;
             auto progId = scene->addProgram(program);
             scene->bindTexture(heightTextureId, progId);
@@ -184,8 +184,8 @@ namespace MapGenerator {
         auto surfaceGenerator = std::make_shared<BuildingsGenerator>(osmData, elevationData, options);
         auto model = surfaceGenerator->generate();
         auto modelId = scene->addModel(model);
-        auto fragShader = std::make_shared<Shader>(Shaders::BuildingsFragmentShader(), Shader::FRAGMENT);
-        auto vertexShader = std::make_shared<Shader>(Shaders::BuildingsVertexShader(), Shader::VERTEX);
+        auto fragShader = std::make_shared<Shader>(Shaders::BuildingsFragmentShader(), Shader::FRAGMENT, "BuildingsFragmentShader");
+        auto vertexShader = std::make_shared<Shader>(Shaders::BuildingsVertexShader(), Shader::VERTEX, "BuildingsVertexShader");
         auto program = std::make_shared<Program>();
         program->vertexShader = scene->addShader(vertexShader);
         program->fragmentShader = scene->addShader(fragShader);

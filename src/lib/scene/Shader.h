@@ -21,7 +21,7 @@ namespace MapGenerator {
             COMPUTE
         };
 
-        Shader(std::string code, ShaderType type);
+        Shader(std::string code, ShaderType type, std::string name);
 
         std::string getSource() {
             return shaderCode;
@@ -34,6 +34,7 @@ namespace MapGenerator {
     private:
         std::string shaderCode;
         ShaderType type;
+        std::string name;
     };
 }
 

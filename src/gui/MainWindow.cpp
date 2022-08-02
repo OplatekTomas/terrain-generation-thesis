@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     rendererLayout->setVisible(false);
     rendererLayout->setObjectName("rendererLayout");
     rendererLayout->setSizePolicy(sizePolicy);
-    //baseGridLayout->addWidget(rendererLayout);
+    baseGridLayout->addWidget(rendererLayout);
 
     //Button used only for testing purposes. Hidden.
     auto btn = new QPushButton("Test");

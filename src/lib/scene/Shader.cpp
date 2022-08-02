@@ -7,8 +7,9 @@
 #include <utility>
 
 
-MapGenerator::Shader::Shader(std::string code, MapGenerator::Shader::ShaderType type) {
+MapGenerator::Shader::Shader(std::string code, MapGenerator::Shader::ShaderType type, std::string name) {
     this->type = type;
     this->shaderCode = std::move(code);
+    this->name = std::move(name);
 }
 
