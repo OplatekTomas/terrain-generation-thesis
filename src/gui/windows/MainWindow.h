@@ -7,17 +7,15 @@
 #include <QMainWindow>
 #include <QOpenGLContext>
 #include <QOpenGLWidget>
-#include "renderer/Renderer.h"
-#include <ui/rendererlayout.h>
-#include <ui/mapview.h>
-#include <ui/rendererlayout.h>
+//#include "renderer/Renderer.h"
+#include "views/rendererlayout.h"
+#include "views/mapview.h"
+#include "views/rendererlayout.h"
 
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
-class Renderer;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT

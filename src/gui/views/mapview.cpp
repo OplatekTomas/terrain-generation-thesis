@@ -4,9 +4,9 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_MapView.h" resolved
 
-#include <ui/mapview.h>
+#include <views/mapview.h>
 #include "ui_mapview.h"
-#include "MainWindow.h"
+#include "windows/MainWindow.h"
 #include <marble/MarbleModel.h>
 #include <marble/SearchRunnerManager.h>
 #include <marble/GeoDataPlacemark.h>
@@ -15,7 +15,7 @@
 
 MapView::MapView(QWidget *parent) : QWidget(parent), ui(new Ui::MapView) {
     ui->setupUi(this);
-    vector<double> start = {49.19256141221154, 16.594543972568715,
+    std::vector<double> start = {49.19256141221154, 16.594543972568715,
             49.19827707820228, 16.604973078397315};
     auto geo = Marble::GeoDataLatLonBox(start[2], start[0], start[3], start[1], Marble::GeoDataCoordinates::Degree);
     ui->map->centerOn(geo, true);

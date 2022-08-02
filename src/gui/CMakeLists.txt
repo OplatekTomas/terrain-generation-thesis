@@ -42,19 +42,25 @@ CPMAddPackage(
         GITHUB_REPOSITORY Rendering-FIT/GPUEngine
         GIT_TAG 53c587c52d99b57e77817bb4df1d625fcea1d5be
 )
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
-
 
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
 
+qt5_wrap_ui(UIS_HDRS
+        windows/MainWindow.ui
+        views/mapview.ui
+        views/rendererlayout.ui
+        windows/DevelopWindow.ui
+        )
+
 set(PROJECT_SOURCES
         main.cpp
-        MainWindow.cpp MainWindow.h MainWindow.ui
-        renderer/Camera.cpp renderer/Camera.h renderer/Scene3D.cpp renderer/Scene3D.h assets/shaders_gui/Shaders.h StaticFunctions.h renderer/SSAO.cpp renderer/SSAO.h assets/shaders_gui/Shaders.cpp StaticFunctions.cpp renderer/Skybox.cpp renderer/Skybox.h renderer/Renderer.cpp renderer/Renderer.h ui/Map.cpp ui/Map.h ui/mapview.cpp ui/mapview.h ui/mapview.ui ui/rendererlayout.cpp ui/rendererlayout.h ui/rendererlayout.ui DevelopWindow.cpp DevelopWindow.h DevelopWindow.ui)
+        windows/MainWindow.cpp windows/MainWindow.h
+        assets/shaders_gui/Shaders.h StaticFunctions.h effects/SSAO.cpp effects/SSAO.h assets/shaders_gui/Shaders.cpp StaticFunctions.cpp effects/Skybox.cpp effects/Skybox.h views/Map.cpp views/Map.h views/mapview.cpp views/mapview.h views/rendererlayout.cpp views/rendererlayout.h  windows/DevelopWindow.cpp windows/DevelopWindow.h renderer/Renderer.cpp renderer/Renderer.h
+        ${UIS_HDRS}
+        renderer/GBuffer.cpp renderer/GBuffer.h)
+
 
 OPTION (USE_OpenMP "Use OpenMP" ON)
 OPTION (ASSIMP_NO_EXPORT ON)
@@ -67,11 +73,11 @@ IF(USE_OpenMP)
 ENDIF()
 
 #Create dummy files so that they at least exist when CMake project is loaded
-file(GLOB_RECURSE SHADERS_SRC_FILES assets/shaders_gui/*.shader)
+file(GLOB_RECURSE SHADERS_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders_gui/*.shader)
 set(SHADERS_DST_FILES "")
 foreach(file ${SHADERS_SRC_FILES})
     #Get file name after shaders dir
-    string(REPLACE "assets/shaders_gui/" "" PATH_IN_SHADERS_DIR "${file}")
+    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders_gui/" "" PATH_IN_SHADERS_DIR "${file}")
     #Create a dummy file
     set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/shaders_gui/include/${PATH_IN_SHADERS_DIR}.out")
     message(STATUS "Creating dummy shader file ${DUMMY_FILE}")
@@ -112,7 +118,7 @@ add_custom_target(gpuEngineFix
 set(TEXTURE_COPY_GUI textureCopyTarget)
 
 add_custom_target(textureCopyTarget
-        COMMAND ${CMAKE_COMMAND} -E copy_directory assets/textures ${CMAKE_BINARY_DIR}/out/assets/textures
+        COMMAND ${CMAKE_COMMAND} -E copy_directory assets/textures  ${CMAKE_CURRENT_BINARY_DIR}/assets/textures
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -124,8 +130,3 @@ if(QT_VERSION_MAJOR EQUAL 6)
 endif()
 target_include_directories (${PROJECT_NAME} PUBLIC assets/shaders_gui/include/lighting)
 target_link_libraries(${PROJECT_NAME} PRIVATE Marble Qt${QT_VERSION_MAJOR}::Widgets geGL geUtil lib ${PNG_LIBRARY})
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${GPUEngine_BINARY_DIR}/lib ${CMAKE_BINARY_DIR}/out/lib || (exit 0)
-        COMMENT "Copying from ${GPUEngine_BINARY_DIR}/lib to ${CMAKE_BINARY_DIR}/out/lib"
-        )

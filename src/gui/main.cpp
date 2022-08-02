@@ -4,9 +4,9 @@
 #include <fstream>
 
 #ifdef DEBUG
-#include "DevelopWindow.h"
+#include "windows/DevelopWindow.h"
 #else
-#include "MainWindow.h"
+#include "windows/MainWindow.h"
 #endif
 
 int main(int argc, char *argv[]) {

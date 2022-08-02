@@ -25,10 +25,6 @@ endif ()
 
 include(${CPM_DOWNLOAD_LOCATION})
 
-
-set(CMAKE_INSTALL_RPATH ".")
-
-
 #add packages
 CPMAddPackage(
         NAME nlohmann_json
@@ -144,7 +140,7 @@ add_custom_target(shaderCopyTarget
 
 set(ASSET_COPY assetCopyTarget)
 add_custom_target(assetCopyTarget
-        COMMAND ${CMAKE_COMMAND} -E copy_directory assets ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/assets
+        COMMAND ${CMAKE_COMMAND} -E copy_directory assets ${CMAKE_CURRENT_BINARY_DIR}/assets
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         )
 add_dependencies(${PROJECT_NAME} ${SHADER_COPY} ${ASSET_COPY})

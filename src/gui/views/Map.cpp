@@ -2,7 +2,7 @@
 // Created by tomas on 12.04.22.
 //
 
-#include <ui/Map.h>
+#include <views/Map.h>
 #include <marble/GeoPainter.h>
 #include <QApplication>
 #include <marble/ViewportParams.h>

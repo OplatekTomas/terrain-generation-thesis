@@ -2,11 +2,11 @@
 // Created by tomas on 07.04.22.
 //
 
-#include <renderer/Skybox.h>
-#include <StaticFunctions.h>
-#include <assets/shaders_gui/Shaders.h>
+#include "Skybox.h"
+#include "StaticFunctions.h"
+#include "assets/shaders_gui/Shaders.h"
 #include <glm/glm.hpp>
-#include <Logger.h>
+#include "Logger.h"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace MapGenerator {
@@ -14,7 +14,7 @@ namespace MapGenerator {
 
     Skybox::Skybox(std::shared_ptr<ge::gl::Context> gl, std::shared_ptr<Camera> camera, float width, float height) {
         this->gl = gl;
-        this->camera = camera;
+        //this->camera = camera;
         this->width = width;
         this->height = height;
         std::string path = "assets/textures/";
@@ -78,13 +78,13 @@ namespace MapGenerator {
     void Skybox::draw(int frameBuffer) {
         gl->glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         auto projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.005f, 100.0f);
-        auto view = camera->getViewMatrix();
+        //auto view = camera->getViewMatrix();
         gl->glDepthFunc(GL_LEQUAL);
         vao->bind();
         program->use();
         program->setMatrix4fv("projection", glm::value_ptr(projection));
-        program->setMatrix4fv("view", glm::value_ptr(view));
-        program->set3f("cameraPos", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
+        //program->setMatrix4fv("view", glm::value_ptr(view));
+        //program->set3f("cameraPos", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 
         gl->glBindTexture(GL_TEXTURE_CUBE_MAP, texture->getId());
         gl->glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -192,25 +192,25 @@
      </layout>
     </widget>
    </item>
-   <item>
-    <widget class="Renderer" name="renderer" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
-   </item>
+   <!--<item>
+  <widget class="Renderer" name="renderer" native="true">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+   </widget>
+  </item>-->
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
+  <!--<customwidget>
    <class>Renderer</class>
    <extends>QWidget</extends>
    <header>renderer/Renderer.h</header>
    <container>1</container>
-  </customwidget>
+  </customwidget>-->
  </customwidgets>
  <resources/>
  <connections>

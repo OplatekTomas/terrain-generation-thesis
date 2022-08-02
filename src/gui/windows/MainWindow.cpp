@@ -5,14 +5,17 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_MainWindow.h" resolved
 
-#include <MainWindow.h>
-#include <ui_MainWindow.h>
-#include <Logger.h>
+#include <windows/MainWindow.h>
+#include "ui_MainWindow.h"
+#include "Logger.h"
+#include <QEvent>
+#include <QKeyEvent>
+#include <QGridLayout>
 #include <QPushButton>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-    Logger::init(true);
+    MapGenerator::Logger::init(true);
     isRendering = false;
     ui->setupUi(this);
     baseGridLayout = this->findChild<QGridLayout *>("baseGridLayout");
@@ -20,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     sizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);
     sizePolicy.setVerticalPolicy(QSizePolicy::Expanding);
     installEventFilter(this);
-
     this->mapView = new MapView(this);
     this->mapView->setObjectName("mapView");
     this->mapView->setSizePolicy(sizePolicy);
@@ -51,8 +53,8 @@ MainWindow::~MainWindow() {
 }
 
 //Event filter that sends events to renderer when it is active.
-bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
-    if (!isRendering) {
+bool MainWindow::eventFilter(QObject *obj, QEvent *event) { //TODO Fix after renderer is implemented
+    /*if (!isRendering) {
         return QObject::eventFilter(obj, event);
     }
     if (event->type() == QEvent::KeyPress) {
@@ -80,7 +82,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
         glWidget->scrollEvent(wheelEvent);
     }
     return QObject::eventFilter(obj, event);
-
+*/
+    return QObject::eventFilter(obj, event);
 }
 
 void MainWindow::drawRenderer(glm::vec4 box) {

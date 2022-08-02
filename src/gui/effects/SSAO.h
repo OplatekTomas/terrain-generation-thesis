@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include <geGL/OpenGLContext.h>
+#include "geGL/OpenGLContext.h"
 #include <functional>
 #include <glm/glm.hpp>
 #include <memory>
-#include <geGL/Texture.h>
-#include <geGL/Program.h>
-#include <geGL/Buffer.h>
-#include <geGL/VertexArray.h>
-#include <geGL/Framebuffer.h>
+#include "geGL/Texture.h"
+#include "geGL/Program.h"
+#include "geGL/Buffer.h"
+#include "geGL/VertexArray.h"
+#include "geGL/Framebuffer.h"
 
 namespace MapGenerator {
     class SSAO {

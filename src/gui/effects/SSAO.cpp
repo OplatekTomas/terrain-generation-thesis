@@ -2,14 +2,14 @@
 // Created by tomas on 05.04.22.
 //
 
-#include <renderer/SSAO.h>
+#include "SSAO.h"
 #include <functional>
-#include <StaticFunctions.h>
+#include "StaticFunctions.h"
 
 #include <random>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <assets/shaders_gui/Shaders.h>
+#include "assets/shaders_gui/Shaders.h"
 
 namespace MapGenerator {
     SSAO::SSAO(const std::shared_ptr<ge::gl::Context> &gl, int width, int height, int fbo,

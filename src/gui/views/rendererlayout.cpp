@@ -4,16 +4,18 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_RendererLayout.h" resolved
 
-#include <ui/rendererlayout.h>
+#include <views/rendererlayout.h>
 #include <QMessageBox>
 #include "ui_rendererlayout.h"
-#include <MainWindow.h>
+#include <windows/MainWindow.h>
 #include <Logger.h>
+#include <QTimer>
+#include <QTextEdit>
 
 RendererLayout::RendererLayout(QWidget *parent) : QWidget(parent), ui(new class Ui::RendererLayout) {
     ui->setupUi(this);
     ui->log->setLineWrapMode(QTextEdit::LineWrapMode::WidgetWidth);
-    Logger::setTargetFn([this](const std::string &msg) {
+    MapGenerator::Logger::setTargetFn([this](const std::string &msg) {
         receivedMessage(msg);
     });
 }
@@ -39,14 +41,14 @@ void RendererLayout::receivedMessage(const std::string &message) {
 }
 
 void RendererLayout::startRendering(glm::vec4 box) {
-    auto renderer = ui->renderer;
+    /*auto renderer = ui->renderer;
     renderer->startGeneration({box.y, box.w},
                               {box.x, box.z},
-                              QCoreApplication::arguments().at(1).toStdString());
+                              QCoreApplication::arguments().at(1).toStdString());*/
 }
 
 void RendererLayout::backClicked() {
-    Logger::setTargetFn([this](const std::string &msg) {
+    /*MapGenerator::Logger::setTargetFn([this](const std::string &msg) {
     });
     if (!ui->renderer->canCancel()) {
         QMessageBox::warning(this, "Please wait",
@@ -59,23 +61,23 @@ void RendererLayout::backClicked() {
         QMessageBox::warning(this, "No window", "No window is active - this should not happen");
         return;
     }
-    mainWindow->drawMap();
+    mainWindow->drawMap();*/
 }
 
 void RendererLayout::cullingChecked(int state) {
-    ui->renderer->cullingEnabled = state == Qt::Checked;
+    /*ui->renderer->cullingEnabled = state == Qt::Checked;*/
 }
 
 void RendererLayout::skyboxChecked(int state) {
-    ui->renderer->skyboxEnabled = state == Qt::Checked;
+    /*ui->renderer->skyboxEnabled = state == Qt::Checked;*/
 }
 
 
 void RendererLayout::ssaoChecked(int state) {
-    ui->renderer->ssaoEnabled = state == Qt::Checked;
+    /*ui->renderer->ssaoEnabled = state == Qt::Checked;*/
 }
 
 void RendererLayout::cullingDistanceChanged(int value) {
-    ui->renderer->cullFactor = -(value / 100.0f);
+    /*ui->renderer->cullFactor = -(value / 100.0f);*/
 }
 

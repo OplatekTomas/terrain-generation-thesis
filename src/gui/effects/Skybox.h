@@ -7,9 +7,9 @@
 
 #include <string>
 #include <vector>
-#include <geGL/geGL.h>
+#include "geGL/geGL.h"
 #include <memory>
-#include <renderer/Camera.h>
+//#include "renderer/Camera.h"
 
 
 namespace MapGenerator {
@@ -38,7 +38,7 @@ namespace MapGenerator {
         std::shared_ptr<ge::gl::Shader> fs;
         std::shared_ptr<ge::gl::Context> gl;
         float width, height;
-        std::shared_ptr<Camera> camera;
+        //std::shared_ptr<Camera> camera;
 
         float skyboxVertices[108] = {
                 // positions

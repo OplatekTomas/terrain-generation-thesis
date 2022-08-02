@@ -6,7 +6,7 @@
 #define VUT_BP_MAPVIEW_H
 
 #include <QWidget>
-#include <ui/Map.h>
+#include <views/Map.h>
 
 
 QT_BEGIN_NAMESPACE

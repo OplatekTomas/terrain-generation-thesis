@@ -113,7 +113,7 @@
   <customwidget>
    <class>Map</class>
    <extends>QWidget</extends>
-   <header>ui/Map.h</header>
+   <header>views/Map.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
