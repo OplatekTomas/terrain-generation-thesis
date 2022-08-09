@@ -1,15 +1,15 @@
 cmake-build-debug/
 cmake-build-release/
+build/
+
 
 .idea/
+#.vscode/
+
 .directory
 /src/keys.csv
-src/build-gui-Desktop-Debug
 *.user
 .cache/
-.vscode/
-build/
 /src/lib/shaders/include/
 /src/config.json
-
 src/gui/shaders_gui/*

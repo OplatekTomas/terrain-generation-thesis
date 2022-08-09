@@ -2,7 +2,6 @@
 // Created by tomas on 2.8.22.
 //
 
-#include "geGL/Generated/OpenGLConstants.h"
 #include <Logger.h>
 #include <geGL/geGL.h>
 #include <renderer/GBuffer.h>

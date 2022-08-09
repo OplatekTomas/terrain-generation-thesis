@@ -1,9 +1,9 @@
 //
 // Created by tomas on 2.8.22.
 //
-
-#include <StaticFunctions.h>
 #include <renderer/Renderer.h>
+#include <StaticFunctions.h>
+#include <geGL/geGL.h>
 
 namespace MapGenerator::Renderer {
     void Renderer::initializeGL() {
@@ -19,6 +19,8 @@ namespace MapGenerator::Renderer {
         gl->glEnable(GL_DEBUG_OUTPUT);
         gl->glDebugMessageCallback(MessageCallback, nullptr);
 
+        SceneObject::init(gl);
+
         this->gBuffer = GBuffer(*gl);
         this->gBuffer.init(this->height(), this->width(), defaultFramebufferObject());
 
@@ -33,7 +35,7 @@ namespace MapGenerator::Renderer {
 
         // Go through all the passes and render them
         geometryPass();
-
+        
         // Rendering is complete, update the screen
         update();
 
@@ -48,7 +50,14 @@ namespace MapGenerator::Renderer {
     void Renderer::geometryPass() {
         gBuffer.bindBuffer();
 
+        scene->render();
+
         gl->glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
     }
 
+    void Renderer::setScene(std::shared_ptr<Scene> scene) {
+        this->scene = scene;
+    }
+
 } // namespace MapGenerator::Renderer
+

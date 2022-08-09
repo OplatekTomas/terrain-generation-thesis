@@ -4,10 +4,13 @@
 
 #pragma once
 
+#include <renderer/Scene.h>
+#include "renderer/SceneObject.h"
 #include <QOpenGLContext>
 #include <QOpenGLWidget>
 #include <geGL/OpenGLContext.h>
 #include <geGL/geGL.h>
+#include <memory>
 #include <renderer/GBuffer.h>
 
 namespace MapGenerator::Renderer {
@@ -15,7 +18,11 @@ namespace MapGenerator::Renderer {
     class Renderer : public QOpenGLWidget {
         Q_OBJECT
     public:
-        explicit Renderer(QWidget* parent) : QOpenGLWidget(parent) {}
+        explicit Renderer(QWidget* parent) : QOpenGLWidget(parent) {
+            scene = std::make_shared<Scene>();
+        }
+
+        void setScene(std::shared_ptr<Scene> scene);
 
     protected:
         void initializeGL() override;
@@ -27,6 +34,8 @@ namespace MapGenerator::Renderer {
 
         QOpenGLContext* context;
         GBuffer gBuffer;
+
+        std::shared_ptr<Scene> scene;
 
         std::shared_ptr<ge::gl::Context> gl;
     };
