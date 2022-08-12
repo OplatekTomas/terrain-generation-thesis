@@ -17,8 +17,8 @@ namespace MapGenerator::Renderer {
         explicit GBuffer(const ge::gl::Context& gl);
         GBuffer() = default;
 
-        void init(int height, int width, int defaultFbo);
-        void resize(int height, int width, int defaultFbo);
+        void init(int width, int height, int defaultFbo);
+        void resize(int width, int height, int defaultFbo);
 
         void bindBuffer();
 

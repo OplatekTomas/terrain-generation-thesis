@@ -23,6 +23,8 @@ namespace MapGenerator::Renderer::SceneObjects {
 
         void bind();
 
+        void upload();
+
         uint size();
 
         void calculateTangents();

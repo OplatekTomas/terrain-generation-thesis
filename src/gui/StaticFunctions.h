@@ -6,7 +6,15 @@
 
 #include <GL/gl.h>
 #include <string>
+#include <typeinfo>
 #include <vector>
+
+#define YEET(x) throw new std::runtime_error(x)
+
+std::string demangle(const char* name);
+template <class T> std::string type(const T& t) {
+    return demangle(typeid(t).name());
+}
 
 float lerp(float a, float b, float f);
 

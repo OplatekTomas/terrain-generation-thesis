@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "geGL/Generated/OpenGLTypes.h"
 #include "geGL/Shader.h"
 #include <memory>
 #include <renderer/SceneObject.h>
@@ -12,12 +13,12 @@ namespace MapGenerator::Renderer::SceneObjects {
     public:
         enum Type {
             None,
-            Vertex,
-            Fragment,
-            Geometry,
-            TessalationControl,
-            TessalationEvaluation,
-            Compute
+            VERTEX,
+            FRAGMENT,
+            GEOMETRY,
+            TESSALATION_CTRL,
+            TESSALATION_EVAL,
+            COMPUTE
         };
 
         Shader();
@@ -26,19 +27,20 @@ namespace MapGenerator::Renderer::SceneObjects {
         void setSource(const std::string& source);
         void setType(Type type);
 
-        void getSource(std::string& source);
-
+        std::string getInfoLog();
+        std::string& getSource();
+        void recompile();
         std::shared_ptr<ge::gl::Shader> glShader();
         Type getType();
-
+        std::string getTypeString();
         ~Shader();
 
     private:
-        std::shared_ptr<ge::gl::Shader> shader;
-
+        GLenum getGLType();
+        std::shared_ptr<ge::gl::Shader> shader = nullptr;
         std::string infoLog;
-
         std::string code;
+
         Type type;
     };
 } // namespace MapGenerator::Renderer::SceneObjects

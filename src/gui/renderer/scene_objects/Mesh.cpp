@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include <renderer/scene_objects/Mesh.h>
 #include <glm/geometric.hpp>
 #include <memory>
 #include <geGL/geGL.h>
@@ -43,11 +43,11 @@ void Mesh::addVertex(const glm::vec3& vertex, const glm::vec3& normal, const glm
     vertices.push_back(tangent.z);
 }
 
-void Mesh::bind() {
-    if(vao != nullptr){
-        vao->bind();
-    }
+void Mesh::addIndex(unsigned int index) {
+    indices.push_back(index);
+}
 
+void Mesh::upload(){
     vertexBuffer = std::make_shared<ge::gl::Buffer>(vertices.size() * sizeof(float), vertices.data());
     indexBuffer = std::make_shared<ge::gl::Buffer>(indices.size() * sizeof(unsigned int), indices.data());
     vao = std::make_shared<ge::gl::VertexArray>();
@@ -63,8 +63,17 @@ void Mesh::bind() {
     vao->addAttrib(vertexBuffer, 3, 3, GL_FLOAT, stride * sizeof(float), 8 * sizeof(float));
 
     vao->addElementBuffer(indexBuffer);
+};
 
+void Mesh::bind() {
+    if(vao != nullptr){
+        vao->bind();
+        return;
+    }
+
+    upload();
     vao->bind();
+
 }
 
 uint Mesh::size() {

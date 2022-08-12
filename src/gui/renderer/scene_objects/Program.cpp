@@ -5,64 +5,83 @@
 using namespace MapGenerator::Renderer::SceneObjects;
 
 Program::Program() : SceneObject() {
+    compiled = false;
 }
 Program::Program(const std::string& name) : SceneObject(name) {
+    compiled = false;
+}
+
+Program::Program(const std::string& name, const std::vector<std::shared_ptr<Shader>>& shaders) : SceneObject(name) {
+    for (auto shader : shaders) {
+        addShader(shader);
+    }
+}
+
+Program::Program(const std::string& name, const std::shared_ptr<Shader>& vertex, const std::shared_ptr<Shader>& fragment) : SceneObject(name) {
+    if (vertex->getType() != Shader::Type::VERTEX) {
+        throw std::runtime_error("Vertex shader is not of type VERTEX");
+    }
+    if (fragment->getType() != Shader::Type::FRAGMENT) {
+        throw std::runtime_error("Fragment shader is not of type FRAGMENT");
+    }
+    this->vertexShader = vertex;
+    this->fragmentShader = fragment;
 }
 
 Program::~Program() {
 }
 
-void Program::attachShader(std::shared_ptr<Shader> shader) {
+void Program::addShader(std::shared_ptr<Shader> shader) {
     switch (shader->getType()) {
     case Shader::None:
         throw std::runtime_error("Shader type is None");
         break;
-    case Shader::Vertex:
+    case Shader::VERTEX:
         this->vertexShader = shader;
         break;
-    case Shader::Fragment:
+    case Shader::FRAGMENT:
         this->fragmentShader = shader;
         break;
-    case Shader::Geometry:
+    case Shader::GEOMETRY:
         this->geometryShader = shader;
         break;
-    case Shader::TessalationControl:
+    case Shader::TESSALATION_CTRL:
         this->tessalationControlShader = shader;
         break;
-    case Shader::TessalationEvaluation:
+    case Shader::TESSALATION_EVAL:
         this->tessalationEvaluationShader = shader;
         break;
-    case Shader::Compute:
+    case Shader::COMPUTE:
         this->computeShader = shader;
         break;
     }
 }
-
 
 std::shared_ptr<Shader> Program::getShader(Shader::Type type) {
     switch (type) {
     case Shader::None:
         throw std::runtime_error("Shader type is None");
         break;
-    case Shader::Vertex:
+    case Shader::VERTEX:
         return this->vertexShader;
         break;
-    case Shader::Fragment:
+    case Shader::FRAGMENT:
         return this->fragmentShader;
         break;
-    case Shader::Geometry:
+    case Shader::GEOMETRY:
         return this->geometryShader;
         break;
-    case Shader::TessalationControl:
+    case Shader::TESSALATION_CTRL:
         return this->tessalationControlShader;
         break;
-    case Shader::TessalationEvaluation:
+    case Shader::TESSALATION_EVAL:
         return this->tessalationEvaluationShader;
         break;
-    case Shader::Compute:
+    case Shader::COMPUTE:
         return this->computeShader;
         break;
     }
+    return nullptr;
 }
 
 bool Program::compile() {
@@ -88,8 +107,50 @@ bool Program::compile() {
         this->program->attachShaders(this->computeShader->glShader());
     }
     this->program->link();
-    return this->program->getLinkStatus();
+    compiled = this->program->getLinkStatus();
+    return compiled;
 }
 std::shared_ptr<ge::gl::Program> Program::glProgram() {
     return this->program;
+}
+
+std::vector<std::shared_ptr<Shader>> Program::getShaders() {
+    std::vector<std::shared_ptr<Shader>> shaders;
+    if (this->vertexShader != nullptr) {
+        shaders.push_back(this->vertexShader);
+    }
+    if (this->fragmentShader != nullptr) {
+        shaders.push_back(this->fragmentShader);
+    }
+    if (this->geometryShader != nullptr) {
+        shaders.push_back(this->geometryShader);
+    }
+    if (this->tessalationControlShader != nullptr) {
+        shaders.push_back(this->tessalationControlShader);
+    }
+    if (this->tessalationEvaluationShader != nullptr) {
+        shaders.push_back(this->tessalationEvaluationShader);
+    }
+    if (this->computeShader != nullptr) {
+        shaders.push_back(this->computeShader);
+    }
+    return shaders;
+}
+
+void Program::addTexture(std::shared_ptr<Texture> texture) {
+    this->additionalTextures.push_back(texture);
+}
+
+std::vector<std::shared_ptr<Texture>>& Program::getTextures() {
+    return this->additionalTextures;
+}
+void Program::use() {
+    if (!compiled) {
+        auto success = compile();
+        if (!success) {
+            auto err = this->program->getInfoLog();
+            throw std::runtime_error("Program could not be compiled ("+ err +")");
+        }
+    }
+    this->program->use();
 }

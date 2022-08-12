@@ -3,46 +3,53 @@
 //
 #pragma once
 
-
-
 class GUIShaders {
 public:
-    static const char *getLightningVS() {
+
+    static const char* getLightningVS() {
         return lightning_vs;
     }
 
-    static const char *getLightningFS() {
+    static const char* getLightningFS() {
         return lightning_fs;
     }
-    static const char *getSSAOFS() {
+    static const char* getSSAOFS() {
         return ssao_fs;
     }
-    static const char* getSSAOVS(){
+    static const char* getSSAOVS() {
         return getLightningVS();
     }
 
-    static const char* getSSAOBlurVS(){
+    static const char* getSSAOBlurVS() {
         return getLightningVS();
     }
 
-    static const char* getSSAOBlurFS(){
+    static const char* getSSAOBlurFS() {
         return blur_fs;
     }
 
-    static const char* getSkyboxFS(){
+    static const char* getSkyboxFS() {
         return skybox_fs;
     }
 
-    static const char* getSkyboxVS(){
+    static const char* getSkyboxVS() {
         return skybox_vs;
     }
 
-    static const char *lightning_vs;
-    static const char *lightning_fs;
-    static const char *ssao_fs;
-    static const char *blur_fs;
-    static const char *skybox_vs;
-    static const char *skybox_fs;
+    static const char* getBasicVS() {
+        return basic_vs;
+    }
 
+    static const char* getBasicFS() {
+        return basic_fs;
+    }
+
+    static const char* lightning_vs;
+    static const char* lightning_fs;
+    static const char* ssao_fs;
+    static const char* blur_fs;
+    static const char* skybox_vs;
+    static const char* skybox_fs;
+    static const char* basic_vs;
+    static const char* basic_fs;
 };
-

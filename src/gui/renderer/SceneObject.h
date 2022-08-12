@@ -10,15 +10,18 @@ namespace MapGenerator::Renderer {
         SceneObject();
         SceneObject(std::string name);
         ~SceneObject();
-        virtual void render() = 0;
+        //virtual void render() = 0;
         std::string getName();
         void setName(std::string name);
-        static void init(std::shared_ptr<ge::gl::Context> ctx);
 
+        static void setFrameTime(float frameTime);
+        static void init(std::shared_ptr<ge::gl::Context> ctx);
+    
         inline static bool initialized = false;
 
     protected:
         std::string name;
+        inline static float frameTime = 0.0f;
         std::string getNextDefaultName();
         uint getId();
 
@@ -26,6 +29,8 @@ namespace MapGenerator::Renderer {
 
     private:
         uint id = 0;
+
+        virtual void ignorethisshitrighthere(){};
 
         inline static unsigned int defaultNameCounter = 0;
     };

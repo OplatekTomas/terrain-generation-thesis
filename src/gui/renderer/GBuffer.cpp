@@ -10,7 +10,7 @@ namespace MapGenerator::Renderer {
 
     GBuffer::GBuffer(const ge::gl::Context& gl) { this->gl = gl; }
 
-    void GBuffer::init(int height, int width, int defaultFbo) {
+    void GBuffer::init(int width, int height, int defaultFbo) {
         // Prepare quad VAO
         this->quadBuffer = std::make_shared<ge::gl::Buffer>(12 * sizeof(float), vertices.data());
         this->quadVAO = std::make_shared<ge::gl::VertexArray>();
@@ -19,10 +19,10 @@ namespace MapGenerator::Renderer {
         // Prepare gBuffer
         this->gBuffer = std::make_shared<ge::gl::Framebuffer>();
         // This will prepare all textures and attachments
-        resize(height, width, defaultFbo);
+        resize(width, height, defaultFbo);
     }
 
-    void GBuffer::resize(int height, int width, int defaultFbo) {
+    void GBuffer::resize(int width, int height, int defaultFbo) {
         this->gBuffer->bind(GL_FRAMEBUFFER);
 
         // Prepare position texture

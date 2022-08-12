@@ -42,6 +42,12 @@ CPMAddPackage(
     GIT_TAG 53c587c52d99b57e77817bb4df1d625fcea1d5be
 )
 
+CPMAddPackage(
+    NAME QCodeEditor
+    GITHUB_REPOSITORY Megaxela/QCodeEditor
+    GIT_TAG dc644d41b68978ab9a5591ba891a223221570e74
+)
+
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
@@ -50,11 +56,14 @@ qt5_wrap_ui(UIS_HDRS
     views/mapview.ui
     views/rendererlayout.ui
     windows/DevelopWindow.ui
+    windows/RenderOptions.ui
 )
 
 set(PROJECT_SOURCES
     main.cpp
     windows/MainWindow.cpp windows/MainWindow.h
+    windows/RenderOptions.cpp windows/RenderOptions.h
+    views/controls/QDataTreeItem.h
     assets/shaders_gui/Shaders.h StaticFunctions.h effects/SSAO.cpp effects/SSAO.h
     assets/shaders_gui/Shaders.cpp StaticFunctions.cpp effects/Skybox.cpp
     effects/Skybox.h views/Map.cpp views/Map.h views/mapview.cpp views/mapview.h
@@ -67,6 +76,9 @@ set(PROJECT_SOURCES
     renderer/scene_objects/Material.h renderer/scene_objects/Material.cpp
     renderer/scene_objects/Shader.h renderer/scene_objects/Shader.cpp
     renderer/scene_objects/Program.h renderer/scene_objects/Program.cpp
+    renderer/input/InputHandler.h renderer/input/InputHandler.cpp
+     renderer/scene_objects/Camera.h renderer/scene_objects/Camera.cpp
+    renderer/scene_objects/Node.h renderer/scene_objects/Node.cpp
     renderer/GBuffer.cpp renderer/GBuffer.h
     ${UIS_HDRS}
 )
@@ -113,7 +125,7 @@ find_package(Marble REQUIRED)
 
 set(SHADER_COPY_GUI shaderCopyTargetGUI)
 add_custom_target(shaderCopyTargetGUI
-    COMMAND ${CMAKE_COMMAND} -P "assets/shaders_gui/CMakeLists.txt"
+    COMMAND ${CMAKE_COMMAND} -P "assets/shaders_gui/CMakeLists.txt" ${CMAKE_CURRENT_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -133,12 +145,11 @@ add_custom_target(textureCopyTarget
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_dependencies(${SHADER_COPY_GUI_HELP} ${SHADER_COPY_GUI})
-add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI_HELP} ${TEXTURE_COPY_GUI} ${GPUENGINE_HELP_TARGET})
+add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI} ${TEXTURE_COPY_GUI} ${GPUENGINE_HELP_TARGET})
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(vut-bp-gui)
 endif()
 
-target_include_directories(${PROJECT_NAME} PUBLIC assets/shaders_gui/include/lighting)
-target_link_libraries(${PROJECT_NAME} PRIVATE Marble Qt${QT_VERSION_MAJOR}::Widgets geGL geUtil lib ${PNG_LIBRARY})
+target_include_directories(${PROJECT_NAME} PUBLIC assets/shaders_gui/include/)
+target_link_libraries(${PROJECT_NAME} PRIVATE Marble Qt${QT_VERSION_MAJOR}::Widgets geGL geUtil lib ${PNG_LIBRARY} QCodeEditor)

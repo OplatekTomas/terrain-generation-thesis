@@ -6,23 +6,26 @@
             "request": "launch",
             "name": "Launch",
             "program": "${command:cmake.launchTargetPath}",
-            "args": ["src/config.json"],
+            "args": [
+                "src/config.json"
+            ],
             "cwd": "${workspaceRoot}"
         },
-
         {
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
-            "args": ["src/config.json"],
+            "args": [
+                "src/config.json"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
                 {
                     "name": "PATH",
                     "value": "${env:PATH}:${command:cmake.getLaunchTargetDirectory}"
-                },
+                }
             ],
             "console": "externalTerminal",
             "MIMode": "gdb",
@@ -33,7 +36,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "visualizerFile": "/home/tomas/.config/Code/User/workspaceStorage/187b8a58d32c1e44c1c4b97eb5a488a5/tonka3000.qtvsctools/qt.natvis.xml"
+            "visualizerFile": "/home/tomas/.config/Code/User/workspaceStorage/7a77072c0814d5cf3340eafae7b06068/tonka3000.qtvsctools/qt.natvis.xml"
         }
     ]
 }

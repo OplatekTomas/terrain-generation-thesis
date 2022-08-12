@@ -21,8 +21,12 @@ namespace MapGenerator::Renderer {
         this->name = name;
     }
 
+    void SceneObject::setFrameTime(float frameTime) {
+        SceneObject::frameTime = frameTime;
+    }
+
     std::string SceneObject::getNextDefaultName() {
-        auto name = "SceneObject_"+ std::to_string(SceneObject::defaultNameCounter++);
+        auto name = "SceneObject_" + std::to_string(SceneObject::defaultNameCounter++);
         return name;
     }
 
@@ -31,13 +35,13 @@ namespace MapGenerator::Renderer {
         SceneObject::initialized = true;
     }
 
-} // namespace MapGenerator::Renderer::SceneObjects
+} // namespace MapGenerator::Renderer
 
 uint MapGenerator::Renderer::SceneObject::getId() {
-    if(id != 0){
+    if (id != 0) {
         return id;
     }
-    //Calculate hash of name and set it as id
+    // Calculate hash of name and set it as id
     auto name = getName();
     id = std::hash<std::string>{}(name);
     return id;

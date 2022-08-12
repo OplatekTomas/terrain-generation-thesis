@@ -2,6 +2,8 @@
 // Created by tomas on 05.04.22.
 //
 #include <StaticFunctions.h>
+#include <cxxabi.h>
+#include <memory>
 #include <png.h>
 #include <stdexcept>
 
@@ -9,6 +11,14 @@ float lerp(float a, float b, float f) {
     return a + f * (b - a);
 }
 
+std::string demangle(const char* name) {
+
+    int status = -4; // some arbitrary value to eliminate the compiler warning
+
+    std::unique_ptr<char, void (*)(void*)> res{abi::__cxa_demangle(name, NULL, NULL, &status),std::free};
+
+    return (status == 0) ? res.get() : name;
+}
 
 //code edited by me, originally from https://gist.github.com/niw/5963798
 std::vector<unsigned char> readPng(const std::string &path) {
@@ -54,8 +64,48 @@ std::vector<unsigned char> readPng(const std::string &path) {
 }
 
 
+std::string parseSeverity(GLenum severity) {
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+            return "high";
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            return "medium";
+        case GL_DEBUG_SEVERITY_LOW:
+            return "low";
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            return "notification";
+        default:
+            return "unknown";
+    }
+}
+
+std::string parseType(GLenum type) {
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR:
+            return "error";
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            return "deprecated behavior";
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            return "undefined behavior";
+        case GL_DEBUG_TYPE_PORTABILITY:
+            return "portability";
+        case GL_DEBUG_TYPE_PERFORMANCE:
+            return "performance";
+        case GL_DEBUG_TYPE_MARKER:
+            return "marker";
+        case GL_DEBUG_TYPE_PUSH_GROUP:
+            return "push group";
+        case GL_DEBUG_TYPE_POP_GROUP:
+            return "pop group";
+        case GL_DEBUG_TYPE_OTHER:
+            return "other";
+        default:
+            return "unknown";
+    }
+}
+
 void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam){
-    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
-            type, severity, message);
+    auto severityString = parseSeverity(severity);
+    fprintf(stderr, "GL CALLBACK: type = %s, severity = %s, message = %s\n", parseType(type).data(), parseSeverity(severity).data(), message);
+
 }
