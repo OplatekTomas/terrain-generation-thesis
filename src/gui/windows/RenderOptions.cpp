@@ -7,6 +7,7 @@
 #include "internal/QCodeEditor.hpp"
 #include "internal/QSyntaxStyle.hpp"
 #include "ui_RenderOptions.h"
+#include "views/controls/CameraControl.h"
 #include <QCodeEditor>
 #include <QEvent>
 #include <QGLSLCompleter>
@@ -72,6 +73,12 @@ void RenderOptions::editShader(std::shared_ptr<Shader> shader) {
     codeEditor->setPlainText(shader->getSource().data());
 }
 
+
+void RenderOptions::editCamera(std::shared_ptr<Camera> camera){
+    auto cam = new CameraControl(camera , this);
+    dataWidget->layout()->addWidget(cam);
+}
+
 void RenderOptions::onItemClicked() {
     auto widget = dataWidget->layout()->takeAt(0);
     if (widget) {
@@ -80,6 +87,11 @@ void RenderOptions::onItemClicked() {
     auto shader = dynamic_cast<QDataTreeItem<Shader>*>(nodeView->currentItem());
     if (shader != nullptr) {
         editShader(shader->getData());
+        return;
+    }
+    auto camera = dynamic_cast<QDataTreeItem<Camera>*>(nodeView->currentItem());
+    if (camera != nullptr) {
+        editCamera(camera->getData());
         return;
     }
 }
@@ -122,6 +134,14 @@ void RenderOptions::addNode(Node& node, QTreeWidgetItem* parent) {
     auto mesh = node.getMesh();
     meshNode->setText(0, "Mesh");
     meshNode->setText(1, mesh->getName().data());
+
+    //Add the camera
+    auto camera = node.getCamera();
+    auto cameraNode = new QDataTreeItem<Camera>(root);
+    cameraNode->setData(camera);
+    cameraNode->setText(0, "Camera");
+    cameraNode->setText(1, camera->getName().data());
+
 
     // Adds the children of the node
     auto childrenNode = new QTreeWidgetItem(root);

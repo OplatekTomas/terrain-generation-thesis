@@ -57,6 +57,7 @@ qt5_wrap_ui(UIS_HDRS
     views/rendererlayout.ui
     windows/DevelopWindow.ui
     windows/RenderOptions.ui
+    views/controls/CameraControl.ui
 )
 
 set(PROJECT_SOURCES
@@ -64,6 +65,8 @@ set(PROJECT_SOURCES
     windows/MainWindow.cpp windows/MainWindow.h
     windows/RenderOptions.cpp windows/RenderOptions.h
     views/controls/QDataTreeItem.h
+    views/controls/CameraControl.h views/controls/CameraControl.cpp
+
     assets/shaders_gui/Shaders.h StaticFunctions.h effects/SSAO.cpp effects/SSAO.h
     assets/shaders_gui/Shaders.cpp StaticFunctions.cpp effects/Skybox.cpp
     effects/Skybox.h views/Map.cpp views/Map.h views/mapview.cpp views/mapview.h
@@ -77,9 +80,10 @@ set(PROJECT_SOURCES
     renderer/scene_objects/Shader.h renderer/scene_objects/Shader.cpp
     renderer/scene_objects/Program.h renderer/scene_objects/Program.cpp
     renderer/input/InputHandler.h renderer/input/InputHandler.cpp
-     renderer/scene_objects/Camera.h renderer/scene_objects/Camera.cpp
+    renderer/scene_objects/Camera.h renderer/scene_objects/Camera.cpp
     renderer/scene_objects/Node.h renderer/scene_objects/Node.cpp
     renderer/GBuffer.cpp renderer/GBuffer.h
+
     ${UIS_HDRS}
 )
 

@@ -6,6 +6,7 @@
 #include <memory>
 #include <renderer/SceneObject.h>
 #include <renderer/input/InputHandler.h>
+#include <tuple>
 
 namespace MapGenerator::Renderer::SceneObjects{
 
@@ -20,25 +21,36 @@ namespace MapGenerator::Renderer::SceneObjects{
         void setPosition(const glm::vec3& position);
         void setRotation(float yaw, float pitch);
         void setMovementSpeed(float speed);
-        
+        void setMouseSensitivity(float sensitivity);
+        void setFOV(float fov);
+        void setPerspective(float fov, float near, float far);
+        void setDimensions(float width, float height);
         void setWorldUp(const glm::vec3& worldUp);
     
         glm::mat4 getViewMatrix() const;
         glm::mat4 getProjectionMatrix() const;
+        glm::vec3 getPosition() const;
+        std::tuple<float, float> getRotation() const;
+        float getWidth() const;
+        float getHeight() const;
+        float getFOV() const;
+        float getMovementSpeed() const;
+        float getMouseSensitivity() const;
+        bool acceptsInput() const;
+
 
         void setInputHandler(std::shared_ptr<InputHandler> input);
         void acceptInput(bool acceptingInput);
         void update(float deltaTime);
-        void setPerspective(float fov, float near, float far);
-        void setDimensions(float width, float height);
 
-        float getWidth() const;
-        float getHeight() const;        
+       
 
 
     private:
         std::shared_ptr<InputHandler> input;
         bool acceptingInput = false;
+
+        std::tuple<int, int> previousPoint = std::make_tuple(0, 0);
 
         glm::mat4 viewMatrix;
         glm::mat4 projectionMatrix;
@@ -51,6 +63,7 @@ namespace MapGenerator::Renderer::SceneObjects{
         float yaw;
         float pitch;
         float movementSpeed;
+        float mouseSensitivity;
         float fov;
         float near;
         float far;

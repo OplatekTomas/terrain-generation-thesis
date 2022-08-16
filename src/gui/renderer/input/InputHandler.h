@@ -74,8 +74,8 @@ namespace MapGenerator::Renderer{
         };
 
         void mouseMove(int x, int y);
-        void mousePress(MouseButton button);
-        void mouseRelease(MouseButton button);
+        void mousePress(MouseButton button, int x, int y);
+        void mouseRelease(MouseButton button, int x, int y);
         void mouseWheel(int wheel, int direction, int x, int y);
         void keyPress(Key key);
         void keyRelease(Key key);
@@ -85,17 +85,17 @@ namespace MapGenerator::Renderer{
         bool isMouseButtonPressed(MouseButton button);
         bool isMouseButtonUp(MouseButton button);
         std::tuple<int, int> getPositionDelta();
-        std::tuple<int, int> absolutePosition();
+        std::tuple<int, int> getAbsolutePosition();
 
 
     private:
 
         bool keys[512];
         bool mouseButtons[3];
-        int mouseX;
-        int mouseY;
-        int absoluteX;
-        int absoluteY;
+        int deltaX = 0;
+        int deltaY = 0;
+        int absoluteX = 0;
+        int absoluteY = 0;
     };
 }
 

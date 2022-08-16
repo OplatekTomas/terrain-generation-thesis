@@ -40,7 +40,7 @@ std::shared_ptr<Renderer::Scene> DevelopWindow::createScene() {
     camera->setName("camera");
     // camera->setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
     camera->acceptInput(true);
-    camera->setMovementSpeed(0.00001);
+    camera->setMovementSpeed(0.01);
     root->setCamera(camera);
 
     auto quad = std::make_shared<Mesh>("quad");

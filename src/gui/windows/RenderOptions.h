@@ -43,7 +43,8 @@ private:
     QGridLayout* dataWidget;
     std::shared_ptr<Shader> currentShader;
 
-    void editShader(std::shared_ptr<Shader>);
+    void editShader(std::shared_ptr<Shader> shader);
+    void editCamera(std::shared_ptr<Camera> camera);
 
     void prepareCodeEditor();
     void addNode(Node& node, QTreeWidgetItem* parent);

@@ -34,12 +34,12 @@ namespace MapGenerator::Renderer {
 
         connect(this, &Renderer::mousePressEvent, [this](QMouseEvent* event) {
             std::cout << "mouse press event" << std::endl;
-            this->inputHandler->mousePress((InputHandler::MouseButton)event->button());
+            this->inputHandler->mousePress((InputHandler::MouseButton)event->button(), event->x(), event->y());
         });
 
         connect(this, &Renderer::mouseReleaseEvent, this, [this](QMouseEvent* event) {
             std::cout << "mouse release" << std::endl;
-            this->inputHandler->mouseRelease((InputHandler::MouseButton)event->button());
+            this->inputHandler->mouseRelease((InputHandler::MouseButton)event->button(), event->x(), event->y());
         });
 
         connect(this, &Renderer::wheelEvent, [this](QWheelEvent* event) {
@@ -82,6 +82,7 @@ namespace MapGenerator::Renderer {
 
         auto frameEndTime = std::chrono::high_resolution_clock::now();
         auto frameTime = std::chrono::duration_cast<std::chrono::nanoseconds>(frameEndTime - frameStartTime).count();
+        frameStartTime = frameEndTime;
         lastFrameTime = frameTime / 1000000.0;
         SceneObject::setFrameTime(lastFrameTime);
 
