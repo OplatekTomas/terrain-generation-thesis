@@ -109,7 +109,7 @@ std::shared_ptr<Camera> Node::getCamera() const {
     return camera;
 }
 
-void Node::useCamera() {
+void Node::useCamera() { //TODO change to more modern way
 
     if (camera == nullptr) {
         return;
@@ -125,6 +125,11 @@ void Node::useCamera() {
     }
 }
 
+void Node::addTexture(std::shared_ptr<Texture> texture) {
+    textures.push_back(texture);
+}
+
+
 void Node::draw() {
     if (mesh == nullptr) {
         return;
@@ -138,7 +143,12 @@ void Node::draw() {
         program->setUniform(uniform);
     }
     useCamera();
-
+    auto i = program->getTextureCount();
+    for (auto& texture : textures) {
+        texture->bind(i);
+        program->setTexture(texture, i);
+        i++;
+    }
     mesh->bind();
     gl->glDrawElements(GL_TRIANGLES, mesh->size(), GL_UNSIGNED_INT, 0);
 }

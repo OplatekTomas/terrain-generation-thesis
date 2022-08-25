@@ -104,9 +104,10 @@ namespace MapGenerator::Renderer {
     void Renderer::geometryPass() {
         // gBuffer.bindBuffer();
 
-        gl->glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+        gBuffer.bindBuffer();
 
         scene->draw();
+
         gl->glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
     }
 

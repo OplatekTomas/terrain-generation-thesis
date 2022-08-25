@@ -21,6 +21,8 @@ namespace MapGenerator::Renderer {
         void resize(int width, int height, int defaultFbo);
 
         void bindBuffer();
+        void copyToDefaultBuffer(int id);
+
 
         std::shared_ptr<ge::gl::Texture> positionTexture() const;
         std::shared_ptr<ge::gl::Texture> normalTexture() const;
@@ -32,7 +34,8 @@ namespace MapGenerator::Renderer {
         static constexpr auto vertices =
             std::array{-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f,
                        -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f};
-
+        int width = 0;
+        int height = 0;
         std::shared_ptr<ge::gl::Buffer> quadBuffer;
         std::shared_ptr<ge::gl::VertexArray> quadVAO;
         std::shared_ptr<ge::gl::Framebuffer> gBuffer;
@@ -40,6 +43,7 @@ namespace MapGenerator::Renderer {
         std::shared_ptr<ge::gl::Texture> gNormal;
         std::shared_ptr<ge::gl::Texture> gSpecular;
         std::shared_ptr<ge::gl::Renderbuffer> rboDepth;
+
     };
 
 } // namespace MapGenerator::Renderer

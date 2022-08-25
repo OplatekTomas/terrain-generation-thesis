@@ -85,11 +85,12 @@ std::shared_ptr<Mesh> MeshGenerators::createIcoSphere(float radius, uint subdivi
 }
 
 std::shared_ptr<Mesh> MeshGenerators::createPlane(float width, float height, const std::string& name) {
+    auto normal = glm::normalize(glm::vec3(0.f, 1.f, 0.f));
     auto mesh = std::make_shared<Mesh>(name);
-    mesh->addVertex(glm::vec3(-width, 0.f, -height));
-    mesh->addVertex(glm::vec3(width, 0.f, -height));
-    mesh->addVertex(glm::vec3(width, 0.f, height));
-    mesh->addVertex(glm::vec3(-width, 0.f, height));
+    mesh->addVertex(glm::vec3(-width, 0.f, -height), normal, glm::vec2(0.f, 0.f));
+    mesh->addVertex(glm::vec3(width, 0.f, -height), normal, glm::vec2(1.f, 0.f));
+    mesh->addVertex(glm::vec3(width, 0.f, height), normal, glm::vec2(1.f, 1.f));
+    mesh->addVertex(glm::vec3(-width, 0.f, height), normal, glm::vec2(0.f, 1.f));
     mesh->addTriangleIndex(0, 1, 2);
     mesh->addTriangleIndex(0, 2, 3);
     return mesh;

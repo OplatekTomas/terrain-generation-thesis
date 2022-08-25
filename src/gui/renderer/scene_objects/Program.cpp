@@ -120,7 +120,7 @@ bool Program::compile() {
     for (auto uniform : uniforms) {
         auto name = std::string(uniform.first);
         auto location = program->getUniformLocation(name);
-        this->uniformLocations[std::hash<std::string>{}(name)] = location;
+        this->uniformLocations[std::hash<std::string>{}(name)] = {location};
     }
     return compiled;
 }
@@ -164,6 +164,17 @@ void Program::setUniform(std::shared_ptr<Uniform> uniform) {
     }
 }
 
+void Program::setTexture(const std::shared_ptr<Texture>& texture, int unit) {
+    auto id = texture->getId();
+    auto location = this->uniformLocations[id];
+    if (location == -1) {
+        std::cerr << "Texture " << texture->getName() << " not found" << std::endl;
+        return;
+    }
+    gl->glUniform1i(location, unit);
+    //checkError();
+}
+
 std::vector<std::shared_ptr<Shader>> Program::getShaders() {
     std::vector<std::shared_ptr<Shader>> shaders;
     if (this->vertexShader != nullptr) {
@@ -191,6 +202,9 @@ void Program::addTexture(std::shared_ptr<Texture> texture) {
     this->additionalTextures.push_back(texture);
 }
 
+
+
+
 std::vector<std::shared_ptr<Texture>>& Program::getTextures() {
     return this->additionalTextures;
 }
@@ -204,3 +218,8 @@ void Program::use() {
     }
     this->program->use();
 }
+
+uint Program::getTextureCount() {
+    return this->additionalTextures.size();
+}
+

@@ -41,6 +41,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         void setProgram(std::shared_ptr<Program> program);
         void setCamera(std::shared_ptr<Camera> camera);
         void addUniform(std::shared_ptr<Uniform> uniform);
+        void addTexture(std::shared_ptr<Texture> texture);
 
         glm::mat4& getTransform();
         glm::vec3& getPosition();
@@ -57,6 +58,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         void useCamera();
 
         std::vector<std::shared_ptr<Uniform>> uniforms;
+        std::vector<std::shared_ptr<Texture>> textures;
 
         std::vector<std::shared_ptr<Node>> children;
         std::shared_ptr<Node> parent;
@@ -64,6 +66,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         std::shared_ptr<Material> material;
         std::shared_ptr<Program> program;
         std::shared_ptr<Camera> camera;
+
 
         glm::vec3 translation;
         glm::vec3 rotation;

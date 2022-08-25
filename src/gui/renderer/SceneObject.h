@@ -26,6 +26,8 @@ namespace MapGenerator::Renderer {
         inline static float frameTime = 0.0f;
         std::string getNextDefaultName();
 
+        void checkError();
+
         inline static std::shared_ptr<ge::gl::Context> gl = nullptr;
 
     private:

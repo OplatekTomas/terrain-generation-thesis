@@ -67,7 +67,19 @@ std::shared_ptr<Renderer::Scene> DevelopWindow::createScene() {
     auto planeFragmentShader = std::make_shared<Shader>(GUIShaders::getPlaneFS(), Shader::Type::FRAGMENT);
     auto planeProgram = std::make_shared<Program>("plane program", planeVerexShader, planeFragmentShader);
 
-    auto texture = std::make_shared<Texture>("texture");
+    auto texture = std::make_shared<Texture>("tex");
+    auto data = std::vector<unsigned char>();
+    texture->setDimensions(256,256);
+    for(int x = 0; x < 256; x++){
+        for(int y = 0; y < 256; y++){
+            data.push_back(x);
+            data.push_back(y);
+            data.push_back((x + y) / 2);
+            data.push_back(255);
+        }
+    }
+    texture->setData(data, 0);
+    plane->addTexture(texture);
 
     plane->setMesh(MeshGenerators::createPlane(10, 10, "plane"));
     plane->setProgram(planeProgram);

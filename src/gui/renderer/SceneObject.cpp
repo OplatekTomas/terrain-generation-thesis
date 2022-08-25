@@ -46,3 +46,11 @@ uint MapGenerator::Renderer::SceneObject::getId() {
     id = std::hash<std::string>{}(name);
     return id;
 }
+
+void MapGenerator::Renderer::SceneObject::checkError() {
+    auto error = gl->glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cout << "Error: " << error << std::endl;
+        throw std::runtime_error("Error in GL");
+    }
+}

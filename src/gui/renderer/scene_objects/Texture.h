@@ -44,8 +44,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         Texture(const std::string& name, Type type = TYPE_2D, Format format = RGBA, DataType dataType = UNSIGNED_BYTE);
 
         void setDimensions(int width, int height);
-        void addArray(int width, int height);
-        void setArrayDimension(int width, int height, int layer);
+        void addArrayLayer();
 
         void setData(const std::vector<unsigned char>& data, size_t layer);
         void setData(const std::vector<char>& data, size_t layer);
@@ -72,15 +71,17 @@ namespace MapGenerator::Renderer::SceneObjects {
          * @param unit Unit to bind the texture to.
          */
         void bind(uint unit);
-
+        std::shared_ptr<ge::gl::Texture> glTexture();
         ~Texture();
 
     private:
         void init();
 
         std::vector<std::vector<unsigned char>> data;
-        std::vector<std::pair<int, int>> dimensions;
+        std::pair<int, int> dimensions;
+        std::shared_ptr<ge::gl::Texture> texture;
         Type type;
+        GLenum  glType;
         Format format;
         DataType dataType;
 

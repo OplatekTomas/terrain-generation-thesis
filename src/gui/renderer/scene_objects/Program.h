@@ -24,7 +24,10 @@ namespace MapGenerator::Renderer::SceneObjects {
         void addShader(std::shared_ptr<Shader> shader);
 
         void addTexture(std::shared_ptr<Texture> texture);
+
+        void setTexture(const std::shared_ptr<Texture>& texture, int unit);
         std::vector<std::shared_ptr<Texture>>& getTextures();
+        uint getTextureCount();
         std::shared_ptr<Shader> getShader(Shader::Type type);
 
         std::vector<std::shared_ptr<Shader>> getShaders();
@@ -36,6 +39,16 @@ namespace MapGenerator::Renderer::SceneObjects {
         bool compile();
         void use();
     private:
+
+        struct IntDefaultedToMinusOne{
+            int i = -1;
+
+            operator int() const {
+                return i;
+            }
+
+        };
+
         bool compiled;
         std::vector<std::shared_ptr<Texture>> additionalTextures;
         std::shared_ptr<Shader> vertexShader;
@@ -44,7 +57,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         std::shared_ptr<Shader> tessalationControlShader;
         std::shared_ptr<Shader> tessalationEvaluationShader;
         std::shared_ptr<Shader> computeShader;
-        std::map<uint, int> uniformLocations;
+        std::map<uint, IntDefaultedToMinusOne> uniformLocations;
 
 
         std::shared_ptr<ge::gl::Program> program;

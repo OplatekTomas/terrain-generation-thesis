@@ -64,6 +64,9 @@ namespace MapGenerator::Renderer {
             Logger::log("Framebuffer not complete. You should not see this message!!");
         }
         gl.glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+
+        this->width = width;
+        this->height = height;
     }
 
     std::shared_ptr<ge::gl::Texture> GBuffer::positionTexture() const {
@@ -79,6 +82,14 @@ namespace MapGenerator::Renderer {
 
     void GBuffer::bindBuffer() {
         gl.glBindFramebuffer(GL_FRAMEBUFFER, this->gBuffer->getId());
+        gl.glClearColor(0.0, 0.0, 0.0, 1.0); // keep it black so it doesn't leak into g-buffer
+        gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void GBuffer::copyToDefaultBuffer(int id) {
+        gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, this->gBuffer->getId());
+        gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+        gl.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     }
 
 } // namespace MapGenerator::Renderer
