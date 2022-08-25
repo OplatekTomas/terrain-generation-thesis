@@ -44,6 +44,14 @@ public:
         return basic_fs;
     }
 
+    static const char* getPlaneVS() {
+        return plane_vs;
+    }
+
+    static const char* getPlaneFS() {
+        return plane_fs;
+    }
+
     static const char* lightning_vs;
     static const char* lightning_fs;
     static const char* ssao_fs;
@@ -52,4 +60,6 @@ public:
     static const char* skybox_fs;
     static const char* basic_vs;
     static const char* basic_fs;
+    static const char* plane_vs;
+    static const char* plane_fs;
 };

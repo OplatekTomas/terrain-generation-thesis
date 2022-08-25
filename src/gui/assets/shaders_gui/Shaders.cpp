@@ -36,3 +36,12 @@ const char* GUIShaders::basic_fs =
 const char* GUIShaders::basic_vs =
 #include <shaders_gui/include/develop/basic.vs.shader.out>
     ;
+
+const char* GUIShaders::plane_fs =
+#include <shaders_gui/include/develop/plane.fs.shader.out>
+    ;
+
+const char* GUIShaders::plane_vs =
+#include <shaders_gui/include/develop/plane.vs.shader.out>
+    ;
+    

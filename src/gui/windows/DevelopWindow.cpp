@@ -4,7 +4,10 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_DevelopWindow.h" resolved
 
+#include "renderer/scene_objects/Texture.h"
+#include "renderer/scene_objects/Uniform.h"
 #include "ui_DevelopWindow.h"
+#include <MeshGenerators.h>
 #include <assets/shaders_gui/Shaders.h>
 #include <memory>
 #include <renderer/Renderer.h>
@@ -29,64 +32,48 @@ DevelopWindow::DevelopWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
     layout->addWidget(renderer);
 }
 
+void DevelopWindow::createSpheres(std::shared_ptr<Renderer::SceneObjects::Node>& root, std::shared_ptr<Camera>& camera) {
+    auto count = 4;
+
+    auto sphereProgram = std::make_shared<Program>("sphere program");
+    sphereProgram->addShader(std::make_shared<Shader>("basic vertex", GUIShaders::getBasicVS(), Shader::Type::VERTEX));
+    sphereProgram->addShader(std::make_shared<Shader>("basic fragment", GUIShaders::getBasicFS(), Shader::Type::FRAGMENT));
+
+    auto sphere = MeshGenerators::createIcoSphere(1.0f, 4, "icoSphere");
+
+    for (int x = 0; x < count; x++) {
+        for (int y = 0; y < count; y++) {
+            auto sphereNode = std::make_shared<Node>("sphere (" + std::to_string(x) + ", " + std::to_string(y) + ")");
+            sphereNode->setMesh(sphere);
+            sphereNode->setProgram(sphereProgram);
+            sphereNode->addUniform(std::make_shared<Uniform>("position", glm::vec2(x * 5, y * 5), Uniform::VEC2));
+            sphereNode->setCamera(camera);
+            root->addChild(sphereNode);
+        }
+    }
+}
+
 std::shared_ptr<Renderer::Scene> DevelopWindow::createScene() {
     auto scene = std::make_shared<Renderer::Scene>();
 
-    auto root = std::make_shared<Renderer::SceneObjects::Node>();
-    root->setName("root");
-    scene->setRoot(root);
-
-    auto camera = std::make_shared<Renderer::SceneObjects::Camera>();
-    camera->setName("camera");
-    // camera->setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+    auto camera = std::make_shared<Renderer::SceneObjects::Camera>("camera");
     camera->acceptInput(true);
     camera->setMovementSpeed(0.01);
-    root->setCamera(camera);
+    camera->setPosition(glm::vec3(0, 0.5, 0));
 
-    auto quad = std::make_shared<Mesh>("quad");
-    quad->addVertex(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(1.0, 0.0, 0.0));
-    quad->addVertex(glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(1.0, 0.0, 0.0));
-    quad->addVertex(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(1.0, 0.0, 0.0));
-    quad->addVertex(glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(1.0, 0.0, 0.0));
+    auto plane = std::make_shared<Node>("root - plane");
 
-    quad->addVertex(glm::vec3(-1.0f, -1.0f, 5.0f), glm::vec3(0, 1.0, 0.0));
-    quad->addVertex(glm::vec3(1.0f, -1.0f, 5.0f), glm::vec3(0, 1.0, 0.0));
-    quad->addVertex(glm::vec3(1.0f, 1.0f, 5.0f), glm::vec3(0, 1.0, 0.0));
-    quad->addVertex(glm::vec3(-1.0f, 1.0f, 5.0f), glm::vec3(0, 1.0, 0.0));
+    auto planeVerexShader = std::make_shared<Shader>(GUIShaders::getPlaneVS(), Shader::Type::VERTEX);
+    auto planeFragmentShader = std::make_shared<Shader>(GUIShaders::getPlaneFS(), Shader::Type::FRAGMENT);
+    auto planeProgram = std::make_shared<Program>("plane program", planeVerexShader, planeFragmentShader);
 
-    quad->addVertex(glm::vec3(-1.0f, -1.0f, -5.0f), glm::vec3(0.0, 0.0, 1.0));
-    quad->addVertex(glm::vec3(1.0f, -1.0f, -5.0f), glm::vec3(0.0, 0.0, 1.0));
-    quad->addVertex(glm::vec3(1.0f, 1.0f, -5.0f), glm::vec3(0.0, 0.0, 1.0));
-    quad->addVertex(glm::vec3(-1.0f, 1.0f, -5.0f), glm::vec3(0.0, 0.0, 1.0));
+    auto texture = std::make_shared<Texture>("texture");
 
-    quad->addIndex(0);
-    quad->addIndex(1);
-    quad->addIndex(2);
-    quad->addIndex(0);
-    quad->addIndex(2);
-    quad->addIndex(3);
+    plane->setMesh(MeshGenerators::createPlane(10, 10, "plane"));
+    plane->setProgram(planeProgram);
+    plane->setCamera(camera);
 
-    quad->addIndex(4);
-    quad->addIndex(5);
-    quad->addIndex(6);
-    quad->addIndex(4);
-    quad->addIndex(6);
-    quad->addIndex(7);
-
-    quad->addIndex(8);
-    quad->addIndex(9);
-    quad->addIndex(10);
-    quad->addIndex(8);
-    quad->addIndex(10);
-    quad->addIndex(11);
-
-    root->setMesh(quad);
-
-    auto program = std::make_shared<Program>("program");
-    program->addShader(std::make_shared<Shader>(GUIShaders::getBasicVS(), "basic vertex", Shader::Type::VERTEX));
-    program->addShader(std::make_shared<Shader>(GUIShaders::getBasicFS(), "basic fragment", Shader::Type::FRAGMENT));
-
-    root->setProgram(program);
+    scene->setRoot(plane);
 
     scene->build();
     // scene

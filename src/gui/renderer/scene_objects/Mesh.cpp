@@ -1,18 +1,15 @@
-#include <renderer/scene_objects/Mesh.h>
+#include <geGL/geGL.h>
 #include <glm/geometric.hpp>
 #include <memory>
-#include <geGL/geGL.h>
+#include <renderer/scene_objects/Mesh.h>
 
 using namespace MapGenerator::Renderer::SceneObjects;
 
 Mesh::Mesh() : SceneObject() {
-
 }
 
 Mesh::Mesh(const std::string& name) : SceneObject(name) {
-
 }
-
 
 Mesh::~Mesh() {
 }
@@ -47,7 +44,13 @@ void Mesh::addIndex(unsigned int index) {
     indices.push_back(index);
 }
 
-void Mesh::upload(){
+void Mesh::addTriangleIndex(unsigned int i1, unsigned int i2, unsigned int i3) {
+    this->indices.push_back(i1);
+    this->indices.push_back(i2);
+    this->indices.push_back(i3);
+}
+
+void Mesh::upload() {
     vertexBuffer = std::make_shared<ge::gl::Buffer>(vertices.size() * sizeof(float), vertices.data());
     indexBuffer = std::make_shared<ge::gl::Buffer>(indices.size() * sizeof(unsigned int), indices.data());
     vao = std::make_shared<ge::gl::VertexArray>();
@@ -66,17 +69,15 @@ void Mesh::upload(){
 };
 
 void Mesh::bind() {
-    if(vao != nullptr){
+    if (vao != nullptr) {
         vao->bind();
         return;
     }
 
     upload();
     vao->bind();
-
 }
 
 uint Mesh::size() {
     return indices.size();
 }
-

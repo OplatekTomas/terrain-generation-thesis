@@ -12,6 +12,8 @@ namespace MapGenerator::Renderer {
         ~SceneObject();
         //virtual void render() = 0;
         std::string getName();
+        uint getId();
+
         void setName(std::string name);
 
         static void setFrameTime(float frameTime);
@@ -23,7 +25,6 @@ namespace MapGenerator::Renderer {
         std::string name;
         inline static float frameTime = 0.0f;
         std::string getNextDefaultName();
-        uint getId();
 
         inline static std::shared_ptr<ge::gl::Context> gl = nullptr;
 

@@ -13,6 +13,7 @@
 #include <renderer/SceneObject.h>
 #include <renderer/scene_objects/Camera.h>
 #include <renderer/scene_objects/Mesh.h>
+#include <renderer/scene_objects/Uniform.h>
 #include <string>
 #include <vector>
 
@@ -39,6 +40,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         void setMaterial(std::shared_ptr<Material> material);
         void setProgram(std::shared_ptr<Program> program);
         void setCamera(std::shared_ptr<Camera> camera);
+        void addUniform(std::shared_ptr<Uniform> uniform);
 
         glm::mat4& getTransform();
         glm::vec3& getPosition();
@@ -53,6 +55,8 @@ namespace MapGenerator::Renderer::SceneObjects {
 
     private:
         void useCamera();
+
+        std::vector<std::shared_ptr<Uniform>> uniforms;
 
         std::vector<std::shared_ptr<Node>> children;
         std::shared_ptr<Node> parent;

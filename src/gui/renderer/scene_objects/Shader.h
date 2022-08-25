@@ -23,7 +23,7 @@ namespace MapGenerator::Renderer::SceneObjects {
 
         Shader();
         Shader(const std::string& source, Type type);
-        Shader(const std::string& source, const std::string& name, Type type);
+        Shader(const std::string& name, const std::string& source, Type type);
         void setSource(const std::string& source);
         void setType(Type type);
 

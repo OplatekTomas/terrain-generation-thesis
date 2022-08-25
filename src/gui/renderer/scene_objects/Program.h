@@ -5,8 +5,10 @@
 #include "renderer/scene_objects/Shader.h"
 #include "renderer/scene_objects/Texture.h"
 #include <memory>
+#include <renderer/scene_objects/Uniform.h>
 #include <renderer/SceneObject.h>
 #include <vector>
+#include <map>
 
 
 namespace MapGenerator::Renderer::SceneObjects {
@@ -29,6 +31,8 @@ namespace MapGenerator::Renderer::SceneObjects {
 
         std::shared_ptr<ge::gl::Program> glProgram();
 
+        void setUniform(std::shared_ptr<Uniform> uniform);
+
         bool compile();
         void use();
     private:
@@ -40,6 +44,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         std::shared_ptr<Shader> tessalationControlShader;
         std::shared_ptr<Shader> tessalationEvaluationShader;
         std::shared_ptr<Shader> computeShader;
+        std::map<uint, int> uniformLocations;
 
 
         std::shared_ptr<ge::gl::Program> program;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tuple>
-namespace MapGenerator::Renderer{
+namespace MapGenerator::Renderer {
     class InputHandler {
     public:
         InputHandler();
@@ -9,6 +9,8 @@ namespace MapGenerator::Renderer{
 
         enum Key {
             KEY_UNKNOWN = 0,
+            KEY_SHIFT = 16,
+            KEY_CONTROL = 27,
             KEY_SPACE = 32,
             KEY_APOSTROPHE = 39,
             KEY_COMMA = 44,
@@ -56,9 +58,7 @@ namespace MapGenerator::Renderer{
             KEY_LEFT_BRACKET = 91,
             KEY_BACKSLASH = 92,
             KEY_RIGHT_BRACKET = 93,
-            KEY_GRAVE_ACCENT = 96,
-            KEY_WORLD_1 = 161,
-            KEY_WORLD_2 = 162,
+          
             KEY_ESCAPE = 256,
             KEY_ENTER = 257,
             KEY_TAB = 258,
@@ -87,9 +87,9 @@ namespace MapGenerator::Renderer{
         std::tuple<int, int> getPositionDelta();
         std::tuple<int, int> getAbsolutePosition();
 
+        static Key fromQtKey(int key);
 
     private:
-
         bool keys[512];
         bool mouseButtons[3];
         int deltaX = 0;
@@ -97,6 +97,4 @@ namespace MapGenerator::Renderer{
         int absoluteX = 0;
         int absoluteY = 0;
     };
-}
-
-
+} // namespace MapGenerator::Renderer

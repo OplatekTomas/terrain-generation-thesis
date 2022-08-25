@@ -24,6 +24,7 @@ public:
 
 private:
     std::shared_ptr<MapGenerator::Renderer::Scene> createScene();
+    void createSpheres(std::shared_ptr<MapGenerator::Renderer::SceneObjects::Node>& root, std::shared_ptr<MapGenerator::Renderer::SceneObjects::Camera>& camera);
     Ui::DevelopWindow* ui;
 };
 

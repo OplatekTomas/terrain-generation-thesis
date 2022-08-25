@@ -65,6 +65,10 @@ void Node::setCamera(std::shared_ptr<Camera> camera) {
     this->camera = camera;
 }
 
+void Node::addUniform(std::shared_ptr<Uniform> uniform) {
+    this->uniforms.push_back(uniform);
+}
+
 glm::mat4& Node::getTransform() {
     return transform;
 }
@@ -105,17 +109,18 @@ std::shared_ptr<Camera> Node::getCamera() const {
     return camera;
 }
 
-void Node::useCamera(){
+void Node::useCamera() {
 
-    if(camera == nullptr){
+    if (camera == nullptr) {
         return;
     }
     gl->glViewport(0, 0, camera->getWidth(), camera->getHeight());
 
-    if(program->glProgram()->getUniformLocation("view") != -1){
+    //rework as uniforms
+    if (program->glProgram()->getUniformLocation("view") != -1) {
         program->glProgram()->setMatrix4fv("view", glm::value_ptr(camera->getViewMatrix()));
     }
-    if(program->glProgram()->getUniformLocation("projection") != -1){
+    if (program->glProgram()->getUniformLocation("projection") != -1) {
         program->glProgram()->setMatrix4fv("projection", glm::value_ptr(camera->getProjectionMatrix()));
     }
 }
@@ -129,7 +134,9 @@ void Node::draw() {
     }
 
     program->use();
-
+    for (auto& uniform : uniforms) {
+        program->setUniform(uniform);
+    }
     useCamera();
 
     mesh->bind();

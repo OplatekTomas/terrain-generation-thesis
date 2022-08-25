@@ -28,17 +28,14 @@ namespace MapGenerator::Renderer {
     void Renderer::setUpInputHandler() {
         this->inputHandler = std::make_shared<InputHandler>();
         connect(this, &Renderer::mouseMoveEvent, [this](QMouseEvent* event) {
-            std::cout << "mouseMoveEvent" << std::endl;
             this->inputHandler->mouseMove(event->x(), event->y());
         });
 
         connect(this, &Renderer::mousePressEvent, [this](QMouseEvent* event) {
-            std::cout << "mouse press event" << std::endl;
             this->inputHandler->mousePress((InputHandler::MouseButton)event->button(), event->x(), event->y());
         });
 
         connect(this, &Renderer::mouseReleaseEvent, this, [this](QMouseEvent* event) {
-            std::cout << "mouse release" << std::endl;
             this->inputHandler->mouseRelease((InputHandler::MouseButton)event->button(), event->x(), event->y());
         });
 
@@ -46,11 +43,11 @@ namespace MapGenerator::Renderer {
             // this->inputHandler->mouseWheel(event->delta()); TODO
         });
         connect(this, &Renderer::keyPressEvent, this, [&](QKeyEvent* event) {
-            this->inputHandler->keyPress((InputHandler::Key)event->key());
+            this->inputHandler->keyPress(InputHandler::fromQtKey(event->key()));
         });
 
         connect(this, &Renderer::keyReleaseEvent, [this](QKeyEvent* event) {
-            this->inputHandler->keyRelease((InputHandler::Key)event->key()); // TODO check why this is firing
+            this->inputHandler->keyRelease(InputHandler::fromQtKey(event->key())); // TODO check why this is firing
         });
     }
     Renderer::~Renderer() {

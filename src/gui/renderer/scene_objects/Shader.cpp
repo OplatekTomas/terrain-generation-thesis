@@ -17,7 +17,7 @@ Shader::Shader(const std::string& source, Shader::Type type) : SceneObject() {
     this->code = source;
 }
 
-Shader::Shader(const std::string& source, const std::string& name, Shader::Type type) : SceneObject(name) {
+Shader::Shader(const std::string& name, const std::string& source, Shader::Type type) : SceneObject(name) {
     this->type = type;
     this->code = source;
 }

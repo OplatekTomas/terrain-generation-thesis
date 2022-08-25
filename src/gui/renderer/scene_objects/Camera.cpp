@@ -85,14 +85,12 @@ namespace MapGenerator::Renderer::SceneObjects {
             if (std::get<0>(previousPoint) == 0 && std::get<1>(previousPoint) == 0) {
                 viewMatrix = glm::lookAt(position, position + front, up);
                 previousPoint = input->getAbsolutePosition();
-                std::cout << "new point" << std::endl;
                 return;
             }
             auto [x, y] = input->getAbsolutePosition();
             deltaX = x - std::get<0>(previousPoint);
             deltaY = y - std::get<1>(previousPoint);
             previousPoint = input->getAbsolutePosition();
-            std::cout << "deltaX: " << deltaX << " deltaY: " << deltaY << std::endl;
 
         } else {
             previousPoint = std::make_tuple(0, 0);

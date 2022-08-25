@@ -62,6 +62,7 @@ qt5_wrap_ui(UIS_HDRS
 
 set(PROJECT_SOURCES
     main.cpp
+    MeshGenerators.h MeshGenerators.cpp
     windows/MainWindow.cpp windows/MainWindow.h
     windows/RenderOptions.cpp windows/RenderOptions.h
     views/controls/QDataTreeItem.h
@@ -77,6 +78,8 @@ set(PROJECT_SOURCES
     renderer/scene_objects/Mesh.h renderer/scene_objects/Mesh.cpp
     renderer/scene_objects/Texture.h renderer/scene_objects/Texture.cpp
     renderer/scene_objects/Material.h renderer/scene_objects/Material.cpp
+    renderer/scene_objects/Uniform.h renderer/scene_objects/Uniform.cpp
+
     renderer/scene_objects/Shader.h renderer/scene_objects/Shader.cpp
     renderer/scene_objects/Program.h renderer/scene_objects/Program.cpp
     renderer/input/InputHandler.h renderer/input/InputHandler.cpp
@@ -150,6 +153,13 @@ add_custom_target(textureCopyTarget
 )
 
 add_dependencies(${PROJECT_NAME} ${SHADER_COPY_GUI} ${TEXTURE_COPY_GUI} ${GPUENGINE_HELP_TARGET})
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    COMMAND ${CMAKE_COMMAND} -P "assets/shaders_gui/CMakeLists.txt" ${CMAKE_CURRENT_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    
+)
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(vut-bp-gui)

@@ -1,6 +1,11 @@
 #include "renderer/SceneObject.h"
+#include <functional>
+#include <glm/fwd.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 #include <memory>
 #include <renderer/scene_objects/Program.h>
+#include <string>
 
 using namespace MapGenerator::Renderer::SceneObjects;
 
@@ -12,6 +17,7 @@ Program::Program(const std::string& name) : SceneObject(name) {
 }
 
 Program::Program(const std::string& name, const std::vector<std::shared_ptr<Shader>>& shaders) : SceneObject(name) {
+    compiled = false;
     for (auto shader : shaders) {
         addShader(shader);
     }
@@ -26,6 +32,7 @@ Program::Program(const std::string& name, const std::shared_ptr<Shader>& vertex,
     }
     this->vertexShader = vertex;
     this->fragmentShader = fragment;
+    compiled = false;
 }
 
 Program::~Program() {
@@ -108,10 +115,53 @@ bool Program::compile() {
     }
     this->program->link();
     compiled = this->program->getLinkStatus();
+
+    auto uniforms = program->getInfo()->uniforms;
+    for (auto uniform : uniforms) {
+        auto name = std::string(uniform.first);
+        auto location = program->getUniformLocation(name);
+        this->uniformLocations[std::hash<std::string>{}(name)] = location;
+    }
     return compiled;
 }
 std::shared_ptr<ge::gl::Program> Program::glProgram() {
     return this->program;
+}
+
+void Program::setUniform(std::shared_ptr<Uniform> uniform) {
+    // TODO cache uniform locations on successful compile
+    auto id = uniform->getId();
+    auto location = this->uniformLocations[id];
+    if (location == -1) {
+        std::cerr << "Uniform " << name << " not found" << std::endl;
+        return;
+    }
+    switch (uniform->getType()) {
+    case Uniform::Type::BOOL:
+        gl->glProgramUniform1i(this->program->getId(), location, std::any_cast<bool>(uniform->getValue()));
+        break;
+    case Uniform::Type::INT:
+        gl->glProgramUniform1i(program->getId(), location, std::any_cast<int>(uniform->getValue()));
+        break;
+    case Uniform::Type::FLOAT:
+        gl->glProgramUniform1f(program->getId(), location, std::any_cast<float>(uniform->getValue()));
+        break;
+    case Uniform::Type::VEC2:
+        gl->glProgramUniform2fv(program->getId(), location, 1, glm::value_ptr(std::any_cast<glm::vec2>(uniform->getValue())));
+        break;
+    case Uniform::Type::VEC3:
+        gl->glProgramUniform3fv(program->getId(), location, 1, glm::value_ptr(std::any_cast<glm::vec3>(uniform->getValue())));
+        break;
+    case Uniform::Type::VEC4:
+        gl->glProgramUniform4fv(program->getId(), location, 1, glm::value_ptr(std::any_cast<glm::vec4>(uniform->getValue())));
+        break;
+    case Uniform::Type::MAT3:
+        gl->glProgramUniformMatrix3fv(program->getId(), location, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat3>(uniform->getValue())));
+        break;
+    case Uniform::Type::MAT4:
+        gl->glProgramUniformMatrix4fv(program->getId(), location, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat4>(uniform->getValue())));
+        break;
+    }
 }
 
 std::vector<std::shared_ptr<Shader>> Program::getShaders() {
@@ -149,7 +199,7 @@ void Program::use() {
         auto success = compile();
         if (!success) {
             auto err = this->program->getInfoLog();
-            throw std::runtime_error("Program could not be compiled ("+ err +")");
+            throw std::runtime_error("Program could not be compiled (" + err + ")");
         }
     }
     this->program->use();

@@ -20,6 +20,7 @@ namespace MapGenerator::Renderer::SceneObjects {
         void addVertex(const glm::vec3& vertex, const glm::vec3& normal, const glm::vec2& texCoord);
         void addVertex(const glm::vec3& vertex, const glm::vec3& normal, const glm::vec2& texCoord, const glm::vec3& tangent);
         void addIndex(unsigned int index);
+        void addTriangleIndex(unsigned int i1, unsigned int i2, unsigned int i3);
 
         void bind();
 
@@ -29,6 +30,8 @@ namespace MapGenerator::Renderer::SceneObjects {
 
         void calculateTangents();
         void calculateNormals();
+
+        static std::shared_ptr<Mesh> createIcoSphere(float radius, uint subdivisions, const std::string& name);
 
 
     private:
